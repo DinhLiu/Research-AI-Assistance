@@ -1,0 +1,12 @@
+numpy
+pandas
+pyarrow
+faiss-cpu
+torch
+transformers
+adapters>=1.2,<2
+sentencepiece
+pydantic>=2
+python-dotenv
+httpx
+pytest

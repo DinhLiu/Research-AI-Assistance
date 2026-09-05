@@ -1,0 +1,100 @@
+{
+  "dataset_pruning": [
+    {"arxiv_id": "2205.09329", "grade": 2, "title": "Dataset Pruning: Reducing Training Data by Examining Generalization Influence"},
+    {"arxiv_id": "2107.07075", "grade": 2, "title": "Deep Learning on a Data Diet: Finding Important Examples Early in Training"},
+    {"arxiv_id": "2206.14486", "grade": 2, "title": "Beyond neural scaling laws: beating power law scaling via data pruning"},
+    {"arxiv_id": "2302.06960", "grade": 2, "title": "Data pruning and neural scaling laws: fundamental limitations of score-based algorithms"},
+    {"arxiv_id": "2303.04947", "grade": 2, "title": "InfoBatch: Lossless Training Speed Up by Unbiased Dynamic Data Pruning"},
+    {"arxiv_id": "2305.18424", "grade": 2, "title": "Repeated Random Sampling for Minimizing the Time-to-Accuracy of Learning"},
+    {"arxiv_id": "2210.15809", "grade": 2, "title": "Coverage-centric Coreset Selection for High Pruning Rates"},
+    {"arxiv_id": "2204.08499", "grade": 1, "title": "DeepCore: A Comprehensive Library for Coreset Selection in Deep Learning"},
+    {"arxiv_id": "2301.00774", "grade": 0, "title": "SparseGPT: Massive Language Models Can be Accurately Pruned in One-Shot", "note": "weight pruning"},
+    {"arxiv_id": "2306.11695", "grade": 0, "title": "A Simple and Effective Pruning Approach for Large Language Models", "note": "Wanda; weight pruning"},
+    {"arxiv_id": "2312.15230", "grade": 0, "title": "PERP: Rethinking the Prune-Retrain Paradigm in the Era of LLMs", "note": "weight pruning"},
+    {"arxiv_id": "2105.03193", "grade": 0, "title": "Network Pruning That Matters: A Case Study on Retraining Variants"},
+    {"arxiv_id": "2107.02306", "grade": 0, "title": "Connectivity Matters: Neural Network Pruning Through the Lens of Effective Sparsity"}
+  ],
+  "network_pruning": [
+    {"arxiv_id": "2301.00774", "grade": 2, "title": "SparseGPT: Massive Language Models Can be Accurately Pruned in One-Shot"},
+    {"arxiv_id": "2306.11695", "grade": 2, "title": "A Simple and Effective Pruning Approach for Large Language Models"},
+    {"arxiv_id": "2312.15230", "grade": 2, "title": "PERP: Rethinking the Prune-Retrain Paradigm in the Era of LLMs"},
+    {"arxiv_id": "2105.03193", "grade": 2, "title": "Network Pruning That Matters: A Case Study on Retraining Variants"},
+    {"arxiv_id": "2107.02306", "grade": 2, "title": "Connectivity Matters: Neural Network Pruning Through the Lens of Effective Sparsity"},
+    {"arxiv_id": "2212.06144", "grade": 2, "title": "Optimizing Learning Rate Schedules for Iterative Pruning of Deep Neural Networks"},
+    {"arxiv_id": "2412.18091", "grade": 2, "title": "AutoSculpt: A Pattern-based Model Auto-pruning Framework"},
+    {"arxiv_id": "2308.14605", "grade": 2, "title": "A Generalization of Continuous Relaxation in Structured Pruning"},
+    {"arxiv_id": "2205.09329", "grade": 0, "title": "Dataset Pruning: Reducing Training Data by Examining Generalization Influence"},
+    {"arxiv_id": "2107.07075", "grade": 0, "title": "Deep Learning on a Data Diet: Finding Important Examples Early in Training"},
+    {"arxiv_id": "2206.14486", "grade": 0, "title": "Beyond neural scaling laws: beating power law scaling via data pruning"}
+  ],
+  "data_selection": [
+    {"arxiv_id": "2205.09329", "grade": 2, "title": "Dataset Pruning: Reducing Training Data by Examining Generalization Influence"},
+    {"arxiv_id": "2107.07075", "grade": 2, "title": "Deep Learning on a Data Diet: Finding Important Examples Early in Training"},
+    {"arxiv_id": "2206.14486", "grade": 2, "title": "Beyond neural scaling laws: beating power law scaling via data pruning"},
+    {"arxiv_id": "2210.15809", "grade": 2, "title": "Coverage-centric Coreset Selection for High Pruning Rates"},
+    {"arxiv_id": "2303.04947", "grade": 2, "title": "InfoBatch: Lossless Training Speed Up by Unbiased Dynamic Data Pruning"},
+    {"arxiv_id": "2302.06960", "grade": 2, "title": "Data pruning and neural scaling laws: fundamental limitations of score-based algorithms"},
+    {"arxiv_id": "2204.08499", "grade": 2, "title": "DeepCore: A Comprehensive Library for Coreset Selection in Deep Learning"},
+    {"arxiv_id": "2403.03838", "grade": 0, "title": "Feature Selection as Deep Sequential Generative Learning", "note": "selects features, not examples"},
+    {"arxiv_id": "2301.00774", "grade": 0, "title": "SparseGPT: Massive Language Models Can be Accurately Pruned in One-Shot"}
+  ],
+  "feature_selection": [
+    {"arxiv_id": "2403.03838", "grade": 2, "title": "Feature Selection as Deep Sequential Generative Learning"},
+    {"arxiv_id": "2101.08539", "grade": 2, "title": "Orthogonal Least Squares Based Fast Feature Selection for Linear Classification"},
+    {"arxiv_id": "2101.09460", "grade": 2, "title": "Feature Selection Using Reinforcement Learning"},
+    {"arxiv_id": "2205.09329", "grade": 0, "title": "Dataset Pruning: Reducing Training Data by Examining Generalization Influence"},
+    {"arxiv_id": "2107.07075", "grade": 0, "title": "Deep Learning on a Data Diet: Finding Important Examples Early in Training"},
+    {"arxiv_id": "2210.15809", "grade": 0, "title": "Coverage-centric Coreset Selection for High Pruning Rates"},
+    {"arxiv_id": "2206.14486", "grade": 0, "title": "Beyond neural scaling laws: beating power law scaling via data pruning"}
+  ],
+  "dataset_distillation": [
+    {"arxiv_id": "2203.11932", "grade": 2, "title": "Dataset Distillation by Matching Training Trajectories"},
+    {"arxiv_id": "2110.04181", "grade": 2, "title": "Dataset Condensation with Distribution Matching"},
+    {"arxiv_id": "2205.14959", "grade": 2, "title": "Dataset Condensation via Efficient Synthetic-Data Parameterization"},
+    {"arxiv_id": "2306.13092", "grade": 2, "title": "Squeeze, Recover and Relabel: Dataset Distillation at ImageNet Scale From A New Perspective"},
+    {"arxiv_id": "2203.08679", "grade": 0, "title": "Decoupled Knowledge Distillation", "note": "teacher-student KD"},
+    {"arxiv_id": "2402.13116", "grade": 0, "title": "A Survey on Knowledge Distillation of Large Language Models"}
+  ],
+  "knowledge_distillation": [
+    {"arxiv_id": "2203.08679", "grade": 2, "title": "Decoupled Knowledge Distillation"},
+    {"arxiv_id": "2402.13116", "grade": 2, "title": "A Survey on Knowledge Distillation of Large Language Models"},
+    {"arxiv_id": "2203.11932", "grade": 0, "title": "Dataset Distillation by Matching Training Trajectories"},
+    {"arxiv_id": "2306.13092", "grade": 0, "title": "Squeeze, Recover and Relabel: Dataset Distillation at ImageNet Scale From A New Perspective"},
+    {"arxiv_id": "2110.04181", "grade": 0, "title": "Dataset Condensation with Distribution Matching"}
+  ],
+  "coreset_selection": [
+    {"arxiv_id": "2210.15809", "grade": 2, "title": "Coverage-centric Coreset Selection for High Pruning Rates"},
+    {"arxiv_id": "2204.08499", "grade": 2, "title": "DeepCore: A Comprehensive Library for Coreset Selection in Deep Learning"},
+    {"arxiv_id": "2205.09329", "grade": 1, "title": "Dataset Pruning: Reducing Training Data by Examining Generalization Influence"},
+    {"arxiv_id": "2107.07075", "grade": 1, "title": "Deep Learning on a Data Diet: Finding Important Examples Early in Training"},
+    {"arxiv_id": "2206.14486", "grade": 1, "title": "Beyond neural scaling laws: beating power law scaling via data pruning"},
+    {"arxiv_id": "2109.03764", "grade": 1, "title": "Active Learning by Acquiring Contrastive Examples"},
+    {"arxiv_id": "2301.00774", "grade": 0, "title": "SparseGPT: Massive Language Models Can be Accurately Pruned in One-Shot"}
+  ],
+  "active_learning": [
+    {"arxiv_id": "2109.03764", "grade": 2, "title": "Active Learning by Acquiring Contrastive Examples"},
+    {"arxiv_id": "2210.15809", "grade": 1, "title": "Coverage-centric Coreset Selection for High Pruning Rates"},
+    {"arxiv_id": "2204.08499", "grade": 1, "title": "DeepCore: A Comprehensive Library for Coreset Selection in Deep Learning"},
+    {"arxiv_id": "2205.09329", "grade": 1, "title": "Dataset Pruning: Reducing Training Data by Examining Generalization Influence"},
+    {"arxiv_id": "2301.00774", "grade": 0, "title": "SparseGPT: Massive Language Models Can be Accurately Pruned in One-Shot"}
+  ],
+  "data_centric_ai": [
+    {"arxiv_id": "2301.04819", "grade": 2, "title": "Data-centric AI: Perspectives and Challenges"},
+    {"arxiv_id": "2303.10158", "grade": 2, "title": "Data-centric Artificial Intelligence: A Survey"},
+    {"arxiv_id": "2110.02491", "grade": 2, "title": "Data-Centric AI Requires Rethinking Data Notion"},
+    {"arxiv_id": "2212.11854", "grade": 2, "title": "Data-Centric Artificial Intelligence"},
+    {"arxiv_id": "2211.14611", "grade": 2, "title": "The Principles of Data-Centric AI (DCAI)"},
+    {"arxiv_id": "2111.12548", "grade": 1, "title": "AutoDC: Automated data-centric processing"},
+    {"arxiv_id": "2112.03837", "grade": 1, "title": "Augment & Valuate: A Data Enhancement Pipeline for Data-Centric AI"},
+    {"arxiv_id": "2403.01832", "grade": 1, "title": "Model-Based Data-Centric AI"}
+  ],
+  "proxy_maturity": [
+    {"arxiv_id": "2107.07075", "grade": 2, "title": "Deep Learning on a Data Diet: Finding Important Examples Early in Training"},
+    {"arxiv_id": "2205.09329", "grade": 2, "title": "Dataset Pruning: Reducing Training Data by Examining Generalization Influence"},
+    {"arxiv_id": "2302.06960", "grade": 2, "title": "Data pruning and neural scaling laws: fundamental limitations of score-based algorithms"},
+    {"arxiv_id": "2206.14486", "grade": 2, "title": "Beyond neural scaling laws: beating power law scaling via data pruning"},
+    {"arxiv_id": "2303.04947", "grade": 1, "title": "InfoBatch: Lossless Training Speed Up by Unbiased Dynamic Data Pruning"},
+    {"arxiv_id": "2210.15809", "grade": 1, "title": "Coverage-centric Coreset Selection for High Pruning Rates"},
+    {"arxiv_id": "2301.00774", "grade": 0, "title": "SparseGPT: Massive Language Models Can be Accurately Pruned in One-Shot"}
+  ]
+}

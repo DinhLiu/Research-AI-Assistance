@@ -1,0 +1,97 @@
+{
+  "description": "Phase-1 retrieval benchmark, seeded from the thesis domain (Data-Centric AI / dataset pruning) plus four near-miss concept pairs. Grades live in qrels.json.",
+  "relevance_scale": {
+    "2": "highly relevant — the paper is about this concept",
+    "1": "partially relevant — adjacent method or shared vocabulary",
+    "0": "explicitly irrelevant — judged near-miss, not merely unlabeled"
+  },
+  "notes": [
+    "Unlabeled papers are not treated as relevant. Precision/nDCG are pessimistic because judgments are incomplete.",
+    "Recall@k, MRR, and HitRate are the primary metrics. Hard-pair leak measures concept confusion.",
+    "Corpus is arXiv cs.LG/AI/CL/CV + stat.ML from 2021 onward, so classic pre-2021 papers are out of scope."
+  ],
+  "queries": [
+    {
+      "id": "dataset_pruning",
+      "text": "dataset pruning and data subset selection for deep neural networks",
+      "domain": "data-centric",
+      "notes": "Primary thesis / smoke-test query."
+    },
+    {
+      "id": "network_pruning",
+      "text": "neural network weight pruning and model sparsity",
+      "domain": "compression",
+      "notes": "Hard negative for dataset_pruning: same word 'pruning', different object."
+    },
+    {
+      "id": "data_selection",
+      "text": "training data selection for deep learning",
+      "domain": "data-centric",
+      "notes": "Broader phrasing of dataset pruning / coreset / data diet."
+    },
+    {
+      "id": "feature_selection",
+      "text": "feature selection and variable selection for machine learning",
+      "domain": "classical-ml",
+      "notes": "Hard negative for data_selection: selects dimensions, not training examples."
+    },
+    {
+      "id": "dataset_distillation",
+      "text": "dataset distillation and dataset condensation",
+      "domain": "data-centric",
+      "notes": "Synthesize a small training set, not compress a teacher network."
+    },
+    {
+      "id": "knowledge_distillation",
+      "text": "knowledge distillation from teacher to student networks",
+      "domain": "compression",
+      "notes": "Hard negative for dataset_distillation: same word 'distillation', different object."
+    },
+    {
+      "id": "coreset_selection",
+      "text": "coreset selection for deep neural network training",
+      "domain": "data-centric",
+      "notes": "Overlaps dataset pruning; contrast with active learning."
+    },
+    {
+      "id": "active_learning",
+      "text": "active learning for deep neural networks",
+      "domain": "data-centric",
+      "notes": "Hard-ish pair with coreset_selection: both pick examples, different labeling protocol."
+    },
+    {
+      "id": "data_centric_ai",
+      "text": "data-centric AI methods for improving training data quality",
+      "domain": "data-centric",
+      "notes": "Survey / framing papers around the thesis area."
+    },
+    {
+      "id": "proxy_maturity",
+      "text": "proxy maturity in dataset pruning",
+      "domain": "data-centric",
+      "notes": "Thesis-specific: scoring proxies (EL2N, GraNd, forgetting, influence) used to prune data."
+    }
+  ],
+  "hard_pairs": [
+    {
+      "a": "dataset_pruning",
+      "b": "network_pruning",
+      "why": "SPECTER2 previously mixed network-pruning papers into dataset-pruning queries."
+    },
+    {
+      "a": "data_selection",
+      "b": "feature_selection",
+      "why": "Shared 'selection' vocabulary; object is examples vs features."
+    },
+    {
+      "a": "dataset_distillation",
+      "b": "knowledge_distillation",
+      "why": "Shared 'distillation' vocabulary; object is data vs model."
+    },
+    {
+      "a": "active_learning",
+      "b": "coreset_selection",
+      "why": "Both select examples; active learning queries labels, coresets subset a labeled set."
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "research-assistant-agent"
+version = "0.1.0"
+description = "Literature-review agent: SPECTER2 retrieve-then-rerank over a local arXiv corpus"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pandas",
+    "pyarrow",
+    "faiss-cpu",
+    "torch",
+    "transformers",
+    "adapters>=1.2,<2",
+    "sentencepiece",
+    "pydantic>=2",
+    "python-dotenv",
+    "httpx",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+retrieve-papers = "research_assistant.retrieval.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["research_assistant*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
