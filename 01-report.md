@@ -1,46 +1,46 @@
-# Báo cáo tiến độ: Research Assistance Agent
+# Progress report: Research Assistance Agent
 
-**Ngày:** 4 tháng 9, 2026  
-**Phạm vi:** hoàn thành **giai đoạn 1 — Retrieval** (chuẩn bị corpus + pipeline truy vấn). Chưa làm Extraction / Synthesis / Writing.
+**Date:** 4 September 2026  
+**Scope:** **Stage 1 — Retrieval** is complete (corpus preparation + query pipeline). Extraction / Synthesis / Writing are not started.
 
 ---
 
-## 1. Mục tiêu đã chốt
+## 1. Locked-in goal
 
-Xây dựng agent hỗ trợ literature review: nhận một chủ đề nghiên cứu, tìm paper liên quan trên arXiv, rồi (ở các giai đoạn sau) trích xuất, tổng hợp và viết review có trích dẫn.
+Build a literature-review assistant: take a research topic, find related papers on arXiv, then (in later stages) extract, synthesize, and write a cited review.
 
-MVP gồm bốn giai đoạn. Hiện tại chỉ hoàn thành tầng dữ liệu nền và **retrieve-then-rerank**.
+The MVP has four stages. So far only the offline data layer and **retrieve-then-rerank** are done.
 
 ```
-Chủ đề
+Topic
   → query expansion
   → FAISS (SPECTER2 adhoc-query)
-  → rerank bằng embedding proximity đã lưu
-  → (tuỳ chọn) hybrid RRF với arXiv keyword / citation
-  → top-k paper
+  → rerank with stored proximity embeddings
+  → (optional) hybrid RRF with arXiv keyword / citation
+  → top-k papers
 ```
 
-Bối cảnh dùng ngay: Data-Centric AI / dataset pruning (chủ đề khóa luận).
+Immediate use case: Data-Centric AI / dataset pruning (thesis topic).
 
 ---
 
-## 2. Corpus offline (làm một lần trên Kaggle)
+## 2. Offline corpus (built once on Kaggle)
 
-Đã embed và đưa về máy tại `data/specter2_artifacts`.
+Embedded and copied locally to `data/specter2_artifacts`.
 
-| Hạng mục | Giá trị |
+| Item | Value |
 |---|---|
-| Nguồn | arXiv metadata OAI snapshot |
-| Filter | `cs.LG`, `cs.AI`, `cs.CL`, `cs.CV`, `stat.ML` · năm ≥ 2021 |
-| Số paper | **449,682** (45 shard, stream exhausted) |
-| Encoder paper | `allenai/specter2_base` + adapter **proximity** (`allenai/specter2`) |
-| Dim | 768 · lưu `float16` · L2-normalize |
-| Index | FAISS `IndexFlatIP` (cosine qua inner product trên vector đã chuẩn hóa) |
-| Thời gian embed (Kaggle) | ~1751 giây ≈ **257 paper/s** (compute) |
+| Source | arXiv metadata OAI snapshot |
+| Filter | `cs.LG`, `cs.AI`, `cs.CL`, `cs.CV`, `stat.ML` · year ≥ 2021 |
+| Papers | **449,682** (45 shards, stream exhausted) |
+| Paper encoder | `allenai/specter2_base` + **proximity** adapter (`allenai/specter2`) |
+| Dim | 768 · stored as `float16` · L2-normalized |
+| Index | FAISS `IndexFlatIP` (cosine via inner product on normalized vectors) |
+| Embed time (Kaggle) | ~1751 seconds ≈ **257 papers/s** (compute) |
 
-Phân bố năm (từ lần chạy Kaggle): 2021: 48k · 2022: 53k · 2023: 67k · 2024: 87k · 2025: 107k · 2026: 88k.
+Year distribution (from the Kaggle run): 2021: 48k · 2022: 53k · 2023: 67k · 2024: 87k · 2025: 107k · 2026: 88k.
 
-Cấu trúc artifact:
+Artifact layout:
 
 ```
 data/specter2_artifacts/
@@ -50,64 +50,64 @@ data/specter2_artifacts/
   index/papers_flatip.faiss
 ```
 
-Metadata mỗi paper gồm `arxiv_id`, title, abstract, authors, categories, năm, DOI, version, `content_hash` (để incremental update sau này). Embedding **không** nhét vào DataFrame.
+Per-paper metadata includes `arxiv_id`, title, abstract, authors, categories, year, DOI, version, and `content_hash` (for later incremental updates). Embeddings are **not** stored in the DataFrame.
 
-Notebook tạo corpus: `smoke_test.ipynb` (bản tối ưu, resumable, tối đa 2 GPU, FP16, OOM fallback, checkpoint qua `manifest.json`).
+Corpus notebook: `embedding.ipynb` (optimized, resumable, up to 2 GPUs, FP16, OOM fallback, checkpointing via `manifest.json`).
 
-Smoke test retrieval trên Kaggle với query *dataset pruning and data subset selection for deep neural networks* trả paper đúng chủ đề (ví dụ `2205.09329` Dataset Pruning, score cosine ~0.83).
-
----
-
-## 3. Notebook: bỏ qua bước embedding
-
-Sau khi corpus đã xong, notebook được chỉnh để **không embed lại**:
-
-- Cờ `SKIP_EMBEDDING = True`
-- Tự tìm `manifest.json` trong working dir hoặc `/kaggle/input/*/`
-- Không load SPECTER2 paper encoder (tiết kiệm GPU/VRAM)
-- Vẫn validate shard, build/reuse FAISS, chạy smoke test query encoder
-- Snapshot arXiv không bắt buộc khi skip
-- Đặt `SKIP_EMBEDDING = False` nếu cần chạy lại pipeline embed
+Kaggle retrieval smoke test with query *dataset pruning and data subset selection for deep neural networks* returned on-topic papers (e.g. `2205.09329` Dataset Pruning, cosine ~0.83).
 
 ---
 
-## 4. Pipeline truy vấn local (giai đoạn 1.2)
+## 3. Notebook: skip the embedding step
 
-Package Python `research_assistant`, đọc corpus local, chạy mỗi khi nhập chủ đề.
+After the corpus was finished, the notebook was changed so it **does not re-embed**:
 
-### Luồng xử lý
+- Flag `SKIP_EMBEDDING = True`
+- Auto-finds `manifest.json` in the working dir or `/kaggle/input/*/`
+- Does not load the SPECTER2 paper encoder (saves GPU/VRAM)
+- Still validates shards, builds/reuses FAISS, and runs the query-encoder smoke test
+- The arXiv snapshot is not required when skipping
+- Set `SKIP_EMBEDDING = False` to rerun the embed pipeline
+
+---
+
+## 4. Local query pipeline (stage 1.2)
+
+Python package `research_assistant` reads the local corpus and runs whenever a topic is entered.
+
+### Processing flow
 
 1. **Query expansion**  
-   LLM (Groq / Gemini / OpenAI, key trong `.env`) sinh ~4 biến thể. Không có key thì dùng template (synonym / methods / survey). Topic gốc luôn là query đầu tiên.
+   An LLM (Groq / Gemini / OpenAI, keys in `.env`) generates ~4 variants. Without a key, templates are used (synonym / methods / survey). The original topic is always the first query.
 
 2. **Broad retrieval**  
-   Encode mọi query bằng `allenai/specter2_adhoc_query` (không dùng proximity cho câu ngắn). Mỗi query lấy `broad_k=150` neighbor FAISS. Union + dedup theo `arxiv_id`, giữ điểm FAISS cao nhất, cắt pool 200.
+   Encode every query with `allenai/specter2_adhoc_query` (do not use proximity for short text). Each query pulls `broad_k=150` FAISS neighbors. Union + dedup by `arxiv_id`, keep the highest FAISS score, cap the pool at 200.
 
 3. **Rerank**  
-   Cosine giữa embedding **chủ đề gốc** (adhoc-query) và **vector proximity đã lưu** của candidate. Không embed lại 200 paper — đúng với việc corpus đã encode proximity sẵn.
+   Cosine between the **original topic** embedding (adhoc-query) and each candidate's **stored proximity vector**. The 200 papers are not re-embedded — the corpus already has proximity encodings.
 
-4. **Hybrid (mặc định bật)**  
-   arXiv keyword API → map vào corpus → Reciprocal Rank Fusion với thứ tự rerank. `--citations` thêm rank Semantic Scholar (tắt mặc định vì rate limit).
+4. **Hybrid (on by default)**  
+   arXiv keyword API → map into the corpus → Reciprocal Rank Fusion with the rerank order. `--citations` adds Semantic Scholar ranks (off by default because of rate limits).
 
 5. **Top-k = 25**  
-   Kèm filter năm / category nếu chỉ định. Trả `PaperHit` (arxiv_id, title, abstract, scores, query nào retrieve được paper).
+   Optional year / category filters. Returns `PaperHit` (arxiv_id, title, abstract, scores, which queries retrieved the paper).
 
-Metrics log được: số query, unique sau union, pool sau filter, keyword hits trong corpus, overlap top-k broad vs final, thời gian.
+Logged metrics: query count, unique after union, pool after filters, keyword hits in corpus, top-k overlap of broad vs final, latency.
 
-### File chính
+### Main files
 
-| File | Vai trò |
+| File | Role |
 |---|---|
-| `research_assistant/config.py` | `RetrievalConfig`, đường dẫn artifact, model IDs |
-| `research_assistant/retrieval/corpus.py` | Load FAISS + lookup metadata/embedding theo shard |
+| `research_assistant/config.py` | `RetrievalConfig`, artifact paths, model IDs |
+| `research_assistant/retrieval/corpus.py` | Load FAISS + shard metadata/embedding lookup |
 | `research_assistant/retrieval/encoder.py` | SPECTER2 query encoder |
 | `research_assistant/retrieval/expand.py` | LLM / template query expansion |
 | `research_assistant/retrieval/pipeline.py` | Orchestrate retrieve-then-rerank |
 | `research_assistant/retrieval/hybrid.py` | RRF, arXiv keyword, Semantic Scholar |
 | `research_assistant/retrieval/cli.py` | CLI `python -m research_assistant.retrieval` |
-| `examples/retrieve_topic.py` | Ví dụ gọi Python API |
+| `examples/retrieve_topic.py` | Example Python API call |
 
-### Cách chạy
+### How to run
 
 ```bash
 pip install -e .
@@ -117,7 +117,7 @@ python -m research_assistant.retrieval \
   --json-out results/pruning.json
 ```
 
-Hoặc:
+Or:
 
 ```python
 from research_assistant import retrieve
@@ -126,22 +126,22 @@ from research_assistant.config import RetrievalConfig
 result = retrieve("proxy maturity in dataset pruning", RetrievalConfig(top_k=25))
 ```
 
-Copy `.env.example` → `.env` và điền `GROQ_API_KEY` / `GEMINI_API_KEY` nếu muốn expansion bằng LLM. Lần chạy đầu tải query encoder (~440MB).
+Copy `.env.example` → `.env` and fill in `GROQ_API_KEY` / `GEMINI_API_KEY` for LLM expansion. The first run downloads the query encoder (~440MB).
 
 ---
 
-## 5. Kiểm thử
+## 5. Tests
 
-`pytest tests/` — unit tests (không cần GPU / SPECTER2 weights):
+`pytest tests/` — unit tests (no GPU / SPECTER2 weights required):
 
-- RRF (kể cả duplicate)
-- Parse JSON expansion (kể cả markdown fence)
-- Template queries unique, luôn gồm topic gốc
-- Chuẩn hóa arXiv ID (URL, version)
-- Filter năm / category
-- Pipeline wiring với fake corpus/encoder: rerank đúng paper gần topic hơn; hybrid đưa keyword hit vào pool; `n_query_variants=0` chỉ giữ query gốc; `--no-rerank` giữ thứ tự FAISS
+- RRF (including duplicates)
+- Parse expansion JSON (including markdown fences)
+- Template queries are unique and always include the original topic
+- Normalize arXiv IDs (URL, version)
+- Year / category filters
+- Pipeline wiring with a fake corpus/encoder: rerank prefers the paper closer to the topic; hybrid adds a keyword hit to the pool; `n_query_variants=0` keeps only the original query; `--no-rerank` keeps FAISS order
 
-Eval retrieval **không nằm trong package production**. Harness + ablation ở notebook `evaluation/retrieval_ablation.ipynb` (qrels `evaluation/qrels.json`). Ablation trên corpus local (10 query, 78 qrels, template expansion, 4 tháng 9 2026) — chi tiết `evaluation/ablation.json`:
+Retrieval eval **does not live in the production package**. The harness and ablation live in `evaluation/retrieval_ablation.ipynb` (qrels in `evaluation/qrels.json`). Ablation on the local corpus (10 queries, 78 qrels, template expansion, 4 September 2026) — details in `evaluation/ablation.json`:
 
 | Variant | Recall@10 | Recall@25 | nDCG@10 | MRR | Hit@25 |
 |---|---|---|---|---|---|
@@ -150,45 +150,45 @@ Eval retrieval **không nằm trong package production**. Harness + ablation ở
 | Expanded + original-query rerank | 0.121 | 0.174 | 0.162 | 0.285 | 0.600 |
 | Expanded + rerank + keyword RRF | **0.121** | **0.212** | **0.173** | **0.367** | **0.700** |
 
-Hybrid là variant tốt nhất. Template expansion làm tụt Recall@25 của `data_selection` (0.286 → 0.143) rồi rerank kéo lại — đúng giả thuyết kiến trúc retrieve-then-rerank. Leak@10 trên 4 cặp hard query = 0, nhưng một phần vì nhiều paper grade-2 chưa vào top-25 nên cũng không thể “lọt” sang query kia.
+Hybrid is the best variant. Template expansion dropped Recall@25 for `data_selection` (0.286 → 0.143); rerank recovered it — consistent with the retrieve-then-rerank design. Leak@10 on the 4 hard query pairs is 0, partly because many grade-2 papers never reach top-25 and therefore cannot leak into the other query.
 
-Query còn Recall@25 = 0 kể cả full system: `feature_selection`, `knowledge_distillation`, `active_learning`.
+Queries still at Recall@25 = 0 even with the full system: `feature_selection`, `knowledge_distillation`, `active_learning`.
 
-Mở notebook (mặc định chỉ đọc `ablation.json`, không load model):
+Open the notebook (by default it only reads `ablation.json` and does not load models):
 
 ```text
 evaluation/retrieval_ablation.ipynb
 ```
 
-Đặt `RUN_LIVE = True` trong notebook rồi chạy lại cell ablation khi cần đo trên corpus.
+Set `RUN_LIVE = True` in the notebook and rerun the ablation cell to measure on the corpus.
 
 ---
 
-## 6. Đối chiếu với thiết kế
+## 6. Design checklist
 
-| Hạng mục thiết kế | Trạng thái |
+| Design item | Status |
 |---|---|
-| Filter category + năm, embed SPECTER2, FAISS local | Xong |
-| Resume cùng snapshot qua `manifest.json` + `content_hash` | Xong (resume; incremental giữa hai snapshot thì chưa) |
-| Query expansion 3–5 biến thể | Xong (LLM hoặc template) |
-| Broad retrieval top 100–200, union/dedup | Xong |
-| Rerank SPECTER2 vs chủ đề gốc | Xong (dùng embedding đã lưu) |
-| Hybrid arXiv keyword + RRF | Xong (mặc định bật) |
-| Semantic Scholar citation | Có, opt-in `--citations` |
-| Log overlap broad vs rerank | Xong (`top_k_overlap_broad_vs_final`) |
-| Extraction TeX/PDF + Pydantic schema | Chưa |
-| Synthesis clustering method | Chưa |
-| Writing literature review + validate citation | Chưa |
+| Category + year filter, SPECTER2 embed, local FAISS | Done |
+| Resume on the same snapshot via `manifest.json` + `content_hash` | Done (resume; incremental across two snapshots is not) |
+| Query expansion 3–5 variants | Done (LLM or template) |
+| Broad retrieval top 100–200, union/dedup | Done |
+| SPECTER2 rerank vs original topic | Done (uses stored embeddings) |
+| Hybrid arXiv keyword + RRF | Done (on by default) |
+| Semantic Scholar citation | Present, opt-in `--citations` |
+| Log overlap of broad vs rerank | Done (`top_k_overlap_broad_vs_final`) |
+| Extraction TeX/PDF + Pydantic schema | Not started |
+| Synthesis method clustering | Not started |
+| Writing literature review + citation validation | Not started |
 | Eval Recall@k / NDCG | Notebook `evaluation/retrieval_ablation.ipynb` + `evaluation/ablation.json` |
-| LangGraph orchestration | Chưa (pipeline Python thuần cho MVP) |
+| LangGraph orchestration | Not started (plain Python pipeline for MVP) |
 
 ---
 
-## 7. Việc tiếp theo (gợi ý)
+## 7. Suggested next steps
 
-1. Từ bảng ablation: hybrid giúp Recall@25 / MRR / Hit@25; template expansion thì không ổn định. Việc đáng làm trước Extraction:
-   - So LLM expansion với template (cùng qrels).
-   - Bổ sung qrels cho 3 query đang Recall@25 = 0, hoặc chấp nhận chúng là out-of-scope.
-   - Tune `broad_k` / `candidate_pool_size` trên query khóa luận (`dataset_pruning`, `proxy_maturity`).
-2. Giai đoạn 2 — Extraction: tải TeX/PDF, schema Pydantic, retry khi JSON lỗi.
-3. Incremental update corpus khi snapshot arXiv đổi (dựa trên `arxiv_id` + `content_hash`), không re-embed toàn bộ.
+1. From the ablation table: hybrid helps Recall@25 / MRR / Hit@25; template expansion is unstable. Before Extraction:
+   - Compare LLM expansion vs templates (same qrels).
+   - Add qrels for the 3 queries still at Recall@25 = 0, or treat them as out of scope.
+   - Tune `broad_k` / `candidate_pool_size` on the thesis queries (`dataset_pruning`, `proxy_maturity`).
+2. Stage 2 — Extraction: download TeX/PDF, Pydantic schema, retry on invalid JSON.
+3. Incremental corpus update when the arXiv snapshot changes (based on `arxiv_id` + `content_hash`), without re-embedding everything.

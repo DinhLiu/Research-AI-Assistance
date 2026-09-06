@@ -1,36 +1,36 @@
-# Kế Hoạch Thiết Kế: Research Assistant Agent
+# Design plan: Research Assistant Agent
 
-**Mục tiêu project**: Xây dựng một agent tự động hóa quy trình review literature — nhận một chủ đề nghiên cứu, tự động tìm paper liên quan trên arXiv, trích xuất nội dung, tổng hợp và viết thành một bản literature review có cấu trúc, có trích dẫn rõ ràng.
+**Project goal**: Build an agent that automates a literature-review workflow — take a research topic, find related papers on arXiv, extract content, synthesize, and write a structured literature review with explicit citations.
 
-**Bối cảnh cá nhân**: Tự động hóa lại chính quy trình đã làm thủ công khi review 60-70 paper cho khóa luận tốt nghiệp (Data-Centric AI / proxy maturity trong dataset pruning).
+**Personal context**: Automate the same process previously done by hand when reviewing 60–70 papers for a graduation thesis (Data-Centric AI / proxy maturity in dataset pruning).
 
 ---
 
-## 1. Tổng quan kiến trúc
+## 1. Architecture overview
 
-Pipeline gồm 4 giai đoạn chính, thiết kế dạng agent/module tuần tự (có thể agentic hóa sau khi pipeline cơ bản chạy ổn):
+The pipeline has 4 main stages, designed as sequential agents/modules (can be made more agentic after the basic pipeline is stable):
 
 ```
 [Topic Input]
      │
      ▼
 ┌─────────────────┐
-│ 1. RETRIEVAL     │  → tìm paper liên quan (candidate pool)
+│ 1. RETRIEVAL     │  → find related papers (candidate pool)
 └─────────────────┘
      │
      ▼
 ┌─────────────────┐
-│ 2. EXTRACTION    │  → trích xuất nội dung có cấu trúc từ mỗi paper
+│ 2. EXTRACTION    │  → extract structured content from each paper
 └─────────────────┘
      │
      ▼
 ┌─────────────────┐
-│ 3. SYNTHESIS     │  → nhóm paper theo hướng tiếp cận, tổng hợp theo nhóm
+│ 3. SYNTHESIS     │  → group papers by approach, summarize per group
 └─────────────────┘
      │
      ▼
 ┌─────────────────┐
-│ 4. WRITING       │  → viết literature review hoàn chỉnh, có trích dẫn
+│ 4. WRITING       │  → write a complete, cited literature review
 └─────────────────┘
      │
      ▼
@@ -39,48 +39,48 @@ Pipeline gồm 4 giai đoạn chính, thiết kế dạng agent/module tuần t�
 
 ---
 
-## 2. Giai đoạn 1 — Retrieval (Tìm kiếm ngữ nghĩa)
+## 2. Stage 1 — Retrieval (semantic search)
 
-Kiến trúc **retrieve-then-rerank hai tầng**, kết hợp semantic search toàn arXiv (recall rộng) với SPECTER2 rerank (precision cao):
+A **two-stage retrieve-then-rerank** architecture: broad semantic search over arXiv (high recall) plus SPECTER2 rerank (high precision):
 
-### 2.1 Chuẩn bị dữ liệu nền (làm 1 lần, cập nhật định kỳ)
-- Giới hạn phạm vi để dataset gọn: category `cs.LG`, `cs.AI`, `cs.CL`... trong ~5 năm gần nhất (thay vì toàn bộ arXiv)
-- Lấy metadata + embedding có sẵn (dataset công khai trên HuggingFace/Kaggle), hoặc tự embed abstract bằng SPECTER2
-- Lưu vào vector DB local: **FAISS** (nhẹ, đủ nhanh cho quy mô project cá nhân) hoặc **Qdrant** nếu muốn có thêm filter theo metadata (năm, category)
-- Thiết kế cơ chế **incremental update**: chỉ embed/thêm paper mới, không re-embed toàn bộ mỗi lần chạy
+### 2.1 Offline data prep (once, then periodic updates)
+- Limit scope so the dataset stays small: categories `cs.LG`, `cs.AI`, `cs.CL`... from roughly the last 5 years (not all of arXiv)
+- Use existing metadata + embeddings (public HuggingFace/Kaggle datasets), or embed abstracts with SPECTER2
+- Store in a local vector DB: **FAISS** (light, fast enough for a personal project) or **Qdrant** if metadata filters (year, category) are needed
+- Design **incremental update**: only embed/add new papers, do not re-embed the whole corpus each run
 
-### 2.2 Pipeline truy vấn (mỗi khi user nhập chủ đề)
+### 2.2 Query pipeline (each time the user enters a topic)
 ```
-1. Query expansion: LLM sinh 3-5 biến thể câu hỏi/từ khóa từ chủ đề gốc
-2. Broad retrieval: embed từng query, search trong FAISS index 
-   → lấy top 100-200 candidate (union + dedup theo arxiv_id)
-3. Rerank: re-embed candidate pool bằng SPECTER2, tính cosine similarity 
-   với embedding chủ đề gốc, sort lại
-4. (optional) Hybrid signal: cross-check với arXiv keyword search / 
-   Semantic Scholar citation count → ưu tiên paper vừa liên quan 
-   vừa có uy tín (reciprocal rank fusion)
-5. Lấy top-k cuối (VD: 20-30 paper) → chuyển sang giai đoạn Extraction
+1. Query expansion: LLM generates 3–5 query/keyword variants from the original topic
+2. Broad retrieval: embed each query, search the FAISS index
+   → take top 100–200 candidates (union + dedup by arxiv_id)
+3. Rerank: re-embed the candidate pool with SPECTER2, cosine similarity
+   against the original topic embedding, re-sort
+4. (optional) Hybrid signal: cross-check with arXiv keyword search /
+   Semantic Scholar citation count → prefer papers that are both relevant
+   and reputable (reciprocal rank fusion)
+5. Take final top-k (e.g. 20–30 papers) → hand off to Extraction
 ```
 
-### 2.3 Lưu ý kỹ thuật
-- Semantic Scholar API rate limit chặt nếu không có key → xin free API key sớm
-- Log lại tỷ lệ recall thô (bước 2) vs sau rerank (bước 3) để có số liệu so sánh cho báo cáo
+### 2.3 Technical notes
+- Semantic Scholar API rate limits are tight without a key → request a free API key early
+- Log raw recall (step 2) vs after rerank (step 3) so the report has comparison numbers
 
 ---
 
-## 3. Giai đoạn 2 — Extraction (Trích xuất nội dung)
+## 3. Stage 2 — Extraction (content extraction)
 
-### 3.1 Lấy nội dung paper
+### 3.1 Fetch paper content
 ```
-1. Thử tải TeX source: arxiv.org/e-print/<id> (nhanh, sạch, giữ cấu trúc)
-2. Parse bằng pylatexenc / TexSoup, merge các file .tex con (\input, \include)
-3. Nếu lỗi hoặc không có source (404) → fallback PDF (PyMuPDF)
-4. Log tỷ lệ dùng source vs fallback PDF (số liệu hay cho báo cáo)
+1. Try TeX source: arxiv.org/e-print/<id> (fast, clean, keeps structure)
+2. Parse with pylatexenc / TexSoup, merge child .tex files (\input, \include)
+3. On error or missing source (404) → fall back to PDF (PyMuPDF)
+4. Log source vs PDF fallback rate (useful report numbers)
 ```
-- Chỉ cần bản mới nhất của mỗi paper (không cần xử lý version cũ); lưu số version vào metadata để trích dẫn chính xác
+- Only the latest version of each paper is needed (old versions can be skipped); store the version number in metadata for accurate citations
 
-### 3.2 Trích xuất structured info
-- Ép LLM trả JSON theo schema cố định, dùng **Pydantic** để validate:
+### 3.2 Extract structured info
+- Force the LLM to return JSON against a fixed schema, validated with **Pydantic**:
 ```json
 {
   "arxiv_id": "...",
@@ -92,36 +92,36 @@ Kiến trúc **retrieve-then-rerank hai tầng**, kết hợp semantic search to
   "limitation": "..."
 }
 ```
-- Nếu LLM trả sai format → retry tự động (giới hạn số lần retry)
-- Nếu 1 paper lỗi extraction hoàn toàn → skip và log, không để crash cả pipeline
+- If the LLM returns the wrong format → automatic retry (capped)
+- If one paper fails extraction entirely → skip and log; do not crash the whole pipeline
 
 ---
 
-## 4. Giai đoạn 3 — Synthesis (Nhóm & tổng hợp)
+## 4. Stage 3 — Synthesis (group & summarize)
 
 ```
-1. Embed phần "method" của mỗi paper đã extract
-2. Clustering (K-Means hoặc HDBSCAN) để nhóm paper theo hướng tiếp cận
-3. Với mỗi cụm: LLM tổng hợp — các paper trong nhóm giải quyết theo 
-   hướng nào, điểm chung, điểm khác biệt
-4. So sánh giữa các cụm: chỉ ra gap / hướng chưa được khai thác
+1. Embed the "method" field of each extracted paper
+2. Cluster (K-Means or HDBSCAN) to group papers by approach
+3. Per cluster: LLM summary — how papers in the group attack the problem,
+   shared points, differences
+4. Compare clusters: surface gaps / underexplored directions
 ```
-- Đây là bước áp dụng trực tiếp kỹ năng data mining (clustering thật, không để LLM tự đoán nhóm cảm tính)
+- This step applies real data mining (actual clustering, not letting the LLM invent groups)
 
 ---
 
-## 5. Giai đoạn 4 — Writing (Viết literature review)
+## 5. Stage 4 — Writing (write the literature review)
 
-- Input: dữ liệu structured đã tổng hợp theo cụm (không phải raw text paper) → **tránh hallucination trích dẫn**
-- Output: văn bản review có cấu trúc, mỗi nhận định phải trace được về `arxiv_id` cụ thể
-- Có phần **"Research Gap"** ở cuối, mô phỏng đúng phần người viết khóa luận phải tự làm tay
-- Validate bước cuối: kiểm tra mọi trích dẫn trong bài viết có khớp với candidate pool đã extract hay không (script kiểm tra tự động, không dựa vào "LLM tự nói đúng")
+- Input: structured data already summarized by cluster (not raw paper text) → **avoid citation hallucination**
+- Output: structured review text; every claim must trace to a specific `arxiv_id`
+- End with a **"Research Gap"** section, matching the part a thesis author would write by hand
+- Final validation: check that every citation in the write-up matches the extracted candidate pool (automatic script, not "the LLM says it is correct")
 
 ---
 
-## 6. Tech stack tổng hợp
+## 6. Tech stack
 
-| Thành phần | Công cụ |
+| Component | Tool |
 |---|---|
 | Orchestration | LangGraph |
 | Vector DB | FAISS / Qdrant (local) |
@@ -134,38 +134,38 @@ Kiến trúc **retrieve-then-rerank hai tầng**, kết hợp semantic search to
 
 ---
 
-## 7. Đánh giá (Evaluation)
+## 7. Evaluation
 
-- **Retrieval**: tự tạo test set 10-15 chủ đề kèm ground-truth paper đã biết trước → đo Recall@k, NDCG. So sánh "chỉ broad retrieval" vs "broad + SPECTER2 rerank" để có con số minh chứng giá trị của kiến trúc 2 tầng.
-- **Literature review cuối**: LLM-as-judge chấm coherence/coverage (ghi rõ đây là proxy metric, không hoàn toàn khách quan).
-- **So sánh với quy trình thủ công**: thời gian làm tay (60-70 paper) vs thời gian agent chạy — số liệu kể chuyện thuyết phục khi trình bày.
-
----
-
-## 8. Rủi ro & lưu ý cần theo dõi suốt project
-
-1. **Data engineering**: cần cơ chế cập nhật embedding dataset định kỳ, không re-embed toàn bộ mỗi lần
-2. **Extraction lỗi**: TeX parse fail với macro lạ → fallback graceful, không crash pipeline
-3. **Hallucination trích dẫn**: rủi ro lớn nhất — mọi câu trong output cuối phải trace được về paper thật
-4. **Chi phí & rate limit**: xin Semantic Scholar API key sớm; giới hạn phạm vi dataset embedding (category + khoảng năm) để gọn nhẹ
-5. **Scope creep**: chốt MVP là search → extract → synthesize → write; các ý tưởng mở rộng (agent review code, generate slide...) để riêng thành "future work"
+- **Retrieval**: build a 10–15 topic test set with known ground-truth papers → measure Recall@k, NDCG. Compare "broad retrieval only" vs "broad + SPECTER2 rerank" to quantify the two-stage architecture.
+- **Final literature review**: LLM-as-judge for coherence/coverage (explicitly a proxy metric, not fully objective).
+- **Vs the manual process**: hand time (60–70 papers) vs agent runtime — a convincing story for presentations.
 
 ---
 
-## 9. Timeline gợi ý
+## 8. Risks & notes to watch throughout the project
 
-| Tuần | Công việc |
+1. **Data engineering**: periodic embedding-dataset updates without re-embedding everything each time
+2. **Extraction failures**: TeX parse fails on unusual macros → graceful fallback, do not crash the pipeline
+3. **Citation hallucination**: the largest risk — every sentence in the final output must trace to a real paper
+4. **Cost & rate limits**: request a Semantic Scholar API key early; keep the embedding dataset small (category + year window)
+5. **Scope creep**: lock the MVP to search → extract → synthesize → write; extra ideas (code-review agent, slide generation...) stay in "future work"
+
+---
+
+## 9. Suggested timeline
+
+| Week | Work |
 |---|---|
-| 1 | Setup retrieval: chuẩn bị embedding dataset, FAISS index, pipeline query expansion + rerank |
-| 2 | Extraction: TeX/PDF parser, schema + validate, xử lý lỗi |
-| 3 | Synthesis + Writing: clustering, tổng hợp theo cụm, sinh literature review |
-| 4 | Evaluation: test set Recall@k/NDCG, so sánh kiến trúc, viết báo cáo/demo |
+| 1 | Retrieval setup: embedding dataset, FAISS index, query-expansion + rerank pipeline |
+| 2 | Extraction: TeX/PDF parser, schema + validate, error handling |
+| 3 | Synthesis + Writing: clustering, per-cluster summaries, generate literature review |
+| 4 | Evaluation: Recall@k/NDCG test set, architecture comparison, write report/demo |
 
 ---
 
-## 10. Điểm nhấn khi trình bày (CV / phỏng vấn)
+## 10. Presentation highlights (CV / interview)
 
-- Kiến trúc retrieve-then-rerank hai tầng (semantic search nghiêm túc, không chỉ gọi API)
-- Áp dụng data mining thật (clustering paper theo hướng tiếp cận) thay vì để LLM tự làm hết
-- Có số liệu đánh giá định lượng (Recall@k, NDCG) — không chỉ demo suông
-- Câu chuyện cá nhân: tự động hóa chính quy trình đã làm tay cho khóa luận, có số liệu so sánh thời gian/độ chính xác thực tế
+- Two-stage retrieve-then-rerank architecture (serious semantic search, not just an API call)
+- Real data mining (cluster papers by approach) instead of leaving everything to an LLM
+- Quantitative evaluation numbers (Recall@k, NDCG) — not only a demo
+- Personal story: automate the same process previously done by hand for a thesis, with real time/accuracy comparison numbers

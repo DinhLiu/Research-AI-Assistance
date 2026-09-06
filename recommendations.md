@@ -1,24 +1,24 @@
-Phần Retrieval hiện tại đã khá hoàn chỉnh về mặt **engineering**, nhưng nếu mục tiêu là biến project này thành một project cá nhân có chất lượng tốt để đưa CV/GitHub và có thể nói sâu trong phỏng vấn, tôi chưa chuyển hẳn sang Extraction ngay. Tôi sẽ bổ sung một vòng **evaluation + hardening** trước.
+Retrieval is already fairly complete on the **engineering** side, but if the goal is a strong personal project for CV/GitHub and interview depth, I would not jump straight to Extraction. I would add an **evaluation + hardening** pass first.
 
-Bạn hiện đã có corpus 449,682 paper, SPECTER2 proximity embeddings, FAISS, query expansion, hybrid retrieval/RRF, CLI/API, logging và 9 unit tests.    Đây là nền tảng tốt. Phần còn thiếu chủ yếu không phải “thêm feature”, mà là **chứng minh Retrieval thực sự tốt và hiểu failure mode của nó**.
+You already have a 449,682-paper corpus, SPECTER2 proximity embeddings, FAISS, query expansion, hybrid retrieval/RRF, CLI/API, logging, and 9 unit tests. That is a solid foundation. What is missing is not mainly “more features”, but **evidence that Retrieval actually works and an understanding of its failure modes**.
 
-## 1. Việc quan trọng nhất: làm Retrieval Evaluation trước Extraction
+## 1. Highest priority: Retrieval Evaluation before Extraction
 
-Trong báo cáo bạn cũng đã ghi đây là phần chưa làm. 
+The progress report already lists this as unfinished.
 
-Tôi sẽ xem đây là **blocking task trước Phase 2**.
+I would treat it as a **blocking task before Phase 2**.
 
-Không nên chỉ test 10–15 topic kiểu:
+Do not only test 10–15 topics like:
 
 ```text
 query
 → known paper
-→ có retrieve ra không
+→ did it retrieve?
 ```
 
-Mà nên tạo benchmark nhỏ có relevance grading.
+Build a small benchmark with relevance grades.
 
-Ví dụ khoảng **15–20 queries**, chia domain:
+For example about **15–20 queries**, split by domain:
 
 ```text
 Dataset Pruning
@@ -33,7 +33,7 @@ Dataset Distillation
 Representation Learning
 ```
 
-Mỗi query lấy union khoảng 30–50 candidate rồi manually label:
+For each query, take a union of about 30–50 candidates and label them by hand:
 
 ```text
 2 = highly relevant
@@ -41,7 +41,7 @@ Mỗi query lấy union khoảng 30–50 candidate rồi manually label:
 0 = irrelevant
 ```
 
-Sau đó đo:
+Then measure:
 
 * Recall@10 / @25 / @50 / @100
 * Precision@10 / @25
@@ -49,20 +49,20 @@ Sau đó đo:
 * MRR
 * HitRate@k
 
-Quan trọng hơn là làm **ablation**:
+More important is an **ablation**:
 
-| Variant                       | Ý nghĩa                 |
-| ----------------------------- | ----------------------- |
-| Original query + FAISS        | baseline dense          |
-| Expanded queries + FAISS      | giá trị query expansion |
-| Dense + original-query rerank | giá trị rerank hiện tại |
-| Keyword only                  | lexical baseline        |
-| Dense + keyword RRF           | giá trị hybrid          |
-| Dense + keyword + expansion   | full system             |
+| Variant                       | Meaning                      |
+| ----------------------------- | ---------------------------- |
+| Original query + FAISS        | dense baseline               |
+| Expanded queries + FAISS      | value of query expansion     |
+| Dense + original-query rerank | value of the current rerank  |
+| Keyword only                  | lexical baseline             |
+| Dense + keyword RRF           | value of hybrid              |
+| Dense + keyword + expansion   | full system                  |
 
-Hiện pipeline có đủ component để làm thí nghiệm này. 
+The pipeline already has the components for this experiment.
 
-Nếu kết quả cuối là:
+If the final result looks like:
 
 ```text
 Dense only            nDCG@10 = 0.71
@@ -70,17 +70,17 @@ Dense only            nDCG@10 = 0.71
 + RRF                           0.81
 ```
 
-thì project trở nên thuyết phục hơn rất nhiều.
+the project becomes much more convincing.
 
 ---
 
-# 2. Thêm một bộ “hard queries”
+# 2. Add a “hard queries” set
 
-Smoke test hiện tại dùng dataset pruning và đã thành công. 
+The current smoke test uses dataset pruning and succeeded.
 
-Nhưng nên cố tình tạo những query mà dense retrieval dễ nhầm.
+Also deliberately create queries that dense retrieval is likely to confuse.
 
-Ví dụ:
+Examples:
 
 ```text
 dataset pruning
@@ -112,13 +112,13 @@ vs
 coreset selection
 ```
 
-Mục tiêu không phải chỉ chứng minh system tìm được cái đúng mà còn xem:
+The goal is not only to show the system finds the right papers, but to check:
 
-> **System có phân biệt được các concept gần nhau hay không?**
+> **Can the system tell nearby concepts apart?**
 
-Đây chính là failure mode đã thấy trong smoke test trước: SPECTER2 đôi lúc kéo network-pruning papers vào query dataset pruning.
+This is the failure mode already seen in an earlier smoke test: SPECTER2 sometimes pulled network-pruning papers into a dataset-pruning query.
 
-Tôi sẽ thêm một file:
+I would add a file:
 
 ```text
 evaluation/
@@ -129,13 +129,13 @@ evaluation/
 
 ---
 
-# 3. Log hiện tại nên phong phú hơn
+# 3. Logging should be richer
 
-Bạn đã log:
+You already log:
 
-> số query, unique union, pool sau filter, keyword hits, overlap broad/final và latency. 
+> query count, unique after union, pool after filters, keyword hits, broad/final overlap, and latency.
 
-Nên bổ sung:
+Also add:
 
 ```text
 dense_candidates
@@ -155,7 +155,7 @@ query_encoder_time_ms
 metadata_lookup_time_ms
 ```
 
-Và với từng paper:
+And per paper:
 
 ```json
 {
@@ -171,21 +171,21 @@ Và với từng paper:
 }
 ```
 
-Điều này rất hữu ích khi debug:
+This is very useful when debugging:
 
-> “Tại sao paper này rank #3?”
+> “Why is this paper rank #3?”
 
-Agent retrieval tốt nên có thể giải thích **paper lọt vào candidate pool bằng đường nào**.
+A good retrieval agent should explain **which path put a paper into the candidate pool**.
 
 ---
 
-# 4. Query expansion cần guardrail
+# 4. Query expansion needs a guardrail
 
-Hiện LLM sinh khoảng 4 query và fallback template nếu không có API key. 
+The LLM currently generates about 4 queries and falls back to templates if there is no API key.
 
-Đây là một điểm tốt, nhưng expansion có rủi ro **query drift**.
+That is a good design, but expansion risks **query drift**.
 
-Ví dụ:
+Example:
 
 ```text
 original:
@@ -197,9 +197,9 @@ efficient deep learning
 model pruning
 ```
 
-Nếu expansion trôi quá xa, recall có thể tăng nhưng precision giảm mạnh.
+If expansion drifts too far, recall can rise while precision drops sharply.
 
-Nên lưu:
+Store:
 
 ```text
 original_query
@@ -207,11 +207,11 @@ expanded_query
 similarity(expanded, original)
 ```
 
-và có thể reject expansion quá xa.
+and optionally reject expansions that are too far.
 
-Không nhất thiết phải dùng một threshold ngay từ đầu. Trước hết hãy log rồi xem evaluation.
+A threshold is not required on day one. Log first, then look at evaluation.
 
-Ngoài ra nên yêu cầu LLM expansion theo loại:
+Also ask the LLM to expand by type:
 
 ```json
 {
@@ -222,56 +222,54 @@ Ngoài ra nên yêu cầu LLM expansion theo loại:
 }
 ```
 
-thay vì 4 câu query không có semantics rõ ràng.
+instead of 4 query strings with unclear semantics.
 
 ---
 
-# 5. Rerank hiện tại nên đổi tên cho chính xác
+# 5. Rename the current rerank more accurately
 
-Bạn đang:
+You currently:
 
-> broad retrieval bằng expanded adhoc queries → candidate union → cosine với **original topic embedding** để rerank. 
+> broad retrieval with expanded adhoc queries → candidate union → cosine against the **original topic embedding** to rerank.
 
-Cách này hợp lý.
+That is reasonable.
 
-Nhưng tôi sẽ gọi nó:
+I would call it:
 
 ```text
 original-query semantic reranking
 ```
 
-chứ không chỉ:
+rather than only:
 
 ```text
 SPECTER2 rerank
 ```
 
-vì paper không được encode lại và cũng không có reranker model riêng.
+because papers are not re-encoded and there is no separate reranker model.
 
-Điều này giúp README/design chính xác hơn.
+That keeps the README/design accurate.
 
-Về sau, nếu evaluation cho thấy precision vẫn thấp, mới benchmark thêm một **cross-encoder reranker**.
+Later, if evaluation still shows low precision, then benchmark a **cross-encoder reranker**.
 
-Không nên thêm ngay bây giờ.
+Do not add that now.
 
 ---
 
-# 6. Candidate pool size cần được tune bằng số liệu
+# 6. Tune candidate pool size with numbers
 
-Hiện:
+Currently:
 
 ```text
-150 mỗi expanded query
+150 per expanded query
 → union
 → pool 200
 → top 25
 ```
 
+These numbers are fairly heuristic.
 
-
-Các số này hiện tương đối heuristic.
-
-Evaluation nên thử:
+Evaluation should try:
 
 ```text
 broad_k:
@@ -287,7 +285,7 @@ candidate_pool:
 500
 ```
 
-và xem:
+and look at:
 
 ```text
 Recall@candidate_pool
@@ -295,7 +293,7 @@ vs
 latency
 ```
 
-Có thể bạn sẽ thấy:
+You may find:
 
 ```text
 pool 100 → recall 0.87
@@ -303,21 +301,21 @@ pool 200 → recall 0.96
 pool 500 → recall 0.97
 ```
 
-Khi đó chọn 200 có bằng chứng rõ ràng.
+Then choosing 200 has clear evidence.
 
 ---
 
-# 7. Thêm corpus coverage diagnostics
+# 7. Add corpus coverage diagnostics
 
-Hiện bạn biết distribution theo năm và category. 
+You already know year and category distributions.
 
-Tôi sẽ bổ sung một script generate:
+I would add a script that generates:
 
 ```text
 corpus_report.json
 ```
 
-gồm:
+including:
 
 ```text
 paper count
@@ -333,21 +331,21 @@ average abstract length
 p95 abstract length
 ```
 
-Đặc biệt:
+In particular:
 
 ```text
 duplicate content_hash
 ```
 
-có thể phát hiện các trường hợp metadata bất thường.
+can catch unusual metadata cases.
 
 ---
 
 # 8. Formalize corpus limitation
 
-Đây là điều nên ghi thẳng trong README.
+This should be written plainly in the README.
 
-Corpus hiện chỉ gồm:
+The corpus currently only includes:
 
 ```text
 cs.LG
@@ -358,35 +356,33 @@ stat.ML
 >= 2021
 ```
 
+So the agent **is not a general scientific literature search engine**.
 
-
-Vì vậy agent **không phải general scientific literature search engine**.
-
-Nên mô tả:
+Describe it as:
 
 > Current MVP targets recent AI/ML literature indexed on arXiv.
 
-Và Literature Review sau này không được viết:
+And later literature reviews must not write:
 
 > “No prior work has explored X.”
 
-mà phải là:
+but:
 
 > “Within the retrieved arXiv corpus from 2021 onward, we found limited work on X.”
 
-Điều này sẽ cực kỳ quan trọng khi tới phần Research Gap.
+That will matter a great deal when you reach the Research Gap section.
 
 ---
 
-# 9. Integration test thật, không chỉ unit test fake
+# 9. Real integration tests, not only fake unit tests
 
-9 test hiện tại rất tốt cho logic pipeline. 
+The current 9 tests are very good for pipeline logic.
 
-Nhưng chúng:
+But they:
 
-> không cần GPU / SPECTER2 weights.
+> do not need GPU / SPECTER2 weights.
 
-Tôi sẽ giữ unit tests và thêm:
+I would keep the unit tests and add:
 
 ```text
 tests/
@@ -394,7 +390,7 @@ tests/
 └── integration/
 ```
 
-Integration test có thể chỉ chạy khi:
+Integration tests can run only when:
 
 ```bash
 RUN_INTEGRATION=1 pytest tests/integration
@@ -413,25 +409,25 @@ assert:
 2205.09329 ∈ top 20
 ```
 
-Thêm 3–5 known paper là đủ.
+3–5 known papers are enough.
 
-Điều này bắt được các lỗi mà fake encoder không bắt được:
+This catches bugs a fake encoder will miss:
 
 ```text
-adapter sai
-normalization sai
-FAISS mapping sai
-model version sai
+wrong adapter
+wrong normalization
+wrong FAISS mapping
+wrong model version
 artifact mismatch
 ```
 
 ---
 
-# 10. Reproducibility metadata nên mạnh hơn
+# 10. Stronger reproducibility metadata
 
-Manifest hiện đã rất tốt.
+The manifest is already very good.
 
-Tôi sẽ thêm:
+I would add:
 
 ```json
 {
@@ -449,36 +445,36 @@ Tôi sẽ thêm:
 }
 ```
 
-Hiện config fingerprint giúp kiểm tra cấu hình corpus, nhưng package/model revision giúp bạn thực sự tái tạo kết quả sau vài tháng.
+A config fingerprint already checks corpus configuration, but package/model revisions let you actually reproduce results months later.
 
 ---
 
-# 11. Semantic Scholar citations nên được xem là ranking prior, không phải relevance
+# 11. Treat Semantic Scholar citations as a ranking prior, not as relevance
 
-Bạn hiện có:
+You currently have:
 
-> Semantic Scholar citation rank opt-in. 
+> Semantic Scholar citation rank opt-in.
 
-Tôi sẽ rất cẩn thận ở đây.
+I would be careful here.
 
-Citation count có bias lớn:
+Citation count has a large bias:
 
 ```text
 old papers > new papers
 popular topics > niche topics
 ```
 
-Ví dụ paper 2026 mới nhưng cực kỳ relevant có citation ≈0.
+For example a 2026 paper that is extremely relevant may have citation ≈0.
 
-Nên nếu dùng citation signal, dùng dạng:
+If you use a citation signal, use it as a:
 
 ```text
 small secondary prior
 ```
 
-không để nó dominate relevance.
+do not let it dominate relevance.
 
-Và benchmark:
+And benchmark:
 
 ```text
 without citations
@@ -486,19 +482,19 @@ vs
 with citations
 ```
 
-trước khi bật mặc định.
+before turning it on by default.
 
-Việc bạn đang để `--citations` opt-in là quyết định đúng.
+Keeping `--citations` opt-in is the right call.
 
 ---
 
-# 12. Chưa cần LangGraph
+# 12. LangGraph is not needed yet
 
-Báo cáo ghi LangGraph chưa làm. 
+The report lists LangGraph as unfinished.
 
-Tôi sẽ **giữ nguyên trạng thái này**.
+I would **leave that as-is**.
 
-Retrieval hiện tại là deterministic pipeline:
+Retrieval today is a deterministic pipeline:
 
 ```text
 expand
@@ -507,9 +503,9 @@ rerank
 fuse
 ```
 
-Không có lý do tốt để biến thành graph agent.
+There is no good reason to turn it into a graph agent.
 
-LangGraph chỉ bắt đầu có giá trị ở:
+LangGraph starts to pay off at:
 
 ```text
 Extraction failed?
@@ -527,31 +523,31 @@ counter-evidence?
 revise gap
 ```
 
-Tức Phase 2–4.
+That is Phase 2–4.
 
-Không nên thêm LangGraph chỉ để CV có chữ “LangGraph”.
+Do not add LangGraph just so the CV can say “LangGraph”.
 
 ---
 
-# Thứ tự tôi đề xuất trước khi chuyển Phase 2
+# Suggested order before moving to Phase 2
 
-Tôi sẽ sửa mục §7 trong báo cáo thành:
+I would rewrite §7 of the report as:
 
 **Milestone 1A — Retrieval Quality**
 
-1. Tạo 15–20 query benchmark + relevance labels.
-2. Chạy ablation Dense / Expansion / Keyword / Hybrid.
-3. Tính Recall, Precision, MRR, nDCG.
-4. Thêm hard-query failure analysis.
-5. Tune `broad_k`, candidate pool và RRF parameters.
+1. Create a 15–20 query benchmark + relevance labels.
+2. Run Dense / Expansion / Keyword / Hybrid ablation.
+3. Compute Recall, Precision, MRR, nDCG.
+4. Add hard-query failure analysis.
+5. Tune `broad_k`, candidate pool, and RRF parameters.
 
 **Milestone 1B — Retrieval Engineering Hardening**
-6. Thêm integration tests với real corpus/model.
-7. Mở rộng logging + provenance của ranking.
-8. Thêm corpus diagnostics.
-9. Pin model/package revisions và reproducibility metadata.
+6. Add integration tests with the real corpus/model.
+7. Expand logging + ranking provenance.
+8. Add corpus diagnostics.
+9. Pin model/package revisions and reproducibility metadata.
 
 **Milestone 2 — Extraction**
-10. Sau đó mới bắt đầu TeX/PDF → structured claims → evidence provenance.
+10. Only then start TeX/PDF → structured claims → evidence provenance.
 
-Nếu phải chọn **một việc duy nhất tiếp theo**, tôi sẽ không làm Extraction ngay mà làm **Retrieval Evaluation notebook/script**. Engineering của giai đoạn Retrieval hiện đã đủ tốt; phần còn thiếu nhất là bằng chứng định lượng rằng kiến trúc bạn vừa xây thực sự tốt hơn baseline. Sau khi có bảng ablation đó, có thể xem **Phase 1 hoàn thành đúng nghĩa** rồi chuyển sang Extraction.
+If I had to pick **one next task**, I would not do Extraction yet — I would do a **Retrieval Evaluation notebook/script**. Retrieval engineering is already good enough; the biggest gap is quantitative evidence that the architecture you built actually beats the baseline. After that ablation table exists, Phase 1 can be treated as **genuinely complete**, then move to Extraction.
