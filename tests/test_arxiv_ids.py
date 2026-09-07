@@ -1,4 +1,4 @@
-from research_assistant.arxiv_ids import format_version, normalize_arxiv_id, split_arxiv_id
+from research_assistant.arxiv_ids import format_version, normalize_arxiv_id, paper_key, split_arxiv_id, version_number
 
 
 def test_split_keeps_version():
@@ -16,3 +16,10 @@ def test_format_version():
     assert format_version(None) == "v1"
     assert format_version("2") == "v2"
     assert format_version("v3") == "v3"
+
+
+def test_paper_key_and_version_number():
+    assert paper_key("2205.09329", "v2") == "2205.09329v2"
+    assert paper_key("2205.09329v3") == "2205.09329v3"
+    assert version_number("v10") == 10
+    assert version_number(None) == 1

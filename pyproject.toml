@@ -21,6 +21,7 @@ dependencies = [
     "httpx",
     "pymupdf",
     "pylatexenc",
+    "scikit-learn>=1.3,<2",
 ]
 
 [project.optional-dependencies]
@@ -29,6 +30,7 @@ dev = ["pytest"]
 [project.scripts]
 retrieve-papers = "research_assistant.retrieval.cli:main"
 extract-papers = "research_assistant.extraction.cli:main"
+synthesize-papers = "research_assistant.synthesis.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["research_assistant*"]

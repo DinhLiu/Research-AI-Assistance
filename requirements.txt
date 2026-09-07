@@ -11,4 +11,5 @@ python-dotenv
 httpx
 pymupdf
 pylatexenc
+scikit-learn>=1.3,<2
 pytest

@@ -10,6 +10,7 @@ load_dotenv(REPO_ROOT / ".env", override=True)
 
 DEFAULT_ARTIFACTS_DIR = REPO_ROOT / "data" / "specter2_artifacts"
 DEFAULT_EXTRACTION_CACHE_DIR = REPO_ROOT / "data" / "extraction_cache"
+DEFAULT_SYNTHESIS_CACHE_DIR = REPO_ROOT / "data" / "synthesis_cache"
 
 # Bump these when the corresponding algorithm/prompt/schema changes.
 EXTRACTION_SCHEMA_VERSION = "2"
@@ -80,3 +81,39 @@ class ExtractionConfig:
     parsed_version: str = EXTRACTION_PARSED_VERSION
     # Extraction prefers Gemini; Groq is last-resort for this stage.
     prefer_provider: str = "gemini"
+
+
+SYNTHESIS_SCHEMA_VERSION = "1"
+SYNTHESIS_NORMALIZER_VERSION = "1"
+SYNTHESIS_CLUSTERING_VERSION = "1"
+SYNTHESIS_PROMPT_VERSION = "1"
+SYNTHESIS_VALIDATOR_VERSION = "1"
+SYNTHESIS_CARD_VERSION = "1"
+
+
+@dataclass
+class SynthesisConfig:
+    cache_dir: Path = DEFAULT_SYNTHESIS_CACHE_DIR
+    summarize: bool = False
+    strict_ok: bool = False
+    strict_evidence: bool = False
+    # Provisional cosine-distance cut; calibrate before treating as validated.
+    distance_threshold: float = 0.55
+    keyword_weight: float = 0.5
+    max_features: int = 2000
+    use_cache: bool = True
+    llm_timeout_s: float = 90.0
+    max_logical_calls: int = 2
+    max_prompt_chars: int = 24000
+    max_method_chars: int = 800
+    max_problem_chars: int = 400
+    max_claim_chars: int = 300
+    max_claims_per_field: int = 2
+    max_quote_chars: int = 280
+    prefer_provider: str = "gemini"
+    schema_version: str = SYNTHESIS_SCHEMA_VERSION
+    normalizer_version: str = SYNTHESIS_NORMALIZER_VERSION
+    clustering_version: str = SYNTHESIS_CLUSTERING_VERSION
+    prompt_version: str = SYNTHESIS_PROMPT_VERSION
+    validator_version: str = SYNTHESIS_VALIDATOR_VERSION
+    card_version: str = SYNTHESIS_CARD_VERSION

@@ -1,0 +1,58 @@
+{
+  "notes": "Smoke fixture for Stage 3, not independent clustering ground truth. Exclusive labels mix selection mechanism and paper role; overlapping tags and uncertain pairs must be retained.",
+  "axis": "primary_selection_mechanism",
+  "papers": [
+    {
+      "arxiv_id": "2205.09329",
+      "exclusive_cluster": "score_based_static",
+      "role": "method",
+      "overlapping_tags": ["score_based", "static_pruning"]
+    },
+    {
+      "arxiv_id": "2107.07075",
+      "exclusive_cluster": "score_based_static",
+      "role": "method",
+      "overlapping_tags": ["score_based", "el2n"]
+    },
+    {
+      "arxiv_id": "2206.14486",
+      "exclusive_cluster": "score_based_static",
+      "role": "method",
+      "overlapping_tags": ["score_based", "scaling_laws"]
+    },
+    {
+      "arxiv_id": "2210.15809",
+      "exclusive_cluster": "coverage_coreset",
+      "role": "method",
+      "overlapping_tags": ["coreset", "coverage"]
+    },
+    {
+      "arxiv_id": "2303.04947",
+      "exclusive_cluster": "dynamic_pruning",
+      "role": "method",
+      "overlapping_tags": ["dynamic", "score_based"]
+    },
+    {
+      "arxiv_id": "2204.08499",
+      "exclusive_cluster": "library",
+      "role": "library",
+      "overlapping_tags": ["coreset"]
+    },
+    {
+      "arxiv_id": "2302.06960",
+      "exclusive_cluster": "analysis",
+      "role": "analysis",
+      "overlapping_tags": ["score_based"]
+    },
+    {
+      "arxiv_id": "2305.18424",
+      "exclusive_cluster": "random_baseline",
+      "role": "baseline",
+      "overlapping_tags": ["random"]
+    }
+  ],
+  "uncertain_pairs": [
+    ["2205.09329", "2107.07075"],
+    ["2303.04947", "2205.09329"]
+  ]
+}

@@ -39,6 +39,20 @@ def format_version(version: str | None, default: str = "v1") -> str:
     return text
 
 
+def paper_key(arxiv_id: str, version: str | None = None) -> str:
+    """Canonical citation key: versionless id plus a vN suffix."""
+    core, parsed = split_arxiv_id(arxiv_id)
+    resolved = format_version(version or parsed)
+    return f"{core}{resolved}"
+
+
+def version_number(version: str | None) -> int:
+    formatted = format_version(version)
+    if formatted.lower().startswith("v") and formatted[1:].isdigit():
+        return int(formatted[1:])
+    return 0
+
+
 def _strip_url(url_or_id: str) -> str:
     text = url_or_id.strip()
     if "arxiv.org/abs/" in text:
