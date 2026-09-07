@@ -1,15 +1,2 @@
-numpy
-pandas
-pyarrow
-faiss-cpu
-torch
-transformers
-adapters>=1.2,<2
-sentencepiece
-pydantic>=2
-python-dotenv
-httpx
-pymupdf
-pylatexenc
-scikit-learn>=1.3,<2
-pytest
+# Dependencies are maintained in pyproject.toml. Run from the project root.
+-e .[dev]

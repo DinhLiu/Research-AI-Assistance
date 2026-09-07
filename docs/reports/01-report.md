@@ -52,7 +52,7 @@ data/specter2_artifacts/
 
 Per-paper metadata includes `arxiv_id`, title, abstract, authors, categories, year, DOI, version, and `content_hash` (for later incremental updates). Embeddings are **not** stored in the DataFrame.
 
-Corpus notebook: `embedding.ipynb` (optimized, resumable, up to 2 GPUs, FP16, OOM fallback, checkpointing via `manifest.json`).
+Corpus notebook: `notebooks/embedding.ipynb` (optimized, resumable, up to 2 GPUs, FP16, OOM fallback, checkpointing via `manifest.json`).
 
 Kaggle retrieval smoke test with query *dataset pruning and data subset selection for deep neural networks* returned on-topic papers (e.g. `2205.09329` Dataset Pruning, cosine ~0.83).
 

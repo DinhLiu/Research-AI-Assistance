@@ -12,7 +12,7 @@ import numpy as np
 from research_assistant.config import SynthesisConfig
 from research_assistant.extraction.types import ExtractionResult
 from research_assistant.extraction.validate import extract_json_object
-from research_assistant.llm.client import complete, extraction_provider, model_for_provider
+from research_assistant.llm.client import complete, extraction_provider, model_for_provider, LlmError
 from research_assistant.synthesis.cards import (
     build_inventory,
     build_registry_and_cards,
@@ -314,12 +314,15 @@ def _complete_narration(
     last_comparisons: list = []
     last_errors: list[str] = []
     message = user_prompt
-    budget = max(1, int(cfg.max_logical_calls))
+    budget = max(0, int(cfg.max_logical_calls))
     while calls < budget:
         calls += 1
         try:
             raw = completer(system=SYSTEM_PROMPT, user=message)
             payload = LlmNarration.model_validate(extract_json_object(raw))
+        except (LlmError, TimeoutError) as exc:
+            last_errors = [f"transport_fail:{exc}"]
+            break
         except Exception as exc:
             last_errors = [f"parse_fail:{exc}"]
             message = repair_user_message(user_prompt, last_errors)

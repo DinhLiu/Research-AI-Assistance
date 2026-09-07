@@ -380,3 +380,14 @@ def test_extract_one_uses_injected_prompt_path(monkeypatch, tmp_path):
     assert paper.status == "ok"
     assert paper.source_kind == "tex"
     assert paper.method is not None
+
+
+def test_terminal_llm_error_stops_later_batches(tmp_path, offline_fetch):
+    from research_assistant.llm.client import LlmError
+    calls = []
+    def fail(**kwargs):
+        calls.append(1)
+        raise LlmError("llm_http_401")
+    result = extract_papers([_hit_n(i) for i in range(1, 7)], _cfg(tmp_path, llm_batch_size=2), complete_fn=fail)
+    assert len(calls) == 1
+    assert len(result.records) == 6

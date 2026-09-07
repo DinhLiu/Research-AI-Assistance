@@ -117,3 +117,48 @@ class SynthesisConfig:
     prompt_version: str = SYNTHESIS_PROMPT_VERSION
     validator_version: str = SYNTHESIS_VALIDATOR_VERSION
     card_version: str = SYNTHESIS_CARD_VERSION
+
+
+@dataclass
+class WritingConfig:
+    cache_dir: Path = REPO_ROOT / "data" / "writing_cache"
+    use_cache: bool = True
+    use_llm: bool = False
+    dry_run: bool = False
+    language: str = "en"
+    target_words: int = 1500
+    max_generation_batches: int = 3
+    max_repair_calls: int = 1
+    max_http_attempts_per_run: int = 5
+    max_run_tokens: int = 100000
+    max_input_tokens: int = 20000
+    max_output_tokens: int = 6000
+    context_tokens: int = 32768
+    request_timeout_s: float = 90.0
+    run_deadline_s: float = 600.0
+    prefer_provider: str = "gemini"
+    run_id: str | None = None
+    schema_version: str = "1"
+    prompt_version: str = "1"
+    validator_version: str = "1"
+    render_version: str = "1"
+
+    def __post_init__(self):
+        import math
+        counts = (self.target_words, self.max_generation_batches, self.max_repair_calls,
+                  self.max_http_attempts_per_run, self.max_run_tokens, self.max_input_tokens,
+                  self.max_output_tokens, self.context_tokens)
+        if any(type(n) is not int for n in counts):
+            raise ValueError("Writing budgets must be integers")
+        if self.schema_version != "1":
+            raise ValueError("Unsupported writing schema")
+        if self.language not in {"en", "vi"}:
+            raise ValueError("language must be en or vi")
+        if not 1 <= self.max_generation_batches <= 3 or not 0 <= self.max_repair_calls <= 1:
+            raise ValueError("At most three batches and one repair are supported")
+        if not 0 <= self.max_http_attempts_per_run <= 5:
+            raise ValueError("HTTP attempt cap must be between zero and five")
+        if min(self.target_words, self.max_input_tokens, self.max_output_tokens, self.context_tokens) <= 0 or self.max_run_tokens < 0:
+            raise ValueError("Invalid writing token/length budgets")
+        if any(not math.isfinite(n) or n <= 0 for n in (self.request_timeout_s, self.run_deadline_s)):
+            raise ValueError("Invalid writing deadlines")

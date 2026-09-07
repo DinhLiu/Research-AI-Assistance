@@ -39,6 +39,7 @@ from research_assistant.extraction.types import (
 from research_assistant.extraction.validate import ground_llm, paper_from_local_candidates, parse_llm_payload
 from research_assistant.llm.client import (
     LlmBudgetExceeded,
+    LlmError,
     RateLimitError,
     complete,
     extraction_provider,
@@ -57,14 +58,17 @@ class _CallCounter:
     last_ts: float | None = None
     max_calls: int = 0
     min_interval_s: float = 0.0
+    stopped: bool = False
 
     def remaining(self) -> int:
+        if self.stopped:
+            return 0
         if self.max_calls <= 0:
             return 10**9
         return max(0, self.max_calls - self.n)
 
     def exhausted(self) -> bool:
-        return self.max_calls > 0 and self.n >= self.max_calls
+        return self.stopped or (self.max_calls > 0 and self.n >= self.max_calls)
 
     def wrap(self, fn: CompleteFn) -> CompleteFn:
         def _inner(*, system: str, user: str, **kwargs: Any) -> str:
@@ -77,6 +81,9 @@ class _CallCounter:
             self.n += 1
             try:
                 return fn(system=system, user=user, **kwargs)
+            except LlmError:
+                self.stopped = True
+                raise
             finally:
                 self.last_ts = time.monotonic()
 

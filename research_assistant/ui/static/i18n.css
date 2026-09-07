@@ -1,0 +1,38 @@
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.language-switch {
+  display: flex;
+  padding: 3px;
+  background: #eef2f8;
+  border-radius: 8px;
+}
+
+.language-switch button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 12px;
+}
+
+.language-switch button[aria-pressed="true"] {
+  background: white;
+  color: var(--blue);
+  box-shadow: 0 1px 4px #1a335526;
+}
+
+summary > span[data-i18n]:first-child {
+  float: none;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+@media (max-width: 760px) {
+  .header-actions { gap: 8px; }
+}

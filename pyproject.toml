@@ -28,8 +28,10 @@ dependencies = [
 dev = ["pytest"]
 
 [project.scripts]
+research-assistant-ui = "research_assistant.ui.server:main"
 retrieve-papers = "research_assistant.retrieval.cli:main"
 extract-papers = "research_assistant.extraction.cli:main"
+write-review = "research_assistant.writing.cli:main"
 synthesize-papers = "research_assistant.synthesis.cli:main"
 
 [tool.setuptools.packages.find]
@@ -38,3 +40,6 @@ include = ["research_assistant*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.setuptools.package-data]
+"research_assistant.ui" = ["static/*.html", "static/*.css", "static/*.js"]

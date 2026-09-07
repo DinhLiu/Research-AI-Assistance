@@ -38,7 +38,7 @@ def test_timeout_preserves_clusters(tmp_path):
     )
     assert result.assignments
     assert result.execution.summary_status == "failed"
-    assert result.execution.logical_calls == 2
+    assert result.execution.logical_calls == 1
 
 
 def test_malformed_json_then_repair(tmp_path):
@@ -126,3 +126,22 @@ def test_strict_evidence_templates(tmp_path):
 def test_cluster_id_stable_for_same_members():
     assert cluster_id_for(["b", "a"], "1") == cluster_id_for(["a", "b"], "1")
     assert cluster_id_for(["a"], "1") != cluster_id_for(["a"], "2")
+
+
+def test_transport_error_is_not_content_repair(tmp_path):
+    from research_assistant.llm.client import LlmError
+    calls = []
+    def fail(**kwargs):
+        calls.append(1)
+        raise LlmError("llm_http_401")
+    result = synthesize(snapshot([paper()]), _cfg(tmp_path), complete_fn=fail)
+    assert len(calls) == 1
+    assert result.execution.summary_status == "failed"
+    assert "transport_fail" in result.execution.failure_reason
+
+
+def test_zero_logical_budget_never_calls(tmp_path):
+    def fail(**kwargs):
+        raise AssertionError("budget zero")
+    result = synthesize(snapshot([paper()]), _cfg(tmp_path, max_logical_calls=0), complete_fn=fail)
+    assert result.execution.logical_calls == 0
