@@ -75,6 +75,11 @@ def synthesize(
         cached = load_result(cluster_path(cfg.cache_dir, ckey))
         if cached is not None and cached.corpus_digest == digest:
             result = cached
+            # Membership is order-independent; row indices and skip reasons are not.
+            inventory, _accepted = build_inventory(snapshot.records, strict_ok=cfg.strict_ok)
+            empty_keys = {item.paper_key for item in cached.input_inventory if item.disposition == "empty_features"}
+            mark_empty_features(inventory, empty_keys)
+            result.input_inventory = inventory
             cluster_hit = True
             result.summaries = []
             result.comparisons = []

@@ -31,12 +31,11 @@ COMPARISON_KINDS: frozenset[EvidenceKind] = frozenset({"method", "result", "limi
 
 def named_paper_keys(text: str, known_keys: set[str]) -> set[str]:
     found: set[str] = set()
-    cores = {normalize_arxiv_id(key): key for key in known_keys}
     for token in _ARXIV_TOKEN.findall(text or ""):
         core, version = split_arxiv_id(token)
-        candidate = paper_key(core, version) if version else cores.get(core)
-        if candidate in known_keys:
-            found.add(candidate)
+        # An explicit version must never resolve to evidence from another version.
+        if version:
+            found.add(paper_key(core, version))
             continue
         matches = [key for key in known_keys if normalize_arxiv_id(key) == core]
         if len(matches) == 1:
@@ -190,6 +189,8 @@ def apply_narration(
             claims.append(checked)
             if checked.validation_status == "rejected":
                 errors.append(f"{raw.cluster_id}:{checked.rejection_reason}")
+        if not any(claim.validation_status == "structurally_validated" for claim in claims):
+            errors.append(f"empty_cluster_summary:{raw.cluster_id}")
         summaries.append(ClusterSummary(cluster_id=raw.cluster_id, claims=claims))
 
     missing = [item.cluster_id for item in assignments if item.cluster_id not in seen_clusters]

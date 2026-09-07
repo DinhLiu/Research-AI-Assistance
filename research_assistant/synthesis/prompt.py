@@ -10,7 +10,7 @@ from research_assistant.synthesis.types import (
     PaperCard,
 )
 
-PROMPT_VERSION = "1"
+PROMPT_VERSION = "2"
 
 SYSTEM_PROMPT = """You write structurally grounded synthesis over a frozen paper clustering.
 Return JSON only with this shape:
@@ -172,7 +172,9 @@ def _paper_block(
     paper_units.sort(key=lambda unit: (0 if unit.kind in preferred else 1, unit.field_path))
     for unit in paper_units:
         if config.max_quote_chars <= 0:
+            # Omit quote text, never the references required by the citation gate.
             omitted += 1
+            evidence_lines.append(f"[{unit.unit_id}] kind={unit.kind} path={unit.field_path}")
             continue
         quote, clipped = _clip(unit.quote or unit.text, config.max_quote_chars)
         omitted += int(clipped)
