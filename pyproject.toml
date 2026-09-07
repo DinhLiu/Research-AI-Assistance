@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "research-assistant-agent"
 version = "0.1.0"
-description = "Literature-review agent: SPECTER2 retrieve-then-rerank over a local arXiv corpus"
+description = "Literature-review agent: SPECTER2 retrieve-then-rerank and grounded paper extraction"
 requires-python = ">=3.10"
 dependencies = [
     "numpy",
@@ -19,6 +19,8 @@ dependencies = [
     "pydantic>=2",
     "python-dotenv",
     "httpx",
+    "pymupdf",
+    "pylatexenc",
 ]
 
 [project.optional-dependencies]
@@ -26,6 +28,7 @@ dev = ["pytest"]
 
 [project.scripts]
 retrieve-papers = "research_assistant.retrieval.cli:main"
+extract-papers = "research_assistant.extraction.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["research_assistant*"]

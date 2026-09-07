@@ -99,7 +99,7 @@ def test_fetch_citation_counts_parses_batch_and_retries_429(monkeypatch):
     from research_assistant.retrieval.hybrid import fetch_citation_counts
 
 def test_gemini_response_text_skips_thought_parts():
-    from research_assistant.retrieval.expand import _gemini_response_text
+    from research_assistant.llm.client import _gemini_response_text
 
     text = _gemini_response_text(
         {

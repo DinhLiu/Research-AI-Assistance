@@ -1,0 +1,22 @@
+\documentclass{article}
+\title{Tiny Coreset Selection}
+\author{Test Author}
+\begin{document}
+\maketitle
+\begin{abstract}
+We select a coreset of CIFAR-10 using EL2N scores.
+\end{abstract}
+\section{Introduction}
+Training on all data is expensive.
+\input{extra}
+\section{Related Work}
+GraNd and EL2N score examples early in training.
+\section{Method}
+We prune the training set with EL2N scores computed at epoch 10.
+\section{Experiments}
+On CIFAR-10, random selection achieves 83.2\%. Our method reaches 90.1\% accuracy.
+\section{Limitations}
+Early-training scores are unstable across random seeds.
+\section{Conclusion}
+Coreset selection with EL2N reduces data without large accuracy loss.
+\end{document}

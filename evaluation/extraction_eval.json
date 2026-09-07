@@ -1,0 +1,2729 @@
+{
+  "selected": {
+    "topic": null,
+    "records": [
+      {
+        "arxiv_id": "2205.09329",
+        "version": "v1",
+        "title": "Dataset Pruning: Reducing Training Data by Examining Generalization Influence",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "How to construct a smallest subset from the entire training data as a proxy training set without significantly sacrificing the model's performance?",
+          "evidence": [
+            {
+              "quote": "How much does each individual training sample or a sub-training-set affect the model's generalization, and how to construct a smallest subset from the entire training data as a proxy training set without significantly sacrificing the model's performance?",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 251,
+              "end_char": 505
+            }
+          ]
+        },
+        "method": {
+          "text": "An optimization-based dataset pruning method that examines the influence of removing training samples on generalization and constructs a smallest subset with a constrained generalization gap.",
+          "evidence": [
+            {
+              "quote": "To answer these, we propose dataset pruning, an optimization-based sample selection method that can (1) examine the influence of removing a particular set of training samples on model's generalization ability with theoretical guarantee, and (2) construct a smallest subset of training data that yields strictly constrained generalization gap.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 506,
+              "end_char": 848
+            },
+            {
+              "quote": "In this work, we present an optimization-based dataset pruning method that can prune a largest subset from the entire training dataset with (a) theoretically guaranteed generalization gap and (b) consideration of the joint influence of all collected data.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 2347,
+              "end_char": 2602
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "The method prunes 40% of training examples on CIFAR-10, halves convergence time with only 1.3% test accuracy decrease, and is competitive with other baseline methods.",
+            "evidence": [
+              {
+                "quote": "Furthermore, the proposed method prunes 40% training examples on the CIFAR-10 dataset, halves the convergence time with only 1.3% test accuracy decrease, which is superior to previous score-based sample selection methods.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 975,
+                "end_char": 1196
+              },
+              {
+                "quote": "Superior to previous score-based sample selection methods, our proposed method prunes 40% training examples in CIFAR-10 <cit.>, halves the convergence time, and achieves only 1.3% test accuracy drop.",
+                "section": "Introduction",
+                "source_kind": "tex",
+                "start_char": 3302,
+                "end_char": 3501
+              },
+              {
+                "quote": "We show that the test accuracy of a network trained on the pruned dataset is comparable to the test accuracy of the network trained on the whole dataset, and is competitive with other baseline methods.",
+                "section": "Dataset Pruning",
+                "source_kind": "tex",
+                "start_char": 440,
+                "end_char": 641
+              }
+            ]
+          }
+        ],
+        "limitations": [],
+        "contributions": [
+          {
+            "text": "Proposes a dataset pruning method that extends the sample selection problem from cardinality constraint to generalization constraint.",
+            "evidence": [
+              {
+                "quote": "Before delving into details, we summarize our contributions as below: * This paper proposes a dataset pruning method, which extends the sample selection problem from cardinality constraint to generalization constraint.",
+                "section": "Introduction",
+                "source_kind": "tex",
+                "start_char": 3502,
+                "end_char": 3720
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "osed optimization-based dataset pruning method with several sample-selection baselines on CIFAR-10 (left) and CIFAR-100 (right). Random selects training data randomly. Herding <cit.> selec",
+              "section": "Experiment",
+              "source_kind": "tex",
+              "start_char": 726,
+              "end_char": 734
+            }
+          },
+          {
+            "value": "CIFAR-100",
+            "evidence": {
+              "quote": "sed dataset pruning method with several sample-selection baselines on CIFAR-10 (left) and CIFAR-100 (right). Random selects training data randomly. Herding <cit.> selects samples that are c",
+              "section": "Experiment",
+              "source_kind": "tex",
+              "start_char": 746,
+              "end_char": 755
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "value": "accuracy",
+            "evidence": {
+              "quote": "raining examples on the CIFAR-10 dataset, halves the convergence time with only 1.3% test accuracy decrease, which is superior to previous score-based sample selection methods.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 1110,
+              "end_char": 1118
+            }
+          }
+        ],
+        "method_keywords": [
+          {
+            "value": "dataset pruning",
+            "evidence": {
+              "quote": "To answer these, we propose dataset pruning, an optimization-based sample selection method that can (1) examine the influence of removing a particular set of training samples on model's generalization ability with theoretical guarantee, and (2) construct a smallest subset of training data that yields strictly constrained generalization gap.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 506,
+              "end_char": 848
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 8,
+        "units_kept": 8,
+        "relocated_evidence": 0,
+        "fingerprint": "d7b3316368a755d45dbe"
+      },
+      {
+        "arxiv_id": "2107.07075",
+        "version": "v1",
+        "title": "Deep Learning on a Data Diet: Finding Important Examples Early in Training",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "How much of the data is superfluous, which examples are important for generalization, and how do we find them?",
+          "evidence": [
+            {
+              "quote": "It is therefore natural to ask: how much of the data is superfluous, which examples are important for generalization, and how do we find them?",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 138,
+              "end_char": 280
+            }
+          ]
+        },
+        "method": {
+          "text": "A scoring method based on the initial loss gradient norm of individual training examples to identify important and difficult examples early in training for pruning.",
+          "evidence": [
+            {
+              "quote": "To address these challenges, we propose a scoring method that can be used to identify important and difficult examples early in training, and prune the training dataset without large sacrifices in test accuracy.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 584,
+              "end_char": 795
+            },
+            {
+              "quote": "* We propose to score the importance of each training (x_i,y_i) by its expected loss gradient norm (score), which, up to a constant, bounds the expected change in loss for an arbitrary (x,y) caused by removing (x_i,y_i). * We show that pruning training samples with small scores at initialization allows one to train on as little as 50% of the training data without any loss in accuracy (CIFAR-10).",
+              "section": "Contributions",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 398
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "Pruning training samples with small scores at initialization allows training on as little as 50% of the data without loss in accuracy on CIFAR-10.",
+            "evidence": [
+              {
+                "quote": "In all experiments accuracies achieved by training on the full dataset and on a random subset of the corresponding size are used as baselines.",
+                "section": "Empirical Evaluation of and Scores via Data Pruning",
+                "source_kind": "tex",
+                "start_char": 741,
+                "end_char": 883
+              },
+              {
+                "quote": "Networks trained on subsets of the data with high scores achieve levels of test accuracy comparable to training on the full dataset and are competitive with other state of the art data pruning methods.",
+                "section": "Empirical Evaluation of and Scores via Data Pruning",
+                "source_kind": "tex",
+                "start_char": 1173,
+                "end_char": 1374
+              },
+              {
+                "quote": "In all settings, scores can be used to select a training subset at initialization that achieves test accuracy significantly better than random, and in some cases, competitive with training on all the data.",
+                "section": "Empirical Evaluation of and Scores via Data Pruning",
+                "source_kind": "tex",
+                "start_char": 3184,
+                "end_char": 3389
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          {
+            "text": "The approach does not work when loss gradient norms are computed at weights early in training of a single trajectory without averaging over multiple initializations.",
+            "evidence": [
+              {
+                "quote": "While this approach does not work when the loss gradient norms are computed at the weights early in training of a single trajectory, we find that, surprisingly, averaging these norms over multiple weight initializations does produce a ranking that correlates strongly with forgetting scores and allows us to prune a significant fraction of examples early in training.",
+                "section": "Introduction",
+                "source_kind": "tex",
+                "start_char": 3346,
+                "end_char": 3713
+              }
+            ]
+          }
+        ],
+        "contributions": [
+          {
+            "text": "Proposes scoring importance by expected loss gradient norm and introduces a method based on linearly connected modes to study the empirical risk surface.",
+            "evidence": [
+              {
+                "quote": "* We propose to score the importance of each training (x_i,y_i) by its expected loss gradient norm (score), which, up to a constant, bounds the expected change in loss for an arbitrary (x,y) caused by removing (x_i,y_i). * We show that pruning training samples with small scores at initialization allows one to train on as little as 50% of the training data without any loss in accuracy (CIFAR-10).",
+                "section": "Contributions",
+                "source_kind": "tex",
+                "start_char": 0,
+                "end_char": 398
+              },
+              {
+                "quote": "This boost in performance is enhanced in a corrupted label regime. * We introduce a method, based on linearly connected modes, for studying the empirical risk surface in terms of the modes of subsets of data, allowing us to identify when, in training, the final performance on subpopulations is determined.",
+                "section": "Contributions",
+                "source_kind": "tex",
+                "start_char": 1113,
+                "end_char": 1419
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "ining. Subsets of a fixed size are used: networks are trained on 50% of training data for CIFAR-10, 60% for CINIC-10 and 75% for CIFAR-100. Second row: Final test accuracy achieved by trai",
+              "section": "Empirical Evaluation of and Scores via Data Pruning",
+              "source_kind": "tex",
+              "start_char": 382,
+              "end_char": 390
+            }
+          },
+          {
+            "value": "CIFAR-100",
+            "evidence": {
+              "quote": ": networks are trained on 50% of training data for CIFAR-10, 60% for CINIC-10 and 75% for CIFAR-100. Second row: Final test accuracy achieved by training after different fractions of the da",
+              "section": "Empirical Evaluation of and Scores via Data Pruning",
+              "source_kind": "tex",
+              "start_char": 421,
+              "end_char": 430
+            }
+          },
+          {
+            "value": "CINIC-10",
+            "evidence": {
+              "quote": "a fixed size are used: networks are trained on 50% of training data for CIFAR-10, 60% for CINIC-10 and 75% for CIFAR-100. Second row: Final test accuracy achieved by training after differe",
+              "section": "Empirical Evaluation of and Scores via Data Pruning",
+              "source_kind": "tex",
+              "start_char": 400,
+              "end_char": 408
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "value": "accuracy",
+            "evidence": {
+              "quote": "ee different dataset and network combinations (labeled at the top). First row: Final test accuracy achieved by training on a subset of training data comprised of examples with maximum forg",
+              "section": "Empirical Evaluation of and Scores via Data Pruning",
+              "source_kind": "tex",
+              "start_char": 135,
+              "end_char": 143
+            }
+          }
+        ],
+        "method_keywords": [
+          {
+            "value": "data pruning",
+            "evidence": {
+              "quote": "Based on this, we propose data pruning methods which use only local information early in training, and connect them to recent work that prunes data by discarding examples that are rarely forgotten over the course of training.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 852,
+              "end_char": 1077
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 10,
+        "units_kept": 10,
+        "relocated_evidence": 0,
+        "fingerprint": "d7b3316368a755d45dbe"
+      },
+      {
+        "arxiv_id": "2206.14486",
+        "version": "v1",
+        "title": "Beyond neural scaling laws: beating power law scaling via data pruning",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "Scaling laws require considerable costs in compute and energy; the goal is to break beyond power law scaling of error with dataset size.",
+          "evidence": [
+            {
+              "quote": "However, these improvements through scaling alone require considerable costs in compute and energy.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 187,
+              "end_char": 286
+            },
+            {
+              "quote": "We then test this new exponential scaling prediction with pruned dataset size empirically, and indeed observe better than power law scaling performance on ResNets trained on CIFAR-10, SVHN, and ImageNet.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 627,
+              "end_char": 830
+            }
+          ]
+        },
+        "method": {
+          "text": "A self-supervised pruning metric that ranks training examples to achieve exponential scaling of error with dataset size.",
+          "evidence": [
+            {
+              "quote": "We thus go beyond this prior work by benchmarking the data pruning efficacy of not only these metrics but also a new unsupervised metric we introduce that does not require label information, all at scale on ImageNet.",
+              "section": "Pruning metrics: not all training examples are created equal",
+              "source_kind": "tex",
+              "start_char": 3951,
+              "end_char": 4167
+            },
+            {
+              "quote": "Here we focus on the scaling of error with dataset size and show how both in theory and practice we can break beyond power law scaling and reduce it to exponential scaling instead if we have access to a high-quality data pruning metric that ranks the order in which training examples should be discarded to achieve any pruned dataset size.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 287,
+              "end_char": 626
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "Data pruning by retaining hardest examples enabled training from scratch on 50% and 75% of CIFAR-10 and CIFAR-100 without loss in accuracy.",
+            "evidence": [
+              {
+                "quote": "Data pruning by retaining only the hardest examples with largest error enabled training from scratch on only 50% and 75% of CIFAR-10 and CIFAR-100 respectively without any loss in final test accuracy.",
+                "section": "Pruning metrics: not all training examples are created equal",
+                "source_kind": "tex",
+                "start_char": 610,
+                "end_char": 810
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Achieving exponential scaling requires a high-quality data pruning metric, and many metrics developed for smaller datasets scale poorly to ImageNet.",
+            "evidence": [
+              {
+                "quote": "The most notable limitation is that achieving exponential scaling requires a high quality data pruning metric.",
+                "section": "Discussion",
+                "source_kind": "tex",
+                "start_char": 405,
+                "end_char": 515
+              },
+              {
+                "quote": "Since most metrics developed for smaller datasets scale poorly to ImageNet, our results emphasize the importance of future work in identifying high quality, scalable metrics.",
+                "section": "Discussion",
+                "source_kind": "tex",
+                "start_char": 516,
+                "end_char": 690
+              }
+            ]
+          }
+        ],
+        "contributions": [
+          {
+            "text": "Develops a new analytic theory of data pruning in the student-teacher setting and introduces a new unsupervised metric.",
+            "evidence": [
+              {
+                "quote": "Our main contributions are: * Employing statistical mechanics, we develop a new analytic theory of data pruning in the student-teacher setting for perceptron learning, where examples are pruned based on their teacher margin, with large (small) margins corresponding to easy (hard) examples.",
+                "section": "Introduction",
+                "source_kind": "tex",
+                "start_char": 2396,
+                "end_char": 2686
+              },
+              {
+                "quote": "We thus go beyond this prior work by benchmarking the data pruning efficacy of not only these metrics but also a new unsupervised metric we introduce that does not require label information, all at scale on ImageNet.",
+                "section": "Pruning metrics: not all training examples are created equal",
+                "source_kind": "tex",
+                "start_char": 3951,
+                "end_char": 4167
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "cally, and indeed observe better than power law scaling performance on ResNets trained on CIFAR-10, SVHN, and ImageNet. Given the importance of finding high-quality pruning metrics, we per",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 801,
+              "end_char": 809
+            }
+          },
+          {
+            "value": "ImageNet",
+            "evidence": {
+              "quote": "serve better than power law scaling performance on ResNets trained on CIFAR-10, SVHN, and ImageNet. Given the importance of finding high-quality pruning metrics, we perform the first large",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 821,
+              "end_char": 829
+            }
+          },
+          {
+            "value": "SVHN",
+            "evidence": {
+              "quote": "indeed observe better than power law scaling performance on ResNets trained on CIFAR-10, SVHN, and ImageNet. Given the importance of finding high-quality pruning metrics, we perform t",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 811,
+              "end_char": 815
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "value": "accuracy",
+            "evidence": {
+              "quote": "s, an additional 2 billion pre-training data points (starting from 1 billion) leads to an accuracy gain on ImageNet of a few percentage points (Fig. 1 in <cit.>). Here we ask whether we mi",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 840,
+              "end_char": 848
+            }
+          },
+          {
+            "value": "training time",
+            "evidence": {
+              "quote": "erations on the full dataset was carried out on the pruned dataset, resulting in the same training time, but additional training epochs. However, this performance gain saturated before training",
+              "section": "Discussion",
+              "source_kind": "tex",
+              "start_char": 1171,
+              "end_char": 1184
+            }
+          }
+        ],
+        "method_keywords": [
+          {
+            "value": "data pruning",
+            "evidence": {
+              "quote": "We thus go beyond this prior work by benchmarking the data pruning efficacy of not only these metrics but also a new unsupervised metric we introduce that does not require label information, all at scale on ImageNet.",
+              "section": "Pruning metrics: not all training examples are created equal",
+              "source_kind": "tex",
+              "start_char": 3951,
+              "end_char": 4167
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 10,
+        "units_kept": 10,
+        "relocated_evidence": 0,
+        "fingerprint": "d7b3316368a755d45dbe"
+      },
+      {
+        "arxiv_id": "2210.15809",
+        "version": "v1",
+        "title": "Coverage-centric Coreset Selection for High Pruning Rates",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "State-of-the-art coreset selection methods perform well at low pruning rates but struggle at high pruning rates due to poor data coverage.",
+          "evidence": [
+            {
+              "quote": "State-of-the-art coreset selection methods typically assign an importance score to each example and select the most important examples to form a coreset.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 190,
+              "end_char": 343
+            },
+            {
+              "quote": "We then propose a new coreset selection method, Coverage-centric Coreset Selection (CCS), where we jointly consider overall data coverage based on the proposed metric as well as importance of each example.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 1024,
+              "end_char": 1229
+            }
+          ]
+        },
+        "method": {
+          "text": "Coverage-centric Coreset Selection (CCS), which combines data coverage with importance-based sampling using stratified sampling.",
+          "evidence": [
+            {
+              "quote": "We propose a novel coreset selection method, called Coverage-centric Coreset Selection (CCS), that combines data coverage with importance-based sampling.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 1867,
+              "end_char": 2020
+            },
+            {
+              "quote": "We propose the CCS method that adopts a classical idea from statistics: stratified sampling.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 3262,
+              "end_char": 3354
+            },
+            {
+              "quote": "Based on the observations in Section <ref> that current SOTA methods (forgetting and AUM) prune low-importance (easy) data from the high-density area, which contributes to larger values of AUC_pr, and thus possibly lower model accuracy, we propose a novel coreset selection method called Coverage-centric Coreset Selection (CCS), presented in Algorithm <ref>.",
+              "section": "Methodology: Coverage-centric coreset selection",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 359
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "CCS outperforms other baseline methods under high pruning rates and achieves comparable performance for low pruning rates.",
+            "evidence": [
+              {
+                "quote": "The evaluation results show that CCS outperforms other baseline methods with high pruning rates and achieves comparable accuracy with low pruning rates.",
+                "section": "Evaluation",
+                "source_kind": "tex",
+                "start_char": 276,
+                "end_char": 428
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Increasing the hard cutoff rate \u03b2 causes a drop in accuracy for all pruning rates.",
+            "evidence": [
+              {
+                "quote": "This accuracy drop is a significant limitation as it limits the extent to which coresets can be reduced in size with these selection methods.",
+                "section": "Introduction",
+                "source_kind": "tex",
+                "start_char": 1481,
+                "end_char": 1622
+              },
+              {
+                "quote": "However, further increasing \u03b2 causes a drop in accuracy for all pruning rates.",
+                "section": "Ablation study & analysis",
+                "source_kind": "tex",
+                "start_char": 1210,
+                "end_char": 1288
+              }
+            ]
+          }
+        ],
+        "contributions": [
+          {
+            "text": "Generalizes the probabilistic bound on model loss for a coreset to a density-based characterization.",
+            "evidence": [
+              {
+                "quote": "More specifically, we make the following contributions: * We start by generalizing the result in <cit.>, which provided a probabilistic bound on model loss for a r-cover coreset, where r is the smallest radius around the coreset points that covers 100% of the training set, to a density-based characterization of the coreset in which the radius r is allowed to cover a percentage p of a density space.",
+                "section": "Introduction",
+                "source_kind": "tex",
+                "start_char": 2104,
+                "end_char": 2505
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "with five baseline methods (random, entropy, forgetting, EL2N, and AUM) on four datasets (CIFAR10, CIFAR100, SVHN, and CINIC10). In total, we trained 800 models for performance comparison",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 177,
+              "end_char": 184
+            }
+          },
+          {
+            "value": "CIFAR-100",
+            "evidence": {
+              "quote": "baseline methods (random, entropy, forgetting, EL2N, and AUM) on four datasets (CIFAR10, CIFAR100, SVHN, and CINIC10). In total, we trained 800 models for performance comparison. The eval",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 186,
+              "end_char": 194
+            }
+          },
+          {
+            "value": "SVHN",
+            "evidence": {
+              "quote": "methods (random, entropy, forgetting, EL2N, and AUM) on four datasets (CIFAR10, CIFAR100, SVHN, and CINIC10). In total, we trained 800 models for performance comparison. The evaluation",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 196,
+              "end_char": 200
+            }
+          },
+          {
+            "value": "CINIC-10",
+            "evidence": {
+              "quote": "andom, entropy, forgetting, EL2N, and AUM) on four datasets (CIFAR10, CIFAR100, SVHN, and CINIC10). In total, we trained 800 models for performance comparison. The evaluation results show",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 206,
+              "end_char": 213
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "value": "accuracy",
+            "evidence": {
+              "quote": "at CCS outperforms other baseline methods with high pruning rates and achieves comparable accuracy with low pruning rates. We also conduct an ablation study (Section <ref>) to better under",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 396,
+              "end_char": 404
+            }
+          }
+        ],
+        "method_keywords": [
+          {
+            "value": "Coverage-centric Coreset Selection",
+            "evidence": {
+              "quote": "We propose a novel coreset selection method, called Coverage-centric Coreset Selection (CCS), that combines data coverage with importance-based sampling.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 1867,
+              "end_char": 2020
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 10,
+        "units_kept": 10,
+        "relocated_evidence": 0,
+        "fingerprint": "d7b3316368a755d45dbe"
+      },
+      {
+        "arxiv_id": "2303.04947",
+        "version": "v1",
+        "title": "InfoBatch: Lossless Training Speed Up by Unbiased Dynamic Data Pruning",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "Data pruning leads to gradient expectation bias between the pruned and original data.",
+          "evidence": [
+            {
+              "quote": "This leads to gradient expectation bias between the pruned and original data.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 202,
+              "end_char": 279
+            }
+          ]
+        },
+        "method": {
+          "text": "InfoBatch, a framework that randomly prunes less informative samples based on loss distribution and rescales gradients of remaining samples to maintain unbiased updates.",
+          "evidence": [
+            {
+              "quote": "To solve this problem, we propose InfoBatch, a novel framework aiming to achieve lossless training acceleration by unbiased dynamic data pruning.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 280,
+              "end_char": 425
+            },
+            {
+              "quote": "To tackle these issues, we propose InfoBatch, a novel unbiased dynamic data pruning framework based on the idea of maintaining the same total update between training on the pruned and original datasets.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 3301,
+              "end_char": 3503
+            },
+            {
+              "quote": "Specifically, InfoBatch randomly prunes a portion of less informative samples based on the loss distribution and rescales the gradients of the remaining samples.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 426,
+              "end_char": 587
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "InfoBatch consistently obtains lossless training results on CIFAR-10, CIFAR-100, Tiny-ImageNet, and ImageNet-1K with significant cost savings.",
+            "evidence": [
+              {
+                "quote": "As a plug-and-play and architecture-agnostic framework, InfoBatch consistently obtains lossless training results on CIFAR-10, CIFAR-100, Tiny-ImageNet, and ImageNet-1K saving 40%, 33%, 30%, and 26% overall cost, respectively.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 728,
+                "end_char": 953
+              },
+              {
+                "quote": "As illustrated in Tab. <ref>, we achieve lossless training performances under all settings, which indicates strong generality of InfoBatch.",
+                "section": "Generalization Evaluation",
+                "source_kind": "tex",
+                "start_char": 278,
+                "end_char": 417
+              }
+            ]
+          }
+        ],
+        "limitations": [],
+        "contributions": [
+          {
+            "text": "Proposes InfoBatch, a novel framework for lossless training acceleration by unbiased dynamic data pruning.",
+            "evidence": [
+              {
+                "quote": "We present InfoBatch, a novel framework for lossless training acceleration by unbiased dynamic data pruning.",
+                "section": "Conclusion",
+                "source_kind": "tex",
+                "start_char": 0,
+                "end_char": 108
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "der to evaluate the cross-architecture generality of InfoBatch, we train R-18 and R-50 on CIFAR-10, CIFAR-100, and ImageNet-1K. As illustrated in Tab. <ref>, we achieve lossless training p",
+              "section": "Generalization Evaluation",
+              "source_kind": "tex",
+              "start_char": 240,
+              "end_char": 248
+            }
+          },
+          {
+            "value": "CIFAR-100",
+            "evidence": {
+              "quote": "s to illustrate the effects of InfoBatch. If not stated, the experiments are conducted on CIFAR-100 by default. Evaluating the components of InfoBatch. We design an ablation study to invest",
+              "section": "Ablation Experiments",
+              "source_kind": "tex",
+              "start_char": 130,
+              "end_char": 139
+            }
+          },
+          {
+            "value": "ImageNet",
+            "evidence": {
+              "quote": "-architecture generality of InfoBatch, we train R-18 and R-50 on CIFAR-10, CIFAR-100, and ImageNet-1K. As illustrated in Tab. <ref>, we achieve lossless training performances under all settin",
+              "section": "Generalization Evaluation",
+              "source_kind": "tex",
+              "start_char": 265,
+              "end_char": 276
+            }
+          },
+          {
+            "value": "Tiny-ImageNet",
+            "evidence": {
+              "quote": "amework, InfoBatch consistently obtains lossless training results on CIFAR-10, CIFAR-100, Tiny-ImageNet, and ImageNet-1K saving 40%, 33%, 30%, and 26% overall cost, respectively. We extend Info",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 865,
+              "end_char": 878
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "value": "accuracy",
+            "evidence": {
+              "quote": "foBatch saves the overall cost by more than 25% on ImageNet-1K. (d) The pruned number and accuracy curve during the ImageNet-1K training process. Best viewed in color. Cross-optimizer robu",
+              "section": "Generalization Evaluation",
+              "source_kind": "tex",
+              "start_char": 1162,
+              "end_char": 1170
+            }
+          },
+          {
+            "value": "training time",
+            "evidence": {
+              "quote": "super large batch size to improve data parallelism during training to reduce the overall training time. However, more computation units are required and the total training cost is not reduced,",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 2050,
+              "end_char": 2063
+            }
+          }
+        ],
+        "method_keywords": [
+          {
+            "value": "InfoBatch",
+            "evidence": {
+              "quote": "To solve this problem, we propose InfoBatch, a novel framework aiming to achieve lossless training acceleration by unbiased dynamic data pruning.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 280,
+              "end_char": 425
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 8,
+        "units_kept": 8,
+        "relocated_evidence": 0,
+        "fingerprint": "d7b3316368a755d45dbe"
+      },
+      {
+        "arxiv_id": "2204.08499",
+        "version": "v1",
+        "title": "DeepCore: A Comprehensive Library for Coreset Selection in Deep Learning",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "Coreset selection aims to select a subset of the most informative training samples to benefit downstream tasks, but many existing methods are not designed for deep learning, leading to high complexity and poor generalization.",
+          "evidence": [
+            {
+              "quote": "Coreset selection, which aims to select a subset of the most informative training samples, is a long-standing learning problem that can benefit many downstream tasks such as data-efficient learning, continual learning, neural architecture search, active learning, .",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 265
+            },
+            {
+              "quote": "However, many existing coreset selection methods are not designed for deep learning, which may have high complexity and poor generalization ability to unseen representations.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 266,
+              "end_char": 440
+            }
+          ]
+        },
+        "method": {
+          "text": "The authors provide a comprehensive code library, DeepCore, and evaluate popular coreset selection methods including uncertainty-based, geometry-based, and error/loss-based approaches.",
+          "evidence": [
+            {
+              "quote": "To advance the research of coreset selection in deep learning, we contribute a comprehensive code library, namely DeepCore, and provide an empirical study on popular coreset selection methods on CIFAR10 and ImageNet datasets[The code is available in <https://github.com/PatrickZH/DeepCore>.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 559,
+              "end_char": 849
+            },
+            {
+              "quote": "We select samples in descending order of the scores: s_least confidence() = 1-max_i=1,...,C P(\u0177=i|) s_entropy() = -\u2211_i=1^C P(\u0177=i|)log P(\u0177=i|) s_margin() = 1-min_y\u2260\u0177(P(\u0177|x)-P(y|x)).",
+              "section": "Uncertainty Based Methods",
+              "source_kind": "tex",
+              "start_char": 357,
+              "end_char": 537
+            },
+            {
+              "quote": "It is assumed that data points close to each other in the feature space tend to have similar properties.",
+              "section": "Geometry Based Methods",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 104
+            },
+            {
+              "quote": "Therefore, geometry based methods <cit.> try to remove those data points providing redundant information then the left data points form a coreset where ||\u226a||.",
+              "section": "Geometry Based Methods",
+              "source_kind": "tex",
+              "start_char": 105,
+              "end_char": 263
+            },
+            {
+              "quote": "The following are commonly used metrics of sample uncertainty given a certain classifier and training epoch, namely Least Confidence, Entropy and Margin <cit.>, where C is the number of classes.",
+              "section": "Uncertainty Based Methods",
+              "source_kind": "tex",
+              "start_char": 162,
+              "end_char": 356
+            },
+            {
+              "quote": "In a dataset, training samples are more important if they contribute more to the error or loss when training neural networks.",
+              "section": "Error/Loss Based Methods",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 125
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "Graph Cut (GC) achieves the best results on CIFAR-10 when selecting 0.1% to 10% of the training data, while random selection remains a strong baseline.",
+            "evidence": [
+              {
+                "quote": "Extensive experiment results show that, although some methods perform better in certain experiment settings, random selection is still a strong baseline.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 934,
+                "end_char": 1087
+              },
+              {
+                "quote": "Graph Cut (GC) is more prominent among them, and achieves the best results when selecting 0.1% to 10% of the training data.",
+                "section": "CIFAR10 Results",
+                "source_kind": "tex",
+                "start_char": 1906,
+                "end_char": 2029
+              }
+            ]
+          }
+        ],
+        "limitations": [],
+        "contributions": [
+          {
+            "text": "The authors contribute a comprehensive code library, DeepCore, and provide an empirical study on popular coreset selection methods.",
+            "evidence": [
+              {
+                "quote": "To advance the research of coreset selection in deep learning, we contribute a comprehensive code library, namely DeepCore, and provide an empirical study on popular coreset selection methods on CIFAR10 and ImageNet datasets[The code is available in <https://github.com/PatrickZH/DeepCore>.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 559,
+                "end_char": 849
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "DeepCore to evaluate different coreset selection methods in multiple learning settings on CIFAR10 and ImageNet-1K datasets. ResNet-18 is used as the default architecture in all experiment",
+              "section": "Experiment Results",
+              "source_kind": "tex",
+              "start_char": 118,
+              "end_char": 125
+            }
+          },
+          {
+            "value": "ImageNet",
+            "evidence": {
+              "quote": "evaluate different coreset selection methods in multiple learning settings on CIFAR10 and ImageNet-1K datasets. ResNet-18 is used as the default architecture in all experiments. Coreset selec",
+              "section": "Experiment Results",
+              "source_kind": "tex",
+              "start_char": 130,
+              "end_char": 141
+            }
+          }
+        ],
+        "metrics": [],
+        "method_keywords": [
+          {
+            "value": "DeepCore",
+            "evidence": {
+              "quote": "To advance the research of coreset selection in deep learning, we contribute a comprehensive code library, namely DeepCore, and provide an empirical study on popular coreset selection methods on CIFAR10 and ImageNet datasets[The code is available in <https://github.com/PatrickZH/DeepCore>.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 559,
+              "end_char": 849
+            }
+          },
+          {
+            "value": "Graph Cut",
+            "evidence": {
+              "quote": "Graph Cut (GC) is more prominent among them, and achieves the best results when selecting 0.1% to 10% of the training data.",
+              "section": "CIFAR10 Results",
+              "source_kind": "tex",
+              "start_char": 1906,
+              "end_char": 2029
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 13,
+        "units_kept": 13,
+        "relocated_evidence": 0,
+        "fingerprint": "d7b3316368a755d45dbe"
+      },
+      {
+        "arxiv_id": "2302.06960",
+        "version": "v1",
+        "title": "Data pruning and neural scaling laws: fundamental limitations of score-based algorithms",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "Data pruning algorithms aim to reduce computational costs, but they often fail to outperform random pruning in high compression regimes (30% or less of data kept).",
+          "evidence": [
+            {
+              "quote": "Data pruning algorithms are commonly used to reduce the memory and computational cost of the optimization process.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 114
+            },
+            {
+              "quote": "The goal of data pruning is to identify a small, yet representative sample of the data that accurately reflects the characteristics and patterns of the entire dataset.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 146,
+              "end_char": 313
+            },
+            {
+              "quote": "Recent empirical results (<cit.>) reveal that random data pruning remains a strong baseline and outperforms most existing data pruning methods in the high compression regime, i.e. where a fraction of 30% or less of the data is kept.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 115,
+              "end_char": 347
+            }
+          ]
+        },
+        "method": {
+          "text": "The authors introduce a framework for score-based pruning algorithms (geometry-based, uncertainty-based, and error-based) and analyze their asymptotic behavior and distribution shift.",
+          "evidence": [
+            {
+              "quote": "Our contributions are as follows: * We introduce a new framework for data pruning that encompasses a wide range of popular algorithms (score-based pruning algorithms). * We analyze the asymptotic behavior of algorithms and identify a phenomenon of distribution shift that provably impacts the generalization error. * We demonstrate No-Free-Lunch results that characterize when and why score-based pruning algorithms perform worse than random pruning. * We show that cannot be used in the high compression regime without a significant drop in performance.",
+              "section": "Contributions",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 554
+            },
+            {
+              "quote": "These can generally be categorized into four groups: * Geometry based methods: these methods are based on some geometric measure in the feature space.",
+              "section": "Score-based methods",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 150
+            },
+            {
+              "quote": "A similar idea based on the K-centroids of the input data was used in <cit.>. * Uncertainty based methods: the aim of such methods is to find the most \u201cdifficult\" examples, defined as the ones for which the model is the least confident.",
+              "section": "Score-based methods",
+              "source_kind": "tex",
+              "start_char": 412,
+              "end_char": 648
+            },
+            {
+              "quote": "Different uncertainty measures can be used for this purpose, see <cit.> for more details. * Error based methods: the goal is to find the most significant examples defined as the ones that contribute the most to the loss.",
+              "section": "Score-based methods",
+              "source_kind": "tex",
+              "start_char": 649,
+              "end_char": 869
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "Random data pruning remains a strong baseline and outperforms most existing data pruning methods in the high compression regime.",
+            "evidence": [
+              {
+                "quote": "Recent empirical results (<cit.>) reveal that random data pruning remains a strong baseline and outperforms most existing data pruning methods in the high compression regime, i.e. where a fraction of 30% or less of the data is kept.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 115,
+                "end_char": 347
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Score-based data pruning algorithms fail in the high compression regime, and their performance gap does not vanish as the amount of data increases.",
+            "evidence": [
+              {
+                "quote": "In this work, we focus on score-based data pruning algorithms and show theoretically and empirically why such algorithms fail in the high compression regime.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 613,
+                "end_char": 770
+              },
+              {
+                "quote": "Otherwise, it would mean that with positive probability, the pruning algorithm induces a deterioration of the out-of-sample performance that does not vanish even when an arbitrarily large amount of data is available.",
+                "section": "Valid and Consistent pruning algorithms",
+                "source_kind": "tex",
+                "start_char": 1367,
+                "end_char": 1583
+              }
+            ]
+          }
+        ],
+        "contributions": [
+          {
+            "text": "The authors introduce a framework for score-based pruning, analyze asymptotic behavior, and demonstrate No-Free-Lunch results for these algorithms.",
+            "evidence": [
+              {
+                "quote": "Our contributions are as follows: * We introduce a new framework for data pruning that encompasses a wide range of popular algorithms (score-based pruning algorithms). * We analyze the asymptotic behavior of algorithms and identify a phenomenon of distribution shift that provably impacts the generalization error. * We demonstrate No-Free-Lunch results that characterize when and why score-based pruning algorithms perform worse than random pruning. * We show that cannot be used in the high compression regime without a significant drop in performance.",
+                "section": "Contributions",
+                "source_kind": "tex",
+                "start_char": 0,
+                "end_char": 554
+              }
+            ]
+          }
+        ],
+        "datasets": [],
+        "metrics": [],
+        "method_keywords": [
+          {
+            "value": "score-based pruning",
+            "evidence": {
+              "quote": "Our contributions are as follows: * We introduce a new framework for data pruning that encompasses a wide range of popular algorithms (score-based pruning algorithms). * We analyze the asymptotic behavior of algorithms and identify a phenomenon of distribution shift that provably impacts the generalization error. * We demonstrate No-Free-Lunch results that characterize when and why score-based pruning algorithms perform worse than random pruning. * We show that cannot be used in the high compression regime without a significant drop in performance.",
+              "section": "Contributions",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 554
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 12,
+        "units_kept": 12,
+        "relocated_evidence": 0,
+        "fingerprint": "d7b3316368a755d45dbe"
+      },
+      {
+        "arxiv_id": "2305.18424",
+        "version": "v1",
+        "title": "Repeated Random Sampling for Minimizing the Time-to-Accuracy of Learning",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "Existing data pruning and distillation strategies come with high computational costs and often under-perform random sampling in high data compression regimes.",
+          "evidence": [
+            {
+              "quote": "Methods for carefully selecting or generating a small set of training data to learn from, i.e., data pruning, coreset selection, and data distillation, have been shown to be effective in reducing the ever-increasing cost of training neural networks.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 249
+            },
+            {
+              "quote": "However, these strategies come with additional computational costs associated with subset selection or data distillation before training begins, and furthermore, many are shown to even under-perform random sampling in high data compression regimes.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 374,
+              "end_char": 622
+            }
+          ]
+        },
+        "method": {
+          "text": "The authors introduce Repeated Sampling of Random Subsets (RS2), which samples a subset uniformly at random for each training epoch.",
+          "evidence": [
+            {
+              "quote": "In this work, we revisit a powerful yet overlooked random sampling strategy to address these challenges and introduce an approach called Repeated Sampling of Random Subsets (RSRS or RS2), where we randomly sample the subset of training data for each epoch of model training.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 830,
+              "end_char": 1104
+            },
+            {
+              "quote": "Motivated by this gap, we introduce Repeated Sampling of Random Subsets (RSRS = RS2), where we sample a subset uniformly at random for each training epoch.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 3944,
+              "end_char": 4099
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "RS2 reaches higher accuracy than existing methods across a wide range of pruning ratios, trains the fastest, and is robust to noisy labels.",
+            "evidence": [
+              {
+                "quote": "We show that: * Across a wide range of pruning ratios, RS2 reaches higher accuracy than all existing methods. * For a given pruning ratio, RS2 also trains the fastest, and thus has the fastest time-to-accuracy. * In the presence of noisy labels, RS2 is the most robust data pruning method; It achieves the highest end-model accuracy and lowest relative drop in performance vs. training on the clean dataset.",
+                "section": "Evaluation",
+                "source_kind": "tex",
+                "start_char": 134,
+                "end_char": 541
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          {
+            "text": "The authors identify a gap between RS2 and training on the full dataset and seek to overcome limitations of data pruning when training with SGD.",
+            "evidence": [
+              {
+                "quote": "Specifically, we are excited for future work focused on the following question: How can we further close the gap between RS2 and training on the full dataset?",
+                "section": "Discussion and Conclusion",
+                "source_kind": "tex",
+                "start_char": 1430,
+                "end_char": 1588
+              },
+              {
+                "quote": "Can we overcome this limitation of data pruning when training with SGD without eliminating the runtime benefits?",
+                "section": "Discussion and Conclusion",
+                "source_kind": "tex",
+                "start_char": 2020,
+                "end_char": 2132
+              }
+            ]
+          }
+        ],
+        "contributions": [
+          {
+            "text": "The authors introduce RS2, test it against state-of-the-art methods, and provide a convergence analysis.",
+            "evidence": [
+              {
+                "quote": "In this work, we revisit a powerful yet overlooked random sampling strategy to address these challenges and introduce an approach called Repeated Sampling of Random Subsets (RSRS or RS2), where we randomly sample the subset of training data for each epoch of model training.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 830,
+                "end_char": 1104
+              },
+              {
+                "quote": "We test RS2 against thirty state-of-the-art data pruning and data distillation methods across four datasets including ImageNet.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 1105,
+                "end_char": 1232
+              },
+              {
+                "quote": "Beyond the above meta-study, we provide a convergence analysis for RS2 and discuss its generalization capability.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 1580,
+                "end_char": 1693
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "ImageNet",
+            "evidence": {
+              "quote": "2 against baseline methods using CIFAR10 <cit.>, CIFAR100 <cit.>, ImageNet30 (a subset of ImageNet) <cit.>, and ImageNet <cit.> itself. We train ResNet models <cit.> representative of mode",
+              "section": "Experimental Setup",
+              "source_kind": "tex",
+              "start_char": 232,
+              "end_char": 240
+            }
+          },
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "ndix <ref>. Datasets, Models, and Metrics We benchmark RS2 against baseline methods using CIFAR10 <cit.>, CIFAR100 <cit.>, ImageNet30 (a subset of ImageNet) <cit.>, and ImageNet <cit.> it",
+              "section": "Experimental Setup",
+              "source_kind": "tex",
+              "start_char": 175,
+              "end_char": 182
+            }
+          },
+          {
+            "value": "CIFAR-100",
+            "evidence": {
+              "quote": "sets, Models, and Metrics We benchmark RS2 against baseline methods using CIFAR10 <cit.>, CIFAR100 <cit.>, ImageNet30 (a subset of ImageNet) <cit.>, and ImageNet <cit.> itself. We train Re",
+              "section": "Experimental Setup",
+              "source_kind": "tex",
+              "start_char": 191,
+              "end_char": 199
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "value": "accuracy",
+            "evidence": {
+              "quote": "lation methods. We show that: * Across a wide range of pruning ratios, RS2 reaches higher accuracy than all existing methods. * For a given pruning ratio, RS2 also trains the fastest, and",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 208,
+              "end_char": 216
+            }
+          },
+          {
+            "value": "time-to-accuracy",
+            "evidence": {
+              "quote": "thods. * For a given pruning ratio, RS2 also trains the fastest, and thus has the fastest time-to-accuracy. * In the presence of noisy labels, RS2 is the most robust data pruning method; It achiev",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 327,
+              "end_char": 343
+            }
+          },
+          {
+            "value": "training time",
+            "evidence": {
+              "quote": "er-RC 72.5\u00b10.6 81.4\u00b10.7 86.6\u00b10.5 SP-Easy-RC - - - RS2 w/o repl 87.1\u00b10.8 91.7\u00b10.5 94.3\u00b10.2 Training Time We now study the training time of RS2 compared to existing methods on CIFAR10 and ImageNe",
+              "section": "End-to-End Data Pruning Experiments",
+              "source_kind": "tex",
+              "start_char": 4688,
+              "end_char": 4701
+            }
+          }
+        ],
+        "method_keywords": [
+          {
+            "value": "RS2",
+            "evidence": {
+              "quote": "In this work, we revisit a powerful yet overlooked random sampling strategy to address these challenges and introduce an approach called Repeated Sampling of Random Subsets (RSRS or RS2), where we randomly sample the subset of training data for each epoch of model training.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 830,
+              "end_char": 1104
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 11,
+        "units_kept": 11,
+        "relocated_evidence": 0,
+        "fingerprint": "d7b3316368a755d45dbe"
+      }
+    ],
+    "metrics": {
+      "n_papers": 8,
+      "ok": 8,
+      "degraded": 0,
+      "skipped": 0,
+      "tex_rate": 1.0,
+      "pdf_fallback_rate": 0.0,
+      "abstract_fallback_rate": 0.0,
+      "skip_rate": 0.0,
+      "evidence_keep_rate": 1.0,
+      "section_relocate_rate": 0.0,
+      "cache_hits": 0,
+      "mean_selected_chars": 23956.2,
+      "mean_candidate_chars": 4373.4,
+      "seconds": 47.712,
+      "llm_calls": 2,
+      "llm_skipped_confident": 0
+    },
+    "fingerprint": "d7b3316368a755d45dbe"
+  },
+  "abstract_only": {
+    "topic": null,
+    "records": [
+      {
+        "arxiv_id": "2205.09329",
+        "version": "v1",
+        "title": "Dataset Pruning: Reducing Training Data by Examining Generalization Influence",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "How much does each individual training sample or a sub-training-set affect the model's generalization, and how to construct a smallest subset from the entire training data as a proxy training set without significantly sacrificing the model's performance?",
+          "evidence": [
+            {
+              "quote": "How much does each individual training sample or a sub-training-set affect the model's generalization, and how to construct a smallest subset from the entire training data as a proxy training set without significantly sacrificing the model's performance?",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 251,
+              "end_char": 505
+            }
+          ]
+        },
+        "method": {
+          "text": "An optimization-based dataset pruning method that examines the influence of removing training samples on generalization and constructs a smallest subset with a theoretically guaranteed generalization gap.",
+          "evidence": [
+            {
+              "quote": "To answer these, we propose dataset pruning, an optimization-based sample selection method that can (1) examine the influence of removing a particular set of training samples on model's generalization ability with theoretical guarantee, and (2) construct a smallest subset of training data that yields strictly constrained generalization gap.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 506,
+              "end_char": 848
+            },
+            {
+              "quote": "In this work, we present an optimization-based dataset pruning method that can prune a largest subset from the entire training dataset with (a) theoretically guaranteed generalization gap and (b) consideration of the joint influence of all collected data.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 2347,
+              "end_char": 2602
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "The method prunes 40% of training examples on CIFAR-10, halves convergence time with only 1.3% test accuracy decrease, and achieves performance comparable to training on the full dataset.",
+            "evidence": [
+              {
+                "quote": "Furthermore, the proposed method prunes 40% training examples on the CIFAR-10 dataset, halves the convergence time with only 1.3% test accuracy decrease, which is superior to previous score-based sample selection methods.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 975,
+                "end_char": 1196
+              },
+              {
+                "quote": "We show that the test accuracy of a network trained on the pruned dataset is comparable to the test accuracy of the network trained on the whole dataset, and is competitive with other baseline methods.",
+                "section": "Dataset Pruning",
+                "source_kind": "tex",
+                "start_char": 440,
+                "end_char": 641
+              }
+            ]
+          }
+        ],
+        "limitations": [],
+        "contributions": [
+          {
+            "text": "Proposes a dataset pruning method that extends the sample selection problem from cardinality constraint to generalization constraint.",
+            "evidence": [
+              {
+                "quote": "Before delving into details, we summarize our contributions as below: * This paper proposes a dataset pruning method, which extends the sample selection problem from cardinality constraint to generalization constraint.",
+                "section": "Introduction",
+                "source_kind": "tex",
+                "start_char": 3502,
+                "end_char": 3720
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "osed optimization-based dataset pruning method with several sample-selection baselines on CIFAR-10 (left) and CIFAR-100 (right). Random selects training data randomly. Herding <cit.> selec",
+              "section": "Experiment",
+              "source_kind": "tex",
+              "start_char": 726,
+              "end_char": 734
+            }
+          },
+          {
+            "value": "CIFAR-100",
+            "evidence": {
+              "quote": "sed dataset pruning method with several sample-selection baselines on CIFAR-10 (left) and CIFAR-100 (right). Random selects training data randomly. Herding <cit.> selects samples that are c",
+              "section": "Experiment",
+              "source_kind": "tex",
+              "start_char": 746,
+              "end_char": 755
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "value": "accuracy",
+            "evidence": {
+              "quote": "raining examples on the CIFAR-10 dataset, halves the convergence time with only 1.3% test accuracy decrease, which is superior to previous score-based sample selection methods.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 1110,
+              "end_char": 1118
+            }
+          }
+        ],
+        "method_keywords": [],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 6,
+        "units_kept": 6,
+        "relocated_evidence": 0,
+        "fingerprint": "69dc2871477270e9c7f3"
+      },
+      {
+        "arxiv_id": "2107.07075",
+        "version": "v1",
+        "title": "Deep Learning on a Data Diet: Finding Important Examples Early in Training",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "How much of the data is superfluous, which examples are important for generalization, and how do we find them?",
+          "evidence": [
+            {
+              "quote": "It is therefore natural to ask: how much of the data is superfluous, which examples are important for generalization, and how do we find them?",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 138,
+              "end_char": 280
+            }
+          ]
+        },
+        "method": {
+          "text": "A scoring method based on the expected loss gradient norm (score) to identify important and difficult examples early in training for pruning.",
+          "evidence": [
+            {
+              "quote": "To address these challenges, we propose a scoring method that can be used to identify important and difficult examples early in training, and prune the training dataset without large sacrifices in test accuracy.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 584,
+              "end_char": 795
+            },
+            {
+              "quote": "* We propose to score the importance of each training (x_i,y_i) by its expected loss gradient norm (score), which, up to a constant, bounds the expected change in loss for an arbitrary (x,y) caused by removing (x_i,y_i). * We show that pruning training samples with small scores at initialization allows one to train on as little as 50% of the training data without any loss in accuracy (CIFAR-10).",
+              "section": "Contributions",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 398
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "Pruning training samples with small scores at initialization allows training on as little as 50% of the data without loss in accuracy on CIFAR-10.",
+            "evidence": [
+              {
+                "quote": "* We propose to score the importance of each training (x_i,y_i) by its expected loss gradient norm (score), which, up to a constant, bounds the expected change in loss for an arbitrary (x,y) caused by removing (x_i,y_i). * We show that pruning training samples with small scores at initialization allows one to train on as little as 50% of the training data without any loss in accuracy (CIFAR-10).",
+                "section": "Contributions",
+                "source_kind": "tex",
+                "start_char": 0,
+                "end_char": 398
+              },
+              {
+                "quote": "Networks trained on subsets of the data with high scores achieve levels of test accuracy comparable to training on the full dataset and are competitive with other state of the art data pruning methods.",
+                "section": "Empirical Evaluation of and Scores via Data Pruning",
+                "source_kind": "tex",
+                "start_char": 1173,
+                "end_char": 1374
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          {
+            "text": "The approach does not work when loss gradient norms are computed at weights early in training of a single trajectory; it requires averaging over multiple weight initializations.",
+            "evidence": [
+              {
+                "quote": "While this approach does not work when the loss gradient norms are computed at the weights early in training of a single trajectory, we find that, surprisingly, averaging these norms over multiple weight initializations does produce a ranking that correlates strongly with forgetting scores and allows us to prune a significant fraction of examples early in training.",
+                "section": "Introduction",
+                "source_kind": "tex",
+                "start_char": 3346,
+                "end_char": 3713
+              }
+            ]
+          }
+        ],
+        "contributions": [
+          {
+            "text": "Proposes scoring training examples by expected loss gradient norm and introduces a method based on linearly connected modes to study the empirical risk surface.",
+            "evidence": [
+              {
+                "quote": "* We propose to score the importance of each training (x_i,y_i) by its expected loss gradient norm (score), which, up to a constant, bounds the expected change in loss for an arbitrary (x,y) caused by removing (x_i,y_i). * We show that pruning training samples with small scores at initialization allows one to train on as little as 50% of the training data without any loss in accuracy (CIFAR-10).",
+                "section": "Contributions",
+                "source_kind": "tex",
+                "start_char": 0,
+                "end_char": 398
+              },
+              {
+                "quote": "This boost in performance is enhanced in a corrupted label regime. * We introduce a method, based on linearly connected modes, for studying the empirical risk surface in terms of the modes of subsets of data, allowing us to identify when, in training, the final performance on subpopulations is determined.",
+                "section": "Contributions",
+                "source_kind": "tex",
+                "start_char": 1113,
+                "end_char": 1419
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "ining. Subsets of a fixed size are used: networks are trained on 50% of training data for CIFAR-10, 60% for CINIC-10 and 75% for CIFAR-100. Second row: Final test accuracy achieved by trai",
+              "section": "Empirical Evaluation of and Scores via Data Pruning",
+              "source_kind": "tex",
+              "start_char": 382,
+              "end_char": 390
+            }
+          },
+          {
+            "value": "CIFAR-100",
+            "evidence": {
+              "quote": ": networks are trained on 50% of training data for CIFAR-10, 60% for CINIC-10 and 75% for CIFAR-100. Second row: Final test accuracy achieved by training after different fractions of the da",
+              "section": "Empirical Evaluation of and Scores via Data Pruning",
+              "source_kind": "tex",
+              "start_char": 421,
+              "end_char": 430
+            }
+          },
+          {
+            "value": "CINIC-10",
+            "evidence": {
+              "quote": "a fixed size are used: networks are trained on 50% of training data for CIFAR-10, 60% for CINIC-10 and 75% for CIFAR-100. Second row: Final test accuracy achieved by training after differe",
+              "section": "Empirical Evaluation of and Scores via Data Pruning",
+              "source_kind": "tex",
+              "start_char": 400,
+              "end_char": 408
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "value": "accuracy",
+            "evidence": {
+              "quote": "ee different dataset and network combinations (labeled at the top). First row: Final test accuracy achieved by training on a subset of training data comprised of examples with maximum forg",
+              "section": "Empirical Evaluation of and Scores via Data Pruning",
+              "source_kind": "tex",
+              "start_char": 135,
+              "end_char": 143
+            }
+          }
+        ],
+        "method_keywords": [
+          {
+            "value": "score",
+            "evidence": {
+              "quote": "* We propose to score the importance of each training (x_i,y_i) by its expected loss gradient norm (score), which, up to a constant, bounds the expected change in loss for an arbitrary (x,y) caused by removing (x_i,y_i). * We show that pruning training samples with small scores at initialization allows one to train on as little as 50% of the training data without any loss in accuracy (CIFAR-10).",
+              "section": "Contributions",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 398
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 9,
+        "units_kept": 9,
+        "relocated_evidence": 0,
+        "fingerprint": "69dc2871477270e9c7f3"
+      },
+      {
+        "arxiv_id": "2206.14486",
+        "version": "v1",
+        "title": "Beyond neural scaling laws: beating power law scaling via data pruning",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "Neural scaling laws require considerable costs in compute and energy; the goal is to break beyond power law scaling to exponential scaling using data pruning.",
+          "evidence": [
+            {
+              "quote": "However, these improvements through scaling alone require considerable costs in compute and energy.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 187,
+              "end_char": 286
+            },
+            {
+              "quote": "We then test this new exponential scaling prediction with pruned dataset size empirically, and indeed observe better than power law scaling performance on ResNets trained on CIFAR-10, SVHN, and ImageNet.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 627,
+              "end_char": 830
+            }
+          ]
+        },
+        "method": {
+          "text": "A data pruning framework that uses a new unsupervised metric and benchmarks pruning efficacy to select training examples.",
+          "evidence": [
+            {
+              "quote": "Our main contributions are: * Employing statistical mechanics, we develop a new analytic theory of data pruning in the student-teacher setting for perceptron learning, where examples are pruned based on their teacher margin, with large (small) margins corresponding to easy (hard) examples.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 2396,
+              "end_char": 2686
+            },
+            {
+              "quote": "We thus go beyond this prior work by benchmarking the data pruning efficacy of not only these metrics but also a new unsupervised metric we introduce that does not require label information, all at scale on ImageNet.",
+              "section": "Pruning metrics: not all training examples are created equal",
+              "source_kind": "tex",
+              "start_char": 3951,
+              "end_char": 4167
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "Data pruning by retaining hardest examples enabled training on 50% and 75% of CIFAR-10 and CIFAR-100 without loss in accuracy, and achieved better than power law scaling.",
+            "evidence": [
+              {
+                "quote": "Data pruning by retaining only the hardest examples with largest error enabled training from scratch on only 50% and 75% of CIFAR-10 and CIFAR-100 respectively without any loss in final test accuracy.",
+                "section": "Pruning metrics: not all training examples are created equal",
+                "source_kind": "tex",
+                "start_char": 610,
+                "end_char": 810
+              },
+              {
+                "quote": "We then test this new exponential scaling prediction with pruned dataset size empirically, and indeed observe better than power law scaling performance on ResNets trained on CIFAR-10, SVHN, and ImageNet.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 627,
+                "end_char": 830
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Achieving exponential scaling requires a high-quality data pruning metric, and many metrics scale poorly to ImageNet.",
+            "evidence": [
+              {
+                "quote": "The most notable limitation is that achieving exponential scaling requires a high quality data pruning metric.",
+                "section": "Discussion",
+                "source_kind": "tex",
+                "start_char": 405,
+                "end_char": 515
+              },
+              {
+                "quote": "Since most metrics developed for smaller datasets scale poorly to ImageNet, our results emphasize the importance of future work in identifying high quality, scalable metrics.",
+                "section": "Discussion",
+                "source_kind": "tex",
+                "start_char": 516,
+                "end_char": 690
+              }
+            ]
+          }
+        ],
+        "contributions": [
+          {
+            "text": "Develops a new analytic theory of data pruning in the student-teacher setting and introduces a new unsupervised pruning metric.",
+            "evidence": [
+              {
+                "quote": "Our main contributions are: * Employing statistical mechanics, we develop a new analytic theory of data pruning in the student-teacher setting for perceptron learning, where examples are pruned based on their teacher margin, with large (small) margins corresponding to easy (hard) examples.",
+                "section": "Introduction",
+                "source_kind": "tex",
+                "start_char": 2396,
+                "end_char": 2686
+              },
+              {
+                "quote": "We thus go beyond this prior work by benchmarking the data pruning efficacy of not only these metrics but also a new unsupervised metric we introduce that does not require label information, all at scale on ImageNet.",
+                "section": "Pruning metrics: not all training examples are created equal",
+                "source_kind": "tex",
+                "start_char": 3951,
+                "end_char": 4167
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "cally, and indeed observe better than power law scaling performance on ResNets trained on CIFAR-10, SVHN, and ImageNet. Given the importance of finding high-quality pruning metrics, we per",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 801,
+              "end_char": 809
+            }
+          },
+          {
+            "value": "ImageNet",
+            "evidence": {
+              "quote": "serve better than power law scaling performance on ResNets trained on CIFAR-10, SVHN, and ImageNet. Given the importance of finding high-quality pruning metrics, we perform the first large",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 821,
+              "end_char": 829
+            }
+          },
+          {
+            "value": "SVHN",
+            "evidence": {
+              "quote": "indeed observe better than power law scaling performance on ResNets trained on CIFAR-10, SVHN, and ImageNet. Given the importance of finding high-quality pruning metrics, we perform t",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 811,
+              "end_char": 815
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "value": "accuracy",
+            "evidence": {
+              "quote": "s, an additional 2 billion pre-training data points (starting from 1 billion) leads to an accuracy gain on ImageNet of a few percentage points (Fig. 1 in <cit.>). Here we ask whether we mi",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 840,
+              "end_char": 848
+            }
+          },
+          {
+            "value": "training time",
+            "evidence": {
+              "quote": "erations on the full dataset was carried out on the pruned dataset, resulting in the same training time, but additional training epochs. However, this performance gain saturated before training",
+              "section": "Discussion",
+              "source_kind": "tex",
+              "start_char": 1171,
+              "end_char": 1184
+            }
+          }
+        ],
+        "method_keywords": [],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 10,
+        "units_kept": 10,
+        "relocated_evidence": 0,
+        "fingerprint": "69dc2871477270e9c7f3"
+      },
+      {
+        "arxiv_id": "2210.15809",
+        "version": "v1",
+        "title": "Coverage-centric Coreset Selection for High Pruning Rates",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "State-of-the-art coreset selection methods perform well at low pruning rates but struggle at high pruning rates due to poor data coverage.",
+          "evidence": [
+            {
+              "quote": "State-of-the-art coreset selection methods typically assign an importance score to each example and select the most important examples to form a coreset.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 190,
+              "end_char": 343
+            },
+            {
+              "quote": "Inspired by theoretical results, we propose a novel coverage-based metric and, based on the metric, find that coresets selected by importance-based coreset methods at high pruning rates can be expected to perform poorly compared to random coresets because of worse data coverage.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 744,
+              "end_char": 1023
+            }
+          ]
+        },
+        "method": {
+          "text": "Coverage-centric Coreset Selection (CCS), which combines data coverage with importance-based sampling using a density-based partial cover metric.",
+          "evidence": [
+            {
+              "quote": "We propose a novel coreset selection method, called Coverage-centric Coreset Selection (CCS), that combines data coverage with importance-based sampling.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 1867,
+              "end_char": 2020
+            },
+            {
+              "quote": "By extending classical geometric set cover to density-based partial cover, we propose a novel data coverage metric and show that existing importance-based coreset selections lead to poor data coverage, which in turn degrades model performance.",
+              "section": "Conclusion",
+              "source_kind": "tex",
+              "start_char": 102,
+              "end_char": 345
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "CCS outperforms other baseline methods under high pruning rates and achieves comparable performance for low pruning rates.",
+            "evidence": [
+              {
+                "quote": "The evaluation results show that CCS outperforms other baseline methods with high pruning rates and achieves comparable accuracy with low pruning rates.",
+                "section": "Evaluation",
+                "source_kind": "tex",
+                "start_char": 276,
+                "end_char": 428
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          {
+            "text": "The accuracy drop at high pruning rates is a significant limitation, and finding the optimal hyperparameter beta is left for future work.",
+            "evidence": [
+              {
+                "quote": "This accuracy drop is a significant limitation as it limits the extent to which coresets can be reduced in size with these selection methods.",
+                "section": "Introduction",
+                "source_kind": "tex",
+                "start_char": 1481,
+                "end_char": 1622
+              },
+              {
+                "quote": "We leave how to more efficiently find the optimal \u03b2 for future work.",
+                "section": "Ablation study & analysis",
+                "source_kind": "tex",
+                "start_char": 1858,
+                "end_char": 1926
+              }
+            ]
+          }
+        ],
+        "contributions": [
+          {
+            "text": "Generalizes theoretical bounds for coreset loss to a density-based characterization and proposes the CCS method.",
+            "evidence": [
+              {
+                "quote": "More specifically, we make the following contributions: * We start by generalizing the result in <cit.>, which provided a probabilistic bound on model loss for a r-cover coreset, where r is the smallest radius around the coreset points that covers 100% of the training set, to a density-based characterization of the coreset in which the radius r is allowed to cover a percentage p of a density space.",
+                "section": "Introduction",
+                "source_kind": "tex",
+                "start_char": 2104,
+                "end_char": 2505
+              },
+              {
+                "quote": "We then propose a new coreset selection method, Coverage-centric Coreset Selection (CCS), where we jointly consider overall data coverage based on the proposed metric as well as importance of each example.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 1024,
+                "end_char": 1229
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "with five baseline methods (random, entropy, forgetting, EL2N, and AUM) on four datasets (CIFAR10, CIFAR100, SVHN, and CINIC10). In total, we trained 800 models for performance comparison",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 177,
+              "end_char": 184
+            }
+          },
+          {
+            "value": "CIFAR-100",
+            "evidence": {
+              "quote": "baseline methods (random, entropy, forgetting, EL2N, and AUM) on four datasets (CIFAR10, CIFAR100, SVHN, and CINIC10). In total, we trained 800 models for performance comparison. The eval",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 186,
+              "end_char": 194
+            }
+          },
+          {
+            "value": "SVHN",
+            "evidence": {
+              "quote": "methods (random, entropy, forgetting, EL2N, and AUM) on four datasets (CIFAR10, CIFAR100, SVHN, and CINIC10). In total, we trained 800 models for performance comparison. The evaluation",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 196,
+              "end_char": 200
+            }
+          },
+          {
+            "value": "CINIC-10",
+            "evidence": {
+              "quote": "andom, entropy, forgetting, EL2N, and AUM) on four datasets (CIFAR10, CIFAR100, SVHN, and CINIC10). In total, we trained 800 models for performance comparison. The evaluation results show",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 206,
+              "end_char": 213
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "value": "accuracy",
+            "evidence": {
+              "quote": "at CCS outperforms other baseline methods with high pruning rates and achieves comparable accuracy with low pruning rates. We also conduct an ablation study (Section <ref>) to better under",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 396,
+              "end_char": 404
+            }
+          }
+        ],
+        "method_keywords": [
+          {
+            "value": "CCS",
+            "evidence": {
+              "quote": "We then propose a new coreset selection method, Coverage-centric Coreset Selection (CCS), where we jointly consider overall data coverage based on the proposed metric as well as importance of each example.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 1024,
+              "end_char": 1229
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 10,
+        "units_kept": 10,
+        "relocated_evidence": 0,
+        "fingerprint": "69dc2871477270e9c7f3"
+      },
+      {
+        "arxiv_id": "2303.04947",
+        "version": "v1",
+        "title": "InfoBatch: Lossless Training Speed Up by Unbiased Dynamic Data Pruning",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "Data pruning often leads to gradient expectation bias between pruned and original data, preventing lossless performance.",
+          "evidence": [
+            {
+              "quote": "A common approach is to simply filter out samples that make less contribution to the training.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 107,
+              "end_char": 201
+            },
+            {
+              "quote": "This leads to gradient expectation bias between the pruned and original data.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 202,
+              "end_char": 279
+            }
+          ]
+        },
+        "method": {
+          "text": "InfoBatch, an unbiased dynamic data pruning framework that prunes samples based on loss distribution and rescales gradients of remaining samples.",
+          "evidence": [
+            {
+              "quote": "To solve this problem, we propose InfoBatch, a novel framework aiming to achieve lossless training acceleration by unbiased dynamic data pruning.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 280,
+              "end_char": 425
+            },
+            {
+              "quote": "To tackle these issues, we propose InfoBatch, a novel unbiased dynamic data pruning framework based on the idea of maintaining the same total update between training on the pruned and original datasets.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 3301,
+              "end_char": 3503
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "InfoBatch consistently obtains lossless training results on CIFAR-10, CIFAR-100, Tiny-ImageNet, and ImageNet-1K with significant cost savings.",
+            "evidence": [
+              {
+                "quote": "As a plug-and-play and architecture-agnostic framework, InfoBatch consistently obtains lossless training results on CIFAR-10, CIFAR-100, Tiny-ImageNet, and ImageNet-1K saving 40%, 33%, 30%, and 26% overall cost, respectively.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 728,
+                "end_char": 953
+              }
+            ]
+          }
+        ],
+        "limitations": [],
+        "contributions": [
+          {
+            "text": "Proposes InfoBatch, a plug-and-play and architecture-agnostic framework for lossless training acceleration.",
+            "evidence": [
+              {
+                "quote": "As a plug-and-play and architecture-agnostic framework, InfoBatch consistently obtains lossless training results on CIFAR-10, CIFAR-100, Tiny-ImageNet, and ImageNet-1K saving 40%, 33%, 30%, and 26% overall cost, respectively.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 728,
+                "end_char": 953
+              },
+              {
+                "quote": "We present InfoBatch, a novel framework for lossless training acceleration by unbiased dynamic data pruning.",
+                "section": "Conclusion",
+                "source_kind": "tex",
+                "start_char": 0,
+                "end_char": 108
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "der to evaluate the cross-architecture generality of InfoBatch, we train R-18 and R-50 on CIFAR-10, CIFAR-100, and ImageNet-1K. As illustrated in Tab. <ref>, we achieve lossless training p",
+              "section": "Generalization Evaluation",
+              "source_kind": "tex",
+              "start_char": 240,
+              "end_char": 248
+            }
+          },
+          {
+            "value": "CIFAR-100",
+            "evidence": {
+              "quote": "s to illustrate the effects of InfoBatch. If not stated, the experiments are conducted on CIFAR-100 by default. Evaluating the components of InfoBatch. We design an ablation study to invest",
+              "section": "Ablation Experiments",
+              "source_kind": "tex",
+              "start_char": 130,
+              "end_char": 139
+            }
+          },
+          {
+            "value": "ImageNet",
+            "evidence": {
+              "quote": "-architecture generality of InfoBatch, we train R-18 and R-50 on CIFAR-10, CIFAR-100, and ImageNet-1K. As illustrated in Tab. <ref>, we achieve lossless training performances under all settin",
+              "section": "Generalization Evaluation",
+              "source_kind": "tex",
+              "start_char": 265,
+              "end_char": 276
+            }
+          },
+          {
+            "value": "Tiny-ImageNet",
+            "evidence": {
+              "quote": "amework, InfoBatch consistently obtains lossless training results on CIFAR-10, CIFAR-100, Tiny-ImageNet, and ImageNet-1K saving 40%, 33%, 30%, and 26% overall cost, respectively. We extend Info",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 865,
+              "end_char": 878
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "value": "accuracy",
+            "evidence": {
+              "quote": "foBatch saves the overall cost by more than 25% on ImageNet-1K. (d) The pruned number and accuracy curve during the ImageNet-1K training process. Best viewed in color. Cross-optimizer robu",
+              "section": "Generalization Evaluation",
+              "source_kind": "tex",
+              "start_char": 1162,
+              "end_char": 1170
+            }
+          },
+          {
+            "value": "training time",
+            "evidence": {
+              "quote": "super large batch size to improve data parallelism during training to reduce the overall training time. However, more computation units are required and the total training cost is not reduced,",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 2050,
+              "end_char": 2063
+            }
+          }
+        ],
+        "method_keywords": [
+          {
+            "value": "InfoBatch",
+            "evidence": {
+              "quote": "To solve this problem, we propose InfoBatch, a novel framework aiming to achieve lossless training acceleration by unbiased dynamic data pruning.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 280,
+              "end_char": 425
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 8,
+        "units_kept": 8,
+        "relocated_evidence": 0,
+        "fingerprint": "69dc2871477270e9c7f3"
+      },
+      {
+        "arxiv_id": "2204.08499",
+        "version": "v1",
+        "title": "DeepCore: A Comprehensive Library for Coreset Selection in Deep Learning",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "Coreset selection aims to select a subset of the most informative training samples to benefit downstream tasks, but many existing methods are not designed for deep learning, leading to high complexity and poor generalization.",
+          "evidence": [
+            {
+              "quote": "Coreset selection, which aims to select a subset of the most informative training samples, is a long-standing learning problem that can benefit many downstream tasks such as data-efficient learning, continual learning, neural architecture search, active learning, .",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 265
+            },
+            {
+              "quote": "However, many existing coreset selection methods are not designed for deep learning, which may have high complexity and poor generalization ability to unseen representations.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 266,
+              "end_char": 440
+            }
+          ]
+        },
+        "method": {
+          "text": "The authors provide a comprehensive code library, DeepCore, and evaluate popular coreset selection methods including uncertainty-based, geometry-based, and error/loss-based approaches.",
+          "evidence": [
+            {
+              "quote": "To advance the research of coreset selection in deep learning, we contribute a comprehensive code library, namely DeepCore, and provide an empirical study on popular coreset selection methods on CIFAR10 and ImageNet datasets[The code is available in <https://github.com/PatrickZH/DeepCore>.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 559,
+              "end_char": 849
+            },
+            {
+              "quote": "We select samples in descending order of the scores: s_least confidence() = 1-max_i=1,...,C P(\u0177=i|) s_entropy() = -\u2211_i=1^C P(\u0177=i|)log P(\u0177=i|) s_margin() = 1-min_y\u2260\u0177(P(\u0177|x)-P(y|x)).",
+              "section": "Uncertainty Based Methods",
+              "source_kind": "tex",
+              "start_char": 357,
+              "end_char": 537
+            },
+            {
+              "quote": "It is assumed that data points close to each other in the feature space tend to have similar properties.",
+              "section": "Geometry Based Methods",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 104
+            },
+            {
+              "quote": "Therefore, geometry based methods <cit.> try to remove those data points providing redundant information then the left data points form a coreset where ||\u226a||.",
+              "section": "Geometry Based Methods",
+              "source_kind": "tex",
+              "start_char": 105,
+              "end_char": 263
+            },
+            {
+              "quote": "The following are commonly used metrics of sample uncertainty given a certain classifier and training epoch, namely Least Confidence, Entropy and Margin <cit.>, where C is the number of classes.",
+              "section": "Uncertainty Based Methods",
+              "source_kind": "tex",
+              "start_char": 162,
+              "end_char": 356
+            },
+            {
+              "quote": "In a dataset, training samples are more important if they contribute more to the error or loss when training neural networks.",
+              "section": "Error/Loss Based Methods",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 125
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "Graph Cut (GC) achieves the best results on CIFAR-10 when selecting 0.1% to 10% of the training data, while random selection remains a strong baseline.",
+            "evidence": [
+              {
+                "quote": "Extensive experiment results show that, although some methods perform better in certain experiment settings, random selection is still a strong baseline.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 934,
+                "end_char": 1087
+              },
+              {
+                "quote": "Graph Cut (GC) is more prominent among them, and achieves the best results when selecting 0.1% to 10% of the training data.",
+                "section": "CIFAR10 Results",
+                "source_kind": "tex",
+                "start_char": 1906,
+                "end_char": 2029
+              }
+            ]
+          }
+        ],
+        "limitations": [],
+        "contributions": [
+          {
+            "text": "The authors contribute a comprehensive code library, DeepCore, and provide an empirical study on popular coreset selection methods.",
+            "evidence": [
+              {
+                "quote": "To advance the research of coreset selection in deep learning, we contribute a comprehensive code library, namely DeepCore, and provide an empirical study on popular coreset selection methods on CIFAR10 and ImageNet datasets[The code is available in <https://github.com/PatrickZH/DeepCore>.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 559,
+                "end_char": 849
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "DeepCore to evaluate different coreset selection methods in multiple learning settings on CIFAR10 and ImageNet-1K datasets. ResNet-18 is used as the default architecture in all experiment",
+              "section": "Experiment Results",
+              "source_kind": "tex",
+              "start_char": 118,
+              "end_char": 125
+            }
+          },
+          {
+            "value": "ImageNet",
+            "evidence": {
+              "quote": "evaluate different coreset selection methods in multiple learning settings on CIFAR10 and ImageNet-1K datasets. ResNet-18 is used as the default architecture in all experiments. Coreset selec",
+              "section": "Experiment Results",
+              "source_kind": "tex",
+              "start_char": 130,
+              "end_char": 141
+            }
+          }
+        ],
+        "metrics": [],
+        "method_keywords": [
+          {
+            "value": "DeepCore",
+            "evidence": {
+              "quote": "To advance the research of coreset selection in deep learning, we contribute a comprehensive code library, namely DeepCore, and provide an empirical study on popular coreset selection methods on CIFAR10 and ImageNet datasets[The code is available in <https://github.com/PatrickZH/DeepCore>.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 559,
+              "end_char": 849
+            }
+          },
+          {
+            "value": "Graph Cut",
+            "evidence": {
+              "quote": "Graph Cut (GC) is more prominent among them, and achieves the best results when selecting 0.1% to 10% of the training data.",
+              "section": "CIFAR10 Results",
+              "source_kind": "tex",
+              "start_char": 1906,
+              "end_char": 2029
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 13,
+        "units_kept": 13,
+        "relocated_evidence": 0,
+        "fingerprint": "69dc2871477270e9c7f3"
+      },
+      {
+        "arxiv_id": "2302.06960",
+        "version": "v1",
+        "title": "Data pruning and neural scaling laws: fundamental limitations of score-based algorithms",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "Data pruning algorithms aim to reduce computational costs, but they often fail to outperform random pruning in high compression regimes (30% or less of data kept).",
+          "evidence": [
+            {
+              "quote": "Data pruning algorithms are commonly used to reduce the memory and computational cost of the optimization process.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 114
+            },
+            {
+              "quote": "The goal of data pruning is to identify a small, yet representative sample of the data that accurately reflects the characteristics and patterns of the entire dataset.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 146,
+              "end_char": 313
+            },
+            {
+              "quote": "Recent empirical results (<cit.>) reveal that random data pruning remains a strong baseline and outperforms most existing data pruning methods in the high compression regime, i.e. where a fraction of 30% or less of the data is kept.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 115,
+              "end_char": 347
+            }
+          ]
+        },
+        "method": {
+          "text": "The authors introduce a framework for score-based pruning algorithms (geometry-based, uncertainty-based, and error-based) and analyze their asymptotic behavior and distribution shift.",
+          "evidence": [
+            {
+              "quote": "Our contributions are as follows: * We introduce a new framework for data pruning that encompasses a wide range of popular algorithms (score-based pruning algorithms). * We analyze the asymptotic behavior of algorithms and identify a phenomenon of distribution shift that provably impacts the generalization error. * We demonstrate No-Free-Lunch results that characterize when and why score-based pruning algorithms perform worse than random pruning. * We show that cannot be used in the high compression regime without a significant drop in performance.",
+              "section": "Contributions",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 554
+            },
+            {
+              "quote": "These can generally be categorized into four groups: * Geometry based methods: these methods are based on some geometric measure in the feature space.",
+              "section": "Score-based methods",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 150
+            },
+            {
+              "quote": "A similar idea based on the K-centroids of the input data was used in <cit.>. * Uncertainty based methods: the aim of such methods is to find the most \u201cdifficult\" examples, defined as the ones for which the model is the least confident.",
+              "section": "Score-based methods",
+              "source_kind": "tex",
+              "start_char": 412,
+              "end_char": 648
+            },
+            {
+              "quote": "Different uncertainty measures can be used for this purpose, see <cit.> for more details. * Error based methods: the goal is to find the most significant examples defined as the ones that contribute the most to the loss.",
+              "section": "Score-based methods",
+              "source_kind": "tex",
+              "start_char": 649,
+              "end_char": 869
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "Random data pruning remains a strong baseline and outperforms most existing data pruning methods in the high compression regime.",
+            "evidence": [
+              {
+                "quote": "Recent empirical results (<cit.>) reveal that random data pruning remains a strong baseline and outperforms most existing data pruning methods in the high compression regime, i.e. where a fraction of 30% or less of the data is kept.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 115,
+                "end_char": 347
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Score-based data pruning algorithms fail in the high compression regime, and their performance gap does not vanish as the amount of data increases.",
+            "evidence": [
+              {
+                "quote": "In this work, we focus on score-based data pruning algorithms and show theoretically and empirically why such algorithms fail in the high compression regime.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 613,
+                "end_char": 770
+              },
+              {
+                "quote": "Otherwise, it would mean that with positive probability, the pruning algorithm induces a deterioration of the out-of-sample performance that does not vanish even when an arbitrarily large amount of data is available.",
+                "section": "Valid and Consistent pruning algorithms",
+                "source_kind": "tex",
+                "start_char": 1367,
+                "end_char": 1583
+              }
+            ]
+          }
+        ],
+        "contributions": [
+          {
+            "text": "The authors introduce a framework for score-based pruning, analyze asymptotic behavior, and demonstrate No-Free-Lunch results for these algorithms.",
+            "evidence": [
+              {
+                "quote": "Our contributions are as follows: * We introduce a new framework for data pruning that encompasses a wide range of popular algorithms (score-based pruning algorithms). * We analyze the asymptotic behavior of algorithms and identify a phenomenon of distribution shift that provably impacts the generalization error. * We demonstrate No-Free-Lunch results that characterize when and why score-based pruning algorithms perform worse than random pruning. * We show that cannot be used in the high compression regime without a significant drop in performance.",
+                "section": "Contributions",
+                "source_kind": "tex",
+                "start_char": 0,
+                "end_char": 554
+              }
+            ]
+          }
+        ],
+        "datasets": [],
+        "metrics": [],
+        "method_keywords": [
+          {
+            "value": "score-based pruning",
+            "evidence": {
+              "quote": "Our contributions are as follows: * We introduce a new framework for data pruning that encompasses a wide range of popular algorithms (score-based pruning algorithms). * We analyze the asymptotic behavior of algorithms and identify a phenomenon of distribution shift that provably impacts the generalization error. * We demonstrate No-Free-Lunch results that characterize when and why score-based pruning algorithms perform worse than random pruning. * We show that cannot be used in the high compression regime without a significant drop in performance.",
+              "section": "Contributions",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 554
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 12,
+        "units_kept": 12,
+        "relocated_evidence": 0,
+        "fingerprint": "69dc2871477270e9c7f3"
+      },
+      {
+        "arxiv_id": "2305.18424",
+        "version": "v1",
+        "title": "Repeated Random Sampling for Minimizing the Time-to-Accuracy of Learning",
+        "source_kind": "tex",
+        "status": "ok",
+        "problem": {
+          "text": "Existing data pruning and distillation strategies come with high computational costs and often under-perform random sampling in high data compression regimes.",
+          "evidence": [
+            {
+              "quote": "Methods for carefully selecting or generating a small set of training data to learn from, i.e., data pruning, coreset selection, and data distillation, have been shown to be effective in reducing the ever-increasing cost of training neural networks.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 0,
+              "end_char": 249
+            },
+            {
+              "quote": "However, these strategies come with additional computational costs associated with subset selection or data distillation before training begins, and furthermore, many are shown to even under-perform random sampling in high data compression regimes.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 374,
+              "end_char": 622
+            }
+          ]
+        },
+        "method": {
+          "text": "The authors introduce Repeated Sampling of Random Subsets (RS2), which samples a subset uniformly at random for each training epoch.",
+          "evidence": [
+            {
+              "quote": "In this work, we revisit a powerful yet overlooked random sampling strategy to address these challenges and introduce an approach called Repeated Sampling of Random Subsets (RSRS or RS2), where we randomly sample the subset of training data for each epoch of model training.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 830,
+              "end_char": 1104
+            },
+            {
+              "quote": "Motivated by this gap, we introduce Repeated Sampling of Random Subsets (RSRS = RS2), where we sample a subset uniformly at random for each training epoch.",
+              "section": "Introduction",
+              "source_kind": "tex",
+              "start_char": 3944,
+              "end_char": 4099
+            }
+          ]
+        },
+        "results": [
+          {
+            "text": "RS2 reaches higher accuracy than existing methods across a wide range of pruning ratios, trains the fastest, and is robust to noisy labels.",
+            "evidence": [
+              {
+                "quote": "We show that: * Across a wide range of pruning ratios, RS2 reaches higher accuracy than all existing methods. * For a given pruning ratio, RS2 also trains the fastest, and thus has the fastest time-to-accuracy. * In the presence of noisy labels, RS2 is the most robust data pruning method; It achieves the highest end-model accuracy and lowest relative drop in performance vs. training on the clean dataset.",
+                "section": "Evaluation",
+                "source_kind": "tex",
+                "start_char": 134,
+                "end_char": 541
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          {
+            "text": "The authors identify a gap between RS2 and training on the full dataset and seek to overcome limitations of data pruning when training with SGD.",
+            "evidence": [
+              {
+                "quote": "Specifically, we are excited for future work focused on the following question: How can we further close the gap between RS2 and training on the full dataset?",
+                "section": "Discussion and Conclusion",
+                "source_kind": "tex",
+                "start_char": 1430,
+                "end_char": 1588
+              },
+              {
+                "quote": "Can we overcome this limitation of data pruning when training with SGD without eliminating the runtime benefits?",
+                "section": "Discussion and Conclusion",
+                "source_kind": "tex",
+                "start_char": 2020,
+                "end_char": 2132
+              }
+            ]
+          }
+        ],
+        "contributions": [
+          {
+            "text": "The authors introduce RS2, test it against state-of-the-art methods, and provide a convergence analysis.",
+            "evidence": [
+              {
+                "quote": "In this work, we revisit a powerful yet overlooked random sampling strategy to address these challenges and introduce an approach called Repeated Sampling of Random Subsets (RSRS or RS2), where we randomly sample the subset of training data for each epoch of model training.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 830,
+                "end_char": 1104
+              },
+              {
+                "quote": "We test RS2 against thirty state-of-the-art data pruning and data distillation methods across four datasets including ImageNet.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 1105,
+                "end_char": 1232
+              },
+              {
+                "quote": "Beyond the above meta-study, we provide a convergence analysis for RS2 and discuss its generalization capability.",
+                "section": "Abstract",
+                "source_kind": "tex",
+                "start_char": 1580,
+                "end_char": 1693
+              }
+            ]
+          }
+        ],
+        "datasets": [
+          {
+            "value": "ImageNet",
+            "evidence": {
+              "quote": "2 against baseline methods using CIFAR10 <cit.>, CIFAR100 <cit.>, ImageNet30 (a subset of ImageNet) <cit.>, and ImageNet <cit.> itself. We train ResNet models <cit.> representative of mode",
+              "section": "Experimental Setup",
+              "source_kind": "tex",
+              "start_char": 232,
+              "end_char": 240
+            }
+          },
+          {
+            "value": "CIFAR-10",
+            "evidence": {
+              "quote": "ndix <ref>. Datasets, Models, and Metrics We benchmark RS2 against baseline methods using CIFAR10 <cit.>, CIFAR100 <cit.>, ImageNet30 (a subset of ImageNet) <cit.>, and ImageNet <cit.> it",
+              "section": "Experimental Setup",
+              "source_kind": "tex",
+              "start_char": 175,
+              "end_char": 182
+            }
+          },
+          {
+            "value": "CIFAR-100",
+            "evidence": {
+              "quote": "sets, Models, and Metrics We benchmark RS2 against baseline methods using CIFAR10 <cit.>, CIFAR100 <cit.>, ImageNet30 (a subset of ImageNet) <cit.>, and ImageNet <cit.> itself. We train Re",
+              "section": "Experimental Setup",
+              "source_kind": "tex",
+              "start_char": 191,
+              "end_char": 199
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "value": "accuracy",
+            "evidence": {
+              "quote": "lation methods. We show that: * Across a wide range of pruning ratios, RS2 reaches higher accuracy than all existing methods. * For a given pruning ratio, RS2 also trains the fastest, and",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 208,
+              "end_char": 216
+            }
+          },
+          {
+            "value": "time-to-accuracy",
+            "evidence": {
+              "quote": "thods. * For a given pruning ratio, RS2 also trains the fastest, and thus has the fastest time-to-accuracy. * In the presence of noisy labels, RS2 is the most robust data pruning method; It achiev",
+              "section": "Evaluation",
+              "source_kind": "tex",
+              "start_char": 327,
+              "end_char": 343
+            }
+          },
+          {
+            "value": "training time",
+            "evidence": {
+              "quote": "er-RC 72.5\u00b10.6 81.4\u00b10.7 86.6\u00b10.5 SP-Easy-RC - - - RS2 w/o repl 87.1\u00b10.8 91.7\u00b10.5 94.3\u00b10.2 Training Time We now study the training time of RS2 compared to existing methods on CIFAR10 and ImageNe",
+              "section": "End-to-End Data Pruning Experiments",
+              "source_kind": "tex",
+              "start_char": 4688,
+              "end_char": 4701
+            }
+          }
+        ],
+        "method_keywords": [
+          {
+            "value": "RS2",
+            "evidence": {
+              "quote": "In this work, we revisit a powerful yet overlooked random sampling strategy to address these challenges and introduce an approach called Repeated Sampling of Random Subsets (RSRS or RS2), where we randomly sample the subset of training data for each epoch of model training.",
+              "section": "Abstract",
+              "source_kind": "tex",
+              "start_char": 830,
+              "end_char": 1104
+            }
+          }
+        ],
+        "confidence": 1.0,
+        "attempts": [
+          {
+            "source_kind": "tex",
+            "attempt_no": 0,
+            "outcome": "ok",
+            "validation_errors": []
+          }
+        ],
+        "error": null,
+        "units_proposed": 11,
+        "units_kept": 11,
+        "relocated_evidence": 0,
+        "fingerprint": "69dc2871477270e9c7f3"
+      }
+    ],
+    "metrics": {
+      "n_papers": 8,
+      "ok": 8,
+      "degraded": 0,
+      "skipped": 0,
+      "tex_rate": 1.0,
+      "pdf_fallback_rate": 0.0,
+      "abstract_fallback_rate": 0.0,
+      "skip_rate": 0.0,
+      "evidence_keep_rate": 1.0,
+      "section_relocate_rate": 0.0,
+      "cache_hits": 0,
+      "mean_selected_chars": 23956.2,
+      "mean_candidate_chars": 4373.4,
+      "seconds": 16.62,
+      "llm_calls": 2,
+      "llm_skipped_confident": 0
+    },
+    "fingerprint": "69dc2871477270e9c7f3"
+  }
+}

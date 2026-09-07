@@ -8,6 +8,8 @@ from urllib.parse import quote_plus
 
 import httpx
 
+from research_assistant.arxiv_ids import normalize_arxiv_id
+
 logger = logging.getLogger(__name__)
 
 ARXIV_ATOM = "{http://www.w3.org/2005/Atom}"
@@ -41,7 +43,7 @@ def search_arxiv_keyword(topic: str, n: int = 50, timeout_s: float = 20.0) -> li
     ids: list[str] = []
     for entry in root.findall(f"{ARXIV_ATOM}entry"):
         raw = (entry.findtext(f"{ARXIV_ATOM}id") or "").strip()
-        arxiv_id = _normalize_arxiv_id(raw)
+        arxiv_id = normalize_arxiv_id(raw)
         if arxiv_id:
             ids.append(arxiv_id)
     return ids
@@ -162,15 +164,5 @@ def _post_paper_batch(
 
 
 def _normalize_arxiv_id(url_or_id: str) -> str:
-    text = url_or_id.strip()
-    if "arxiv.org/abs/" in text:
-        text = text.rsplit("/abs/", 1)[-1]
-    text = text.replace("http://", "").replace("https://", "")
-    if text.startswith("arxiv.org/"):
-        text = text.split("/", 1)[-1]
-    # Strip version suffix: 2205.09329v2 -> 2205.09329
-    if "v" in text:
-        core, _, maybe_ver = text.rpartition("v")
-        if maybe_ver.isdigit():
-            text = core
-    return text
+    """Backward-compatible alias used by tests."""
+    return normalize_arxiv_id(url_or_id)

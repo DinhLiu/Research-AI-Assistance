@@ -9,4 +9,6 @@ sentencepiece
 pydantic>=2
 python-dotenv
 httpx
+pymupdf
+pylatexenc
 pytest

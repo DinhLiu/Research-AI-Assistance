@@ -1,0 +1,94 @@
+{
+  "notes": "Gold labels for stage-2 extraction. Field lists are expected mentions; evidence_samples are for support labeling (substring match is not support).",
+  "papers": [
+    {
+      "arxiv_id": "2205.09329",
+      "title": "Dataset Pruning: Reducing Training Data by Examining Generalization Influence",
+      "method_keywords": ["dataset pruning", "generalization influence", "EL2N"],
+      "datasets": ["CIFAR-10", "CIFAR-100", "Tiny-ImageNet"],
+      "metrics": ["accuracy"],
+      "limitation": "Score-based pruning can be sensitive to the proxy used to estimate example influence.",
+      "evidence_samples": [
+        {
+          "claim": "The method prunes training examples by estimating generalization influence.",
+          "quote": "reducing training data by examining generalization influence",
+          "support": "supported"
+        }
+      ]
+    },
+    {
+      "arxiv_id": "2107.07075",
+      "title": "Deep Learning on a Data Diet: Finding Important Examples Early in Training",
+      "method_keywords": ["EL2N", "GraNd", "data diet"],
+      "datasets": ["CIFAR-10", "CIFAR-100", "CINIC-10", "ImageNet"],
+      "metrics": ["accuracy", "EL2N"],
+      "limitation": "Early-training scores can be unstable across epochs and initializations.",
+      "evidence_samples": [
+        {
+          "claim": "Our method significantly outperforms random selection.",
+          "quote": "Random selection achieves",
+          "support": "unsupported"
+        },
+        {
+          "claim": "EL2N identifies important examples early in training.",
+          "quote": "finding important examples early in training",
+          "support": "supported"
+        }
+      ]
+    },
+    {
+      "arxiv_id": "2206.14486",
+      "title": "Beyond neural scaling laws: beating power law scaling via data pruning",
+      "method_keywords": ["data pruning", "scaling laws", "self-supervised pruning metrics"],
+      "datasets": ["CIFAR-10", "SVHN", "ImageNet"],
+      "metrics": ["accuracy"],
+      "limitation": "Gains from pruning depend on data redundancy and may not hold on less redundant datasets.",
+      "evidence_samples": []
+    },
+    {
+      "arxiv_id": "2210.15809",
+      "title": "Coverage-centric Coreset Selection for High Pruning Rates",
+      "method_keywords": ["coreset", "coverage-centric", "CCS"],
+      "datasets": ["CIFAR-10", "CIFAR-100", "ImageNet"],
+      "metrics": ["accuracy"],
+      "limitation": "Hard-example scoring can miss coverage of easy regions at high pruning rates.",
+      "evidence_samples": []
+    },
+    {
+      "arxiv_id": "2303.04947",
+      "title": "InfoBatch: Lossless Training Speed Up by Unbiased Dynamic Data Pruning",
+      "method_keywords": ["InfoBatch", "dynamic data pruning", "unbiased"],
+      "datasets": ["CIFAR-10", "CIFAR-100", "ImageNet"],
+      "metrics": ["accuracy", "training time"],
+      "limitation": "Dynamic pruning still requires scoring examples during training.",
+      "evidence_samples": []
+    },
+    {
+      "arxiv_id": "2204.08499",
+      "title": "DeepCore: A Comprehensive Library for Coreset Selection in Deep Learning",
+      "method_keywords": ["DeepCore", "coreset selection"],
+      "datasets": ["CIFAR-10", "CIFAR-100"],
+      "metrics": ["accuracy"],
+      "limitation": "Library comparisons depend on implementation details and default hyperparameters.",
+      "evidence_samples": []
+    },
+    {
+      "arxiv_id": "2302.06960",
+      "title": "Data pruning and neural scaling laws: fundamental limitations of score-based algorithms",
+      "method_keywords": ["data pruning", "scaling laws", "score-based pruning"],
+      "datasets": ["CIFAR-10"],
+      "metrics": ["accuracy"],
+      "limitation": "Score-based pruning has fundamental limitations under some scaling regimes.",
+      "evidence_samples": []
+    },
+    {
+      "arxiv_id": "2305.18424",
+      "title": "Repeated Random Sampling for Minimizing the Time-to-Accuracy of Learning",
+      "method_keywords": ["repeated random sampling", "RRS", "time-to-accuracy"],
+      "datasets": ["CIFAR-10", "ImageNet"],
+      "metrics": ["time-to-accuracy", "accuracy"],
+      "limitation": "Random resampling may need many rounds to match careful scoring methods on some tasks.",
+      "evidence_samples": []
+    }
+  ]
+}

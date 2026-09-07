@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import re
 from collections.abc import Sequence
 
-import httpx
+from research_assistant.llm.client import complete, expansion_provider
 
 logger = logging.getLogger(__name__)
 
@@ -98,25 +97,14 @@ class LlmQueryExpander(QueryExpander):
         return _merge_original(topic, variants)
 
     def _complete(self, user: str) -> str:
-        if self.provider == "groq":
-            return _openai_compatible(
-                base_url="https://api.groq.com/openai/v1",
-                api_key=os.environ["GROQ_API_KEY"],
-                model=os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant"),
-                user=user,
-                timeout_s=self.timeout_s,
-            )
-        if self.provider == "openai":
-            return _openai_compatible(
-                base_url=os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1"),
-                api_key=os.environ["OPENAI_API_KEY"],
-                model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
-                user=user,
-                timeout_s=self.timeout_s,
-            )
-        if self.provider == "gemini":
-            return _gemini_complete(user, timeout_s=self.timeout_s)
-        raise ValueError(f"Unknown LLM provider: {self.provider}")
+        return complete(
+            system=SYSTEM_PROMPT,
+            user=user,
+            json_mode=True,
+            temperature=0.3,
+            timeout_s=self.timeout_s,
+            provider=self.provider,
+        )
 
 
 class FallbackQueryExpander(QueryExpander):
@@ -140,22 +128,11 @@ class FallbackQueryExpander(QueryExpander):
 
 
 def build_expander(timeout_s: float = 30.0) -> QueryExpander:
-    if _env_key("GROQ_API_KEY"):
-        return FallbackQueryExpander(LlmQueryExpander("groq", timeout_s=timeout_s))
-    if _env_key("GEMINI_API_KEY") or _env_key("GOOGLE_API_KEY"):
-        return FallbackQueryExpander(LlmQueryExpander("gemini", timeout_s=timeout_s))
-    if _env_key("OPENAI_API_KEY"):
-        return FallbackQueryExpander(LlmQueryExpander("openai", timeout_s=timeout_s))
+    provider = expansion_provider()
+    if provider:
+        return FallbackQueryExpander(LlmQueryExpander(provider, timeout_s=timeout_s))
     logger.info("No LLM API key set; using template query expansion")
     return TemplateQueryExpander()
-
-
-def _env_key(name: str) -> str | None:
-    raw = os.environ.get(name)
-    if not raw:
-        return None
-    value = raw.strip().strip('"').strip("'")
-    return value or None
 
 
 def _merge_original(topic: str, variants: Sequence[str]) -> list[str]:
@@ -169,94 +146,3 @@ def _merge_original(topic: str, variants: Sequence[str]) -> list[str]:
         seen.add(key)
         out.append(q)
     return out
-
-
-def _openai_compatible(*, base_url: str, api_key: str, model: str, user: str, timeout_s: float) -> str:
-    url = base_url.rstrip("/") + "/chat/completions"
-    payload = {
-        "model": model,
-        "temperature": 0.3,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user},
-        ],
-    }
-    with httpx.Client(timeout=timeout_s) as client:
-        response = client.post(
-            url,
-            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-            json=payload,
-        )
-        response.raise_for_status()
-        data = response.json()
-    return data["choices"][0]["message"]["content"]
-
-
-def _gemini_complete(user: str, timeout_s: float) -> str:
-    api_key = _env_key("GEMINI_API_KEY") or _env_key("GOOGLE_API_KEY")
-    if not api_key:
-        raise RuntimeError("GEMINI_API_KEY / GOOGLE_API_KEY is not set")
-    model = (os.environ.get("GEMINI_MODEL") or "gemini-2.5-flash").strip()
-    model = model.removeprefix("models/")
-    logger.info("Calling Gemini model=%s", model)
-
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-    headers = {
-        "x-goog-api-key": api_key,
-        "Content-Type": "application/json",
-    }
-    payload = {
-        "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
-        "contents": [{"role": "user", "parts": [{"text": user}]}],
-        "generationConfig": {
-            "temperature": 0.3,
-            "responseMimeType": "application/json",
-        },
-    }
-    data = _gemini_post(url, headers, payload, timeout_s)
-    text = _gemini_response_text(data)
-    if not text.strip():
-        raise RuntimeError(f"Gemini returned empty text: {data}")
-    return text
-
-
-def _gemini_post(url: str, headers: dict, payload: dict, timeout_s: float) -> dict:
-    with httpx.Client(timeout=timeout_s) as client:
-        response = client.post(url, headers=headers, json=payload)
-        if response.status_code >= 400:
-            raise RuntimeError(
-                f"Gemini HTTP {response.status_code}: {_gemini_error_message(response)}"
-            )
-        data = response.json()
-        if not isinstance(data, dict):
-            raise RuntimeError("Gemini returned a non-object JSON body")
-        return data
-
-
-def _gemini_error_message(response: httpx.Response) -> str:
-    try:
-        payload = response.json()
-        err = payload.get("error") if isinstance(payload, dict) else None
-        if isinstance(err, dict) and err.get("message"):
-            return str(err["message"])
-    except Exception:
-        pass
-    return (response.text or "")[:400]
-
-
-def _gemini_response_text(data: dict) -> str:
-    candidates = data.get("candidates") or []
-    if not candidates:
-        feedback = data.get("promptFeedback") or data.get("error") or data
-        raise RuntimeError(f"Gemini returned no candidates: {feedback}")
-    parts = ((candidates[0].get("content") or {}).get("parts")) or []
-    chunks: list[str] = []
-    for part in parts:
-        if not isinstance(part, dict):
-            continue
-        if part.get("thought"):
-            continue
-        text = part.get("text")
-        if text:
-            chunks.append(str(text))
-    return "\n".join(chunks).strip()
