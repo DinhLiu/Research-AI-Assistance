@@ -1,68 +1,366 @@
-# Research Assistance Agent
+![Research Assistance Agent Banner](docs/assets/banner.jpg)
 
-Pipeline nghiên cứu tài liệu gồm 4 stage: **retrieval → extraction → synthesis → writing**.
+# 🔬 Research Assistance Agent
 
-## Sử dụng giao diện (không cần nhập câu lệnh)
+<div align="center">
 
-Trên máy Linux hiện tại, mở **Research Assistant.desktop** trong thư mục dự án bằng trình quản lý tệp. Nếu hệ điều hành hỏi, chọn cho phép chạy launcher (Allow Launching). Launcher sử dụng `.venv` của dự án và mở trình duyệt tại **http://127.0.0.1:8765**. Giữ cửa sổ launcher mở trong khi sử dụng.
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Model](https://img.shields.io/badge/SPECTER2-AllenAI-6f42c1.svg)](https://huggingface.co/allenai/specter2_base)
+[![LLMs Supported](https://img.shields.io/badge/LLM-Gemini%20%7C%20OpenAI%20%7C%20Groq-brightgreen.svg)](https://deepmind.google/technologies/gemini/)
+[![UI](https://img.shields.io/badge/Web%20UI-Local%20127.0.0.1%3A8765-orange.svg)](http://127.0.0.1:8765)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-Giao diện hỗ trợ **Tiếng Việt** và **English** qua nút `VI / EN` ở góc trên bên phải. Lựa chọn được ghi nhớ trên trình duyệt và chỉ thay đổi ngôn ngữ giao diện; trường **Ngôn ngữ bản review / Review language** vẫn điều khiển ngôn ngữ của tài liệu đầu ra riêng biệt.
+**An autonomous, local-first research pipeline that transforms scientific topics into comprehensive, grounded, and fully cited literature reviews.**
 
-1. Nhập **chủ đề cần tìm**. Chọn số bài, ngôn ngữ review và số từ mục tiêu.
-2. Mở **API & cấu hình .env**, nhập API key của Gemini, OpenAI hoặc Groq; nhập đủ **LLM_RPM**, **LLM_TPM**, **LLM_RPD** theo quota thực tế của nhà cung cấp. Giao diện mặc định bật tổng hợp và viết bằng LLM.
-3. Kiểm tra **thư mục dữ liệu SPECTER2**. Mặc định là `data/specter2_artifacts`; thư mục phải có `manifest.json`, các shard embeddings/metadata và FAISS index (index có thể được pipeline dựng lại). UI sử dụng corpus có sẵn, không tự tạo corpus từ Internet. Lần đầu chạy có thể cần tải model SPECTER2.
-4. Có thể mở **Cấu hình từng stage** để chỉnh bộ lọc năm, categories, provider, cache, hạn mức gọi LLM và các thông số xử lý khác.
-5. Bấm **Lưu cấu hình .env** để dùng lại cấu hình. Bấm **Chạy toàn bộ pipeline** để chạy cả 4 stage bằng giá trị đang hiển thị; nút chạy không tự ghi đè `.env`.
-6. Theo dõi trạng thái từng stage, mở **Nhật ký lượt chạy / Run log** để xem tiến trình và traceback lỗi, sau đó đọc hoặc tải kết quả. Có thể tải `run.log`, dừng pipeline, xem các lượt trước hoặc chạy lại với cấu hình đã lưu.
+[Key Features](#-key-features) • [Architecture](#-pipeline-architecture) • [Quick Start](#-quick-start--web-interface) • [UI Configuration Guide](#%EF%B8%8F-complete-ui-configuration-guide) • [Results & Artifacts](#-results--artifacts) • [Developer Setup](#-developer-setup)
 
-Ô API key trống giữ nguyên key đã lưu. Muốn xóa key, chọn **Xóa key đã lưu** rồi lưu. Key không được gửi lại từ server về giao diện và không được ghi vào kết quả từng lượt. `.env` vẫn là tệp văn bản chứa key; ứng dụng lưu tệp với quyền chỉ chủ sở hữu đọc/ghi. Cấu hình nâng cao được lưu dưới dạng `RA_<STAGE>_<FIELD>` (ví dụ `RA_RETRIEVAL_TOP_K='25'`). Các biến `RA_*` được UI đọc; các CLI riêng vẫn sử dụng tham số CLI của chúng.
+</div>
 
-Các lượt chạy được lưu trong `results/ui/<run-id>/`:
+---
 
-- `stage-1-retrieval.json`
-- `stage-2-extraction.json`
-- `stage-3-synthesis.json`
-- `stage-4-writing.json`
-- `review.md`
-- `run.log` (thời điểm bắt đầu/kết thúc từng stage, log thư viện, cảnh báo và traceback lỗi; API key được che nếu xuất hiện)
-- `config.json` (chủ đề và tham số từng stage, không chứa key) và `status.json`
+## 🌟 Key Features
 
-Nếu một stage lỗi, pipeline dừng, giữ kết quả đã tạo và hiển thị lỗi. Review `partial`, `fallback` hoặc `empty` được hiển thị kèm lưu ý, không được báo thành bản LLM hoàn chỉnh. Đóng server sẽ dừng lượt đang chạy; chạy lại có thể tận dụng cache của các stage, nhưng không tiếp tục tiến trình đã dừng. Mỗi server chỉ chạy một pipeline tại một thời điểm.
+- **⚡ Autonomous 4-Stage Pipeline**: Seamlessly handles **Retrieval → Evidence Extraction → Research Synthesis → Review Writing**.
+- **🧠 Semantic Neural Search**: Uses **AllenAI SPECTER2** embeddings + FAISS vector search combined with BM25 hybrid ranking and query expansion to retrieve relevant scientific literature.
+- **📄 Full-Text Source Parsing**: Downloads and extracts LaTeX source archives (`.tar.gz`) or PDFs from arXiv to parse claims, methodologies, and exact evidentiary quotes.
+- **🛡️ Strict Grounding & Citation Alignment**: Validates every synthesized claim against raw paper content, preventing LLM hallucinations and generating inline bib-style references `[Author, Year]`.
+- **🎛️ Flexible Multi-LLM Orchestration**: Native support for **Google Gemini**, **OpenAI / OpenAI-Compatible endpoints** (vLLM, Ollama, LM Studio), and **Groq** fast inference, featuring automatic fallback and token-bucket rate limiting.
+- **🌐 Privacy-Preserving Local UI**: Built-in web workspace running strictly on `127.0.0.1`. All API keys are stored locally on your machine with owner-only file permissions (`0600`).
+- **🌍 Multilingual Interface & Output**: Bilingual Web UI (English / Vietnamese) with separate control over the target language of the generated literature review document (`en` or `vi`).
 
-Giao diện chỉ lắng nghe trên `127.0.0.1`, dành cho sử dụng cá nhân trên máy. Các API key được gửi đến nhà cung cấp tương ứng khi pipeline gọi LLM; dữ liệu bài báo và chủ đề được xử lý theo hành vi sẵn có của pipeline. Không đưa server này trực tiếp lên Internet.
+---
 
-## Cài đặt lần đầu / dành cho người phát triển
+## 🏗️ Pipeline Architecture
 
-Yêu cầu Python >= 3.10, môi trường Python có dependencies trong `pyproject.toml`, corpus SPECTER2 và kết nối tới các dịch vụ đang bật. Môi trường `.venv` trên máy hiện tại đã có sẵn.
+The pipeline processes research requests through four sequential, decoupled stages. Each stage saves its structured state as JSON before passing evidence to the next.
+
+```mermaid
+flowchart TD
+    A[User Input: Research Topic] --> S1[Stage 1: Retrieval]
+    
+    subgraph S1 [Stage 1: Retrieval]
+        S1A[LLM Query Expansion] --> S1B[SPECTER2 FAISS Vector Search]
+        S1B --> S1C[arXiv Metadata & Hybrid RRF Reranking]
+        S1C --> S1D[Top-K Candidate Papers]
+    end
+
+    S1D --> S2[Stage 2: Evidence Extraction]
+
+    subgraph S2 [Stage 2: Evidence Extraction]
+        S2A[arXiv Source Downloader] --> S2B[LaTeX / PDF Full-Text Parser]
+        S2B --> S2C[LLM Structured Claims Extractor]
+        S2C --> S2D[Extracted Paper Cards & Fallback Abstract Cache]
+    end
+
+    S2D --> S3[Stage 3: Research Synthesis]
+
+    subgraph S3 [Stage 3: Research Synthesis]
+        S3A[Embedding Methodology Clustering] --> S3B[Comparative Matrix Construction]
+        S3B --> S3C[LLM Synthesis & Verification]
+        S3C --> S3D[Synthesized Knowledge Graph]
+    end
+
+    S3D --> S4[Stage 4: Review Writing]
+
+    subgraph S4 [Stage 4: Literature Review Writing]
+        S4A[Multi-Pass Batch Generation] --> S4B[Citation Grounding Validator]
+        S4B --> S4C[Auto-Repair Loop]
+        S4C --> S4D[Final Markdown Literature Review]
+    end
+
+    S4D --> B[review.md & Output Artifacts]
+```
+
+### Stage Summary Breakdown
+
+| Stage | Name | Input | Output | Main Technologies |
+| :--- | :--- | :--- | :--- | :--- |
+| **Stage 1** | **Retrieval** | Topic string & filters | Ranked list of `top_k` papers | SPECTER2, FAISS, PyTorch, BM25, Reciprocal Rank Fusion |
+| **Stage 2** | **Extraction** | Candidate paper IDs | Structured evidence & claim cards | arXiv API, LaTeX parser, PyPDF, LLM extraction prompt |
+| **Stage 3** | **Synthesis** | Extracted paper cards | Methodology clusters & comparative matrix | TF-IDF / Cosine clustering, LLM matrix synthesis |
+| **Stage 4** | **Writing** | Synthesis matrix & cards | Markdown review (`review.md`) | Multi-pass LLM generation, Citation validator, Auto-repair |
+
+---
+
+## 🚀 Quick Start & Web Interface
+
+### 1. Launching via Double-Click (Linux)
+On Linux desktop environments, double-click **`Research Assistant.desktop`** in the project root directory.
+If prompted by your OS, choose **Allow Launching**. The launcher will initialize the virtual environment (`.venv`) and automatically launch the web interface at:
+
+👉 **[http://127.0.0.1:8765](http://127.0.0.1:8765)**
+
+*(Keep the terminal/launcher window open while using the application).*
+
+### 2. Launching via Command Line
+Alternatively, launch the UI server using your terminal:
 
 ```bash
-python -m venv .venv
-.venv/bin/python -m pip install -e '.[dev]'
+# Using the python launcher script
 .venv/bin/python launch_ui.py
+
+# Or using the installed CLI entry point
+.venv/bin/python -m research_assistant.ui.server --port 8765
 ```
 
-Sau khi cài, cũng có thể chạy `research-assistant-ui` hoặc `python -m research_assistant.ui.server`. Có tùy chọn `--port` và `--no-browser`. Nếu chuyển thư mục dự án, cập nhật `Exec` và `Path` trong launcher `.desktop` cho đúng vị trí mới. Trên hệ điều hành khác, chạy `launch_ui.py` bằng Python của môi trường đã cài dependencies.
+> [!NOTE]
+> The server listens strictly on local loopback (`127.0.0.1`). API keys and settings are read from and saved to `.env`.
+
+---
+
+## 🎛️ Complete UI Configuration Guide
+
+The web application exposes both high-level project controls and granular Python dataclass parameters. Below is a complete reference guide for every configuration parameter in the UI.
+
+---
+
+### 1. Quick Research Setup (Top Panel)
+
+These essential fields control the core target of your research session:
+
+| UI Field / Parameter | Python Variable | Type | Default | Description & Guidance |
+| :--- | :--- | :--- | :--- | :--- |
+| **Research topic** | `topic` | `str` | *Required* | High-level topic, problem statement, or methodology to research (1 to 2,000 characters). **Example**: *"Retrieval-augmented generation for scientific literature review"*. |
+| **Number of papers** | `retrieval.top_k` | `int` | `25` | The target number of candidate papers selected by Stage 1 to pass to evidence extraction. Higher values yield broader reviews but increase LLM processing time. |
+| **Review language** | `writing.language` | `select` | `vi` (UI) / `en` | Target language for the written output review (`en` for English, `vi` for Vietnamese). *Note: UI language switch (VI/EN in top right) controls interface text; this setting controls the output document language.* |
+| **Target word count** | `writing.target_words` | `int` | `1500` | Target word length for the final literature review document. |
+| **SPECTER2 data directory** | `retrieval.artifacts_dir` | `path` | `data/specter2_artifacts` | Path to the directory containing pre-computed SPECTER2 embeddings, FAISS vector index, and paper `manifest.json`. |
+
+---
+
+### 2. API & `.env` Provider Settings
+
+Click **API & .env configuration** to expand API keys, model selections, and rate limit quotas.
+
+> [!IMPORTANT]
+> **API Key Privacy**: Saved API keys are never transmitted back from the server to the browser frontend. Leaving a saved API key field blank will retain the existing saved key. Check **Delete saved key** and click **Save .env configuration** to remove a stored key.
+
+#### A. LLM Rate Limit Quotas (Required when LLMs are enabled)
+To prevent API rate limit crashes (HTTP 429 errors), the pipeline uses token-bucket quota management. You must input your API tier's limits:
+
+- **`LLM_RPM`** *(Requests / Minute)*: Maximum API calls permitted per minute across active providers.
+- **`LLM_TPM`** *(Tokens / Minute)*: Maximum token throughput allowed per minute.
+- **`LLM_RPD`** *(Requests / Day)*: Maximum total daily request cap.
+- **`LLM_QUOTA_GROUP`**: Optional logical group name for sharing rate limit state files across multiple worker instances.
+- **`LLM_STATE_DIR`**: Directory path for storing persistent quota token-bucket state.
+
+#### B. LLM Provider Credentials & Models
+
+| Provider | Key Variable | Model Variable (`.env`) | Default Model | Custom Endpoint |
+| :--- | :--- | :--- | :--- | :--- |
+| **Google Gemini** | `GEMINI_API_KEY` | `GEMINI_MODEL` | `gemini-2.5-flash` | — |
+| **OpenAI** | `OPENAI_API_KEY` | `OPENAI_MODEL` | `gpt-4o-mini` | `OPENAI_BASE_URL` (Default: `https://api.openai.com/v1`) |
+| **Groq** | `GROQ_API_KEY` | `GROQ_MODEL` | `llama-3.1-8b-instant` | — |
+| **Semantic Scholar**| `SEMANTIC_SCHOLAR_API_KEY` | — | — | Boosts metadata rate limits |
+
+> [!TIP]
+> **OpenAI-Compatible Local Models**: You can connect local LLM engines (such as vLLM, Ollama, or LM Studio) by setting `OPENAI_BASE_URL` to your local server URL (e.g. `http://localhost:11434/v1`) and specifying your local model name in `OPENAI_MODEL`.
+
+---
+
+### 3. Advanced Stage Configurations
+
+Expand **Stage configuration (Advanced)** in the UI to customize low-level stage execution parameters. Variable names correspond directly to Python dataclasses (`RA_<STAGE>_<VARIABLE>`).
+
+---
+
+#### Stage 1: Retrieval Configuration (`RetrievalConfig`)
+
+Controls semantic vector search, query expansion, arXiv fetching, and candidate reranking.
+
+```
+Env Prefix: RA_RETRIEVAL_
+```
+
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `artifacts_dir` | `path` | `data/specter2_artifacts` | Path to directory containing SPECTER2 FAISS index and paper shards. |
+| `broad_k` | `int` | `150` | Number of FAISS nearest neighbors pulled per expanded query variant before candidate deduplication. |
+| `candidate_pool_size` | `int` | `200` | Cap on deduplicated candidate papers before reranking (`top_k` must be $\le$ `candidate_pool_size`). |
+| `top_k` | `int` | `25` | Final paper count handed over to Stage 2 Extraction. |
+| `n_query_variants` | `int` | `4` | Number of topic variations generated by LLM to expand search coverage. |
+| `use_rerank` | `bool` | `True` | Enables cosine similarity reranking of paper embeddings against topic vector. |
+| `use_hybrid` | `bool` | `True` | Combines dense vector retrieval scores with keyword BM25 scores using Reciprocal Rank Fusion (RRF). |
+| `use_citations` | `bool` | `False` | Enables citation graph traversal to pull heavily cited references. |
+| `rrf_k` | `int` | `60` | Smoothing constant $k$ used in Reciprocal Rank Fusion formula: $\text{RRF Score} = \sum \frac{1}{k + r}$. |
+| `year_from` | `int?` | `None` | Optional publication start year cutoff (e.g., `2020`). |
+| `year_to` | `int?` | `None` | Optional publication end year cutoff (e.g., `2024`). |
+| `categories` | `list` | `()` | Comma-separated list of arXiv categories to filter (e.g. `cs.CL, cs.AI, cs.LG`). |
+| `device` | `select`| `"auto"` | PyTorch computing device (`auto`, `cpu`, `cuda`, `mps`). |
+| `use_fp16` | `bool` | `True` | Uses half-precision FP16 floating point during SPECTER2 inference for speed and memory saving. |
+| `llm_timeout_s` | `float`| `30.0` | Timeout in seconds for query expansion LLM requests. |
+| `arxiv_keyword_n` | `int` | `50` | Number of papers fetched via arXiv API keyword search when supplementing corpus. |
+| `rebuild_index_if_missing` | `bool` | `True` | Automatically rebuilds missing FAISS vector index binary if raw embeddings exist. |
+
+---
+
+#### Stage 2: Extraction Configuration (`ExtractionConfig`)
+
+Controls raw LaTeX/PDF source unpacking, content parsing, and structured claim extraction.
+
+```
+Env Prefix: RA_EXTRACTION_
+```
+
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `cache_dir` | `path` | `data/extraction_cache` | Cache directory storing extracted paper claim cards. |
+| `prefer_provider` | `select`| `"gemini"` | Preferred LLM provider for extraction (`gemini`, `openai`, or `groq`). |
+| `arxiv_delay_s` | `float`| `3.0` | Delay pause in seconds between web requests to arXiv. |
+| `llm_concurrency` | `int` | `1` | Maximum parallel LLM extraction worker calls. |
+| `max_retries` | `int` | `0` | Number of retry attempts on LLM request failure before fallback. |
+| `llm_timeout_s` | `float`| `90.0` | Timeout per extraction LLM request (seconds). |
+| `allow_abstract_fallback` | `bool` | `True` | Falls back to parsing abstract if full-text LaTeX/PDF source fetch fails. |
+| `llm_batch_size` | `int` | `5` | Number of papers grouped into a single LLM extraction batch. |
+| `max_llm_calls_per_run` | `int` | `6` | Upper limit on total LLM API calls in Stage 2 per run. |
+| `llm_min_interval_s` | `float`| `5.0` | Forced minimum pause between LLM requests (seconds) to respect RPM quotas. |
+| `pdf_on_parse_fail_only` | `bool` | `True` | Only attempts heavy PDF parsing if arXiv LaTeX `.tar.gz` source download fails. |
+| `skip_llm_if_confident` | `bool` | `True` | Skips redundant LLM re-analysis if existing cached extraction is high confidence. |
+| `include_related_work` | `bool` | `False` | Include "Related Work" sections in paper source text sent to LLM. |
+| `include_appendix` | `bool` | `False` | Include appendix sections during full-text parsing. |
+| `include_bibliography` | `bool` | `False` | Include bibliography reference list in source parsing. |
+| `abstract_only` | `bool` | `False` | Restricts extraction strictly to abstracts, skipping full-text LaTeX/PDF parsing. |
+| `max_input_chars` | `int` | `24000` | Maximum character length cap for paper text sent in an LLM prompt. |
+| `max_tar_files` | `int` | `400` | Safety threshold for maximum extracted files in `.tar.gz` archives (zip bomb prevention). |
+| `max_tar_bytes` | `int` | `80000000`| Maximum decompressed byte limit (80 MB) for paper archives. |
+| `max_tar_nesting` | `int` | `8` | Maximum directory nesting depth allowed when unpacking `.tar.gz`. |
+| `fetch_timeout_s` | `float`| `60.0` | HTTP network timeout limit for fetching arXiv source files. |
+
+---
+
+#### Stage 3: Synthesis Configuration (`SynthesisConfig`)
+
+Controls methodology clustering, claim comparison matrix construction, and findings synthesis.
+
+```
+Env Prefix: RA_SYNTHESIS_
+```
+
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `cache_dir` | `path` | `data/synthesis_cache` | Cache directory storing synthesis matrices. |
+| `summarize` | `bool` | `True` (UI) / `False` | Enables LLM-driven research methodology clustering and comparative matrix synthesis. |
+| `prefer_provider` | `select`| `"gemini"` | Preferred LLM provider for synthesis (`gemini`, `openai`, `groq`). |
+| `strict_ok` | `bool` | `False` | Enforces strict validation check on synthesized claims. |
+| `strict_evidence` | `bool` | `False` | Requires strict sentence-level verbatim quote alignment for every claim. |
+| `distance_threshold` | `float`| `0.55` | Cosine distance distance threshold for methodology clustering. Lower values create tighter clusters. |
+| `keyword_weight` | `float`| `0.5` | Balance weight between vector embedding similarity and TF-IDF keyword similarity (0.0 to 1.0). |
+| `max_features` | `int` | `2000` | Vocabulary size limit for TF-IDF keyword extraction. |
+| `use_cache` | `bool` | `True` | Reuses existing cached synthesis state if inputs match. |
+| `llm_timeout_s` | `float`| `90.0` | Timeout in seconds for synthesis LLM generation calls. |
+| `max_logical_calls` | `int` | `2` | Maximum logical LLM synthesis turns allowed. |
+| `max_prompt_chars` | `int` | `24000` | Character ceiling for synthesis LLM prompt context. |
+| `max_method_chars` | `int` | `800` | Maximum character length allocated per methodology summary card. |
+| `max_problem_chars` | `int` | `400` | Maximum character length allocated per paper problem statement. |
+| `max_claim_chars` | `int` | `300` | Maximum character limit per extracted scientific claim. |
+| `max_claims_per_field` | `int` | `2` | Cap on extracted claims per category field. |
+| `max_quote_chars` | `int` | `280` | Maximum character length allowed for verbatim quote evidence snippets. |
+
+---
+
+#### Stage 4: Writing Configuration (`WritingConfig`)
+
+Controls structured Markdown review generation, citation verification, and self-correction.
+
+```
+Env Prefix: RA_WRITING_
+```
+
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `cache_dir` | `path` | `data/writing_cache` | Directory path for storing written review draft caches. |
+| `use_llm` | `bool` | `True` (UI) / `False` | Enables LLM generation pass for writing the literature review. |
+| `prefer_provider` | `select`| `"gemini"` | Preferred LLM provider for Stage 4 review writing (`gemini`, `openai`, `groq`). |
+| `language` | `select`| `"vi"` (UI) / `"en"` | Document language for output review (`en` or `vi`). |
+| `target_words` | `int` | `1500` | Target word count budget for the generated markdown paper review. |
+| `max_generation_batches` | `int` | `3` | Maximum sequential generation passes (e.g. section drafting → synthesis expansion). |
+| `max_repair_calls` | `int` | `1` | Maximum self-correction repair passes to fix ungrounded claims or formatting errors. |
+| `max_http_attempts_per_run` | `int` | `5` | HTTP retry attempt limit for writing requests per run. |
+| `max_run_tokens` | `int` | `100000` | Total cumulative token spending ceiling for Stage 4 execution. |
+| `max_input_tokens` | `int` | `20000` | Maximum input prompt token limit per request. |
+| `max_output_tokens` | `int` | `6000` | Maximum output generation token limit per response. |
+| `context_tokens` | `int` | `32768` | Context window token budget for LLM calls. |
+| `request_timeout_s` | `float`| `90.0` | Timeout limit in seconds for writing HTTP calls. |
+| `run_deadline_s` | `float`| `600.0` | Total stage execution deadline limit (10 minutes). |
+
+---
+
+## 📁 Results & Artifacts
+
+All run outputs are systematically saved to `results/ui/<run-id>/` directory:
+
+```text
+results/ui/<run-id>/
+├── stage-1-retrieval.json   # Ranked candidate papers & query expansion variants
+├── stage-2-extraction.json  # Extracted paper cards, evidence quotes & fallback notes
+├── stage-3-synthesis.json   # Methodology clusters & comparative matrix
+├── stage-4-writing.json     # Writing draft history & repair diagnostics
+├── review.md                # 📜 Final literature review with inline citations
+├── run.log                  # 🪵 Complete timestamped execution log (API keys masked)
+├── config.json              # Snapshot of topic & parameters (credentials excluded)
+└── status.json              # Stage progress status & timing statistics
+```
+
+---
+
+## 🛠️ Developer Setup & Installation
+
+### Environment Requirements
+- **Python**: `>= 3.10`
+- **Dependencies**: Declared in `pyproject.toml`
+- **Corpus**: SPECTER2 FAISS index directory (`data/specter2_artifacts/`) containing `manifest.json`.
+
+### 1. Installation
 
 ```bash
-.venv/bin/python -m pytest -q
+# Clone the repository
+git clone https://github.com/DinhLiu/Research-AI-Assistance.git
+cd Research-Assistance-Agent
+
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install editable package with development tools
+pip install -e '.[dev]'
 ```
 
-Bộ kiểm thử UI dùng pipeline giả lập để kiểm tra chuyển dữ liệu và trạng thái, không tiêu thụ quota thật. Kiểm thử HTTP cần quyền mở socket localhost.
+### 2. Running Automated Tests
 
-## Cấu trúc dự án
+```bash
+# Run unit & integration test suite (uses mock pipeline, zero real API quota consumed)
+pytest -q
+```
 
-- `research_assistant/`: mã nguồn pipeline và giao diện; mỗi stage có package riêng.
-- `tests/`: kiểm thử tự động; `tests/fixtures/` chứa dữ liệu mẫu cho kiểm thử.
-- `examples/`: script mẫu để chạy từng stage.
-- `evaluation/`: notebook đánh giá, bộ dữ liệu chuẩn và mã chấm điểm.
-- `notebooks/`: notebook tạo corpus, hiện có [embedding SPECTER2](notebooks/embedding.ipynb) dành cho Kaggle.
-- `docs/design/`: [thiết kế tổng thể](docs/design/research-assistant-agent-design.md) và [đề xuất cải tiến](docs/design/recommendations.md).
-- `docs/plans/`: kế hoạch triển khai [synthesis](docs/plans/stage-3-synthesis-plan.md) và [writing](docs/plans/stage-4-writing-plan.md).
-- `docs/guides/`: [hướng dẫn stage writing](docs/guides/stage-4-writing.md).
-- `docs/reports/`: báo cáo các giai đoạn [1](docs/reports/01-report.md), [2](docs/reports/02-report.md), [3](docs/reports/03-report.md); nội dung phản ánh thời điểm viết báo cáo.
-- `data/`: corpus, cache pipeline và trạng thái hạn mức LLM trên máy; không đưa vào Git.
-- `results/`: kết quả các lượt chạy trên máy; không đưa vào Git.
+---
 
-Chạy các lệnh từ thư mục gốc dự án. Giữ `launch_ui.py` và `Research Assistant.desktop` tại đây để mở giao diện thuận tiện. Dependency được khai báo duy nhất trong `pyproject.toml`; `requirements.txt` tham chiếu cấu hình đó để tương thích với `pip install -r requirements.txt`.
+## 🗂️ Directory Structure
 
-Các thư mục `__pycache__/`, `.pytest_cache/` và `.ipynb_checkpoints/` là cache có thể xóa và sẽ được tạo lại khi cần. `.venv/` và `*.egg-info/` phục vụ môi trường đã cài đặt; giữ lại khi đang sử dụng dự án.
+```text
+Research-Assistance-Agent/
+├── research_assistant/         # Core Python package
+│   ├── retrieval/              # Stage 1: SPECTER2, FAISS & hybrid search
+│   ├── extraction/             # Stage 2: arXiv source fetching & claim parser
+│   ├── synthesis/              # Stage 3: Clustering & comparative matrix
+│   ├── writing/                # Stage 4: Literature review drafting & validator
+│   ├── llm/                    # Unified LLM provider client & rate limiter
+│   ├── ui/                     # Web UI server, settings, worker & assets
+│   └── config.py               # Central dataclass configuration defaults
+├── data/                       # Local corpus, cache & token bucket state (git-ignored)
+├── docs/                       # Design documents, guides & reports
+│   └── assets/banner.jpg       # Project visual header asset
+├── evaluation/                 # Benchmark evaluation notebooks & datasets
+├── examples/                   # Single-stage CLI execution scripts
+├── notebooks/                  # Kaggle / Colab SPECTER2 embedding scripts
+├── results/                    # Generated run outputs & logs (git-ignored)
+├── tests/                      # Pytest test suite & fixtures
+├── launch_ui.py                # Standalone UI entry launcher
+├── Research Assistant.desktop  # Linux double-click launcher
+└── pyproject.toml              # Project dependencies & build settings
+```
+
+---
+
+## 📜 License
+
+This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
