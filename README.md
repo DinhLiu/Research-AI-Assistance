@@ -13,7 +13,7 @@ Giao diện hỗ trợ **Tiếng Việt** và **English** qua nút `VI / EN` ở
 3. Kiểm tra **thư mục dữ liệu SPECTER2**. Mặc định là `data/specter2_artifacts`; thư mục phải có `manifest.json`, các shard embeddings/metadata và FAISS index (index có thể được pipeline dựng lại). UI sử dụng corpus có sẵn, không tự tạo corpus từ Internet. Lần đầu chạy có thể cần tải model SPECTER2.
 4. Có thể mở **Cấu hình từng stage** để chỉnh bộ lọc năm, categories, provider, cache, hạn mức gọi LLM và các thông số xử lý khác.
 5. Bấm **Lưu cấu hình .env** để dùng lại cấu hình. Bấm **Chạy toàn bộ pipeline** để chạy cả 4 stage bằng giá trị đang hiển thị; nút chạy không tự ghi đè `.env`.
-6. Theo dõi trạng thái từng stage, đọc bản review và tải các tệp JSON/Markdown ngay trên giao diện. Có thể **Dừng pipeline**, xem các lượt trước hoặc chạy lại với cấu hình đã lưu.
+6. Theo dõi trạng thái từng stage, mở **Nhật ký lượt chạy / Run log** để xem tiến trình và traceback lỗi, sau đó đọc hoặc tải kết quả. Có thể tải `run.log`, dừng pipeline, xem các lượt trước hoặc chạy lại với cấu hình đã lưu.
 
 Ô API key trống giữ nguyên key đã lưu. Muốn xóa key, chọn **Xóa key đã lưu** rồi lưu. Key không được gửi lại từ server về giao diện và không được ghi vào kết quả từng lượt. `.env` vẫn là tệp văn bản chứa key; ứng dụng lưu tệp với quyền chỉ chủ sở hữu đọc/ghi. Cấu hình nâng cao được lưu dưới dạng `RA_<STAGE>_<FIELD>` (ví dụ `RA_RETRIEVAL_TOP_K='25'`). Các biến `RA_*` được UI đọc; các CLI riêng vẫn sử dụng tham số CLI của chúng.
 
@@ -24,6 +24,7 @@ Các lượt chạy được lưu trong `results/ui/<run-id>/`:
 - `stage-3-synthesis.json`
 - `stage-4-writing.json`
 - `review.md`
+- `run.log` (thời điểm bắt đầu/kết thúc từng stage, log thư viện, cảnh báo và traceback lỗi; API key được che nếu xuất hiện)
 - `config.json` (chủ đề và tham số từng stage, không chứa key) và `status.json`
 
 Nếu một stage lỗi, pipeline dừng, giữ kết quả đã tạo và hiển thị lỗi. Review `partial`, `fallback` hoặc `empty` được hiển thị kèm lưu ý, không được báo thành bản LLM hoàn chỉnh. Đóng server sẽ dừng lượt đang chạy; chạy lại có thể tận dụng cache của các stage, nhưng không tiếp tục tiến trình đã dừng. Mỗi server chỉ chạy một pipeline tại một thời điểm.

@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Research Assistant
-Comment=Mở giao diện pipeline nghiên cứu stage 1–4
+Comment=Open the research pipeline interface for stages 1–4
 Exec=python3 /home/liu/Code/Projects/Research-Assistance-Agent/launch_ui.py
 Path=/home/liu/Code/Projects/Research-Assistance-Agent
 Terminal=true

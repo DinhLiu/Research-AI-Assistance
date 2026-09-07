@@ -33,6 +33,33 @@ summary > span[data-i18n]:first-child {
   font-weight: inherit;
 }
 
+.log-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.text-link {
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+#run-log {
+  max-height: 360px;
+  margin: 0;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid #1d2d43;
+  border-radius: 8px;
+  background: #101a29;
+  color: #d7e3f6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 12px/1.65 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
 @media (max-width: 760px) {
   .header-actions { gap: 8px; }
 }

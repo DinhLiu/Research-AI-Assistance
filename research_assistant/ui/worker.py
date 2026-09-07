@@ -2,11 +2,47 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import sys
+import time
 from pathlib import Path
 
 from research_assistant.ui.settings import ENV_DEFAULTS, validate
+
+logger = logging.getLogger("research_assistant.pipeline")
+
+
+class RedactingFormatter(logging.Formatter):
+    """Remove configured credentials from messages and tracebacks."""
+
+    def __init__(self, fmt, secrets):
+        super().__init__(fmt)
+        self.secrets = tuple(value for value in secrets if value)
+
+    def _redact(self, text):
+        for value in self.secrets:
+            text = text.replace(value, "[REDACTED]")
+        return text
+
+    def format(self, record):
+        return self._redact(super().format(record))
+
+    def formatException(self, exc_info):
+        return self._redact(super().formatException(exc_info))
+
+
+def configure_logging():
+    """Send pipeline and dependency logs to the stream captured by the UI server."""
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setFormatter(RedactingFormatter(
+        "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+        [os.environ.get(key, "") for key in ENV_DEFAULTS if key.endswith("API_KEY")],
+    ))
+    root = logging.getLogger()
+    root.handlers.clear()
+    root.addHandler(handler)
+    root.setLevel(logging.INFO)
 
 
 def atomic_json(path, value):
@@ -28,48 +64,54 @@ def run_pipeline(topic, configs, directory, update, services=None):
     stages = ["pending"] * 4
     summaries = [""] * 4
     warnings = []
-    files = []
+    files = ["run.log"] if (directory / "run.log").is_file() else []
 
     def emit(status="running", error=None):
         update(dict(status=status, topic=topic, stages=stages[:], summaries=summaries[:],
                     warnings=warnings[:], files=files[:], error=error))
 
     try:
+        logger.info("Pipeline started | topic=%r", topic)
         result = None
         for index, (stage, function) in enumerate(zip(configs, (retrieve, extract, synthesize, write))):
+            stage_started = time.perf_counter()
             stages[index] = "running"
             emit()
+            logger.info("Stage %s/4 started | name=%s", index + 1, stage)
             result = function(topic if index == 0 else result, configs[stage])
             name = f"stage-{index + 1}-{stage}.json"
             (directory / name).write_text(result.model_dump_json(indent=2), encoding="utf-8")
             files.append(name)
             if index == 0:
-                summaries[index] = f"{len(result.papers)} bài báo"
+                summaries[index] = f"{len(result.papers)} papers"
                 if not result.papers:
-                    raise ValueError("Không tìm thấy bài báo. Hãy đổi chủ đề hoặc nới bộ lọc.")
+                    raise ValueError("No papers were found. Try another topic or broaden the filters.")
             elif index == 1:
                 usable = sum(r.status != "skipped" for r in result.records)
-                summaries[index] = f"{usable}/{len(result.records)} bài được trích xuất"
+                summaries[index] = f"{usable}/{len(result.records)} papers extracted"
                 if usable < len(result.records):
-                    warnings.append("Một số bài bị bỏ qua ở stage 2; xem JSON để biết lý do.")
+                    warnings.append("Some papers were skipped in stage 2; see the JSON output for details.")
                 if not usable:
-                    raise ValueError("Không trích xuất được bài nào để tổng hợp.")
+                    raise ValueError("No papers could be extracted for synthesis.")
             elif index == 2:
-                summaries[index] = f"{len(result.assignments)} nhóm · {result.execution.summary_status}"
+                summaries[index] = f"{len(result.assignments)} clusters · {result.execution.summary_status}"
                 if not result.paper_manifest:
-                    raise ValueError("Stage 3 không có bài đủ điều kiện để viết review.")
+                    raise ValueError("Stage 3 found no eligible papers for the review.")
                 if configs[stage].summarize and result.execution.summary_status != "complete":
-                    warnings.append(f"Tổng hợp: {result.execution.summary_status}")
+                    warnings.append(f"Synthesis: {result.execution.summary_status}")
             else:
                 summaries[index] = result.generation_status
                 (directory / "review.md").write_text(render(result), encoding="utf-8")
                 files.append("review.md")
                 if result.generation_status != "complete":
-                    warnings.append(f"Bản review: {result.generation_status} ({result.execution.stop_reason or 'xem kết quả'}).")
+                    warnings.append(f"Review: {result.generation_status} ({result.execution.stop_reason or 'see results'}).")
                 if result.generation_status == "failed":
-                    raise ValueError("Stage 4 không tạo được bản review hợp lệ.")
+                    raise ValueError("Stage 4 could not create a valid review.")
             stages[index] = "complete"
+            logger.info("Stage %s/4 completed | name=%s | seconds=%.2f | summary=%s",
+                        index + 1, stage, time.perf_counter() - stage_started, summaries[index])
             emit()
+        logger.info("Pipeline completed | status=%s", "completed_with_warnings" if warnings else "completed")
         emit("completed_with_warnings" if warnings else "completed")
     except Exception as exc:
         stages[index] = "failed"
@@ -80,6 +122,8 @@ def run_pipeline(topic, configs, directory, update, services=None):
             secret = os.environ.get(key)
             if key.endswith("API_KEY") and secret:
                 message = message.replace(secret, "[hidden]")
+        logger.exception("Pipeline failed | stage=%s | error=%s",
+                         list(configs)[index] if "index" in locals() else "initialization", message)
         emit("failed", message[:2000])
 
 
@@ -93,6 +137,8 @@ def main():
             os.environ[key] = value
         else:
             os.environ.pop(key, None)
+    configure_logging()
+    logger.info("Worker initialized | pid=%s | run_directory=%s", os.getpid(), directory)
     _, configs = validate(payload["env"], payload["configs"])
     run_pipeline(payload["topic"], configs, directory,
                  lambda state: atomic_json(directory / "status.json", state))

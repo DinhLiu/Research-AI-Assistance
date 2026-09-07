@@ -1,5 +1,7 @@
 """Structural checks, with conservative prose heuristics; not entailment."""
 import re
+
+from research_assistant.writing.locales import VI_RANK_PATTERN
 from collections import Counter
 
 from research_assistant.arxiv_ids import paper_key
@@ -50,7 +52,7 @@ def validate_input(snapshot: SynthesisResult):
 
 
 _UNSAFE = re.compile(r"https?://|www\.|\[[^\]]+\]|<[^>]+>|\n\s*#", re.I)
-_RANK = re.compile(r"\b(outperform\w*|state.of.the.art|best performance|superior|no prior work|never studied|first ever)\b|vượt trội|chưa (?:từng )?có nghiên cứu", re.I)
+_RANK = re.compile(r"\b(outperform\w*|state.of.the.art|best performance|superior|no prior work|never studied|first ever)\b|" + VI_RANK_PATTERN, re.I)
 _NUMERIC = re.compile(r"\d+(?:\.\d+)?\s*(?:%|pp\b|accuracy\b)", re.I)
 
 

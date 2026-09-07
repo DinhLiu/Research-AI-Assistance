@@ -1,5 +1,6 @@
 """UI boundaries and four-stage orchestration without live provider calls."""
 import json
+import logging
 import threading
 from dataclasses import dataclass
 from types import SimpleNamespace
@@ -12,6 +13,7 @@ import pytest
 from research_assistant.ui.settings import load_settings, save_settings, schema, validate
 from research_assistant.ui.server import Application, make_handler
 from research_assistant.ui.worker import run_pipeline
+from research_assistant.ui.worker import RedactingFormatter
 
 
 def defaults(tmp_path):
@@ -69,7 +71,8 @@ class Result(SimpleNamespace):
         return '{}'
 
 
-def test_pipeline_transfers_outputs_and_keeps_partial_review(tmp_path):
+def test_pipeline_transfers_outputs_and_keeps_partial_review(tmp_path, caplog):
+    caplog.set_level(logging.INFO, logger='research_assistant.pipeline')
     env, raw = defaults(tmp_path)
     _, configs = validate(env, raw)
     retrieved = Result(papers=[1])
@@ -93,6 +96,8 @@ def test_pipeline_transfers_outputs_and_keeps_partial_review(tmp_path):
     assert states[-1]['stages'] == ['complete'] * 4
     assert len(states[-1]['files']) == 5
     assert (tmp_path / 'review.md').read_text() == '# Review'
+    assert 'Stage 1/4 started | name=retrieval' in caplog.text
+    assert 'Stage 4/4 completed | name=writing' in caplog.text
 
 
 def test_pipeline_stops_after_empty_retrieval(tmp_path):
@@ -107,8 +112,34 @@ def test_pipeline_stops_after_empty_retrieval(tmp_path):
     assert states[-1]['stages'] == ['failed', 'skipped', 'skipped', 'skipped']
 
 
+def test_log_tail_is_bounded_and_credentials_are_redacted(tmp_path):
+    app = Application(tmp_path)
+    run_id = 'a' * 32
+    directory = app.runs / run_id
+    directory.mkdir()
+    (directory / 'run.log').write_text('old\n' + ('x' * 80) + '\nlatest\n')
+    tail = app.log_tail(run_id, max_bytes=20)
+    assert 'Earlier log entries omitted' in tail
+    assert tail.endswith('latest\n')
+
+    formatter = RedactingFormatter('%(levelname)s %(message)s', ['test-secret'])
+    record = logging.LogRecord('test', logging.ERROR, __file__, 1,
+                               'request failed: test-secret', (), None)
+    rendered = formatter.format(record)
+    assert 'test-secret' not in rendered
+    assert '[REDACTED]' in rendered
+
+
 def test_http_access_guard_and_static_ui(tmp_path):
     app = Application(tmp_path)
+    run_id = 'b' * 32
+    run_dir = app.runs / run_id
+    run_dir.mkdir()
+    (run_dir / 'run.log').write_text('INFO pipeline started\n')
+    (run_dir / 'status.json').write_text(json.dumps({
+        'status': 'completed', 'topic': 'logging test', 'stages': ['complete'] * 4,
+        'summaries': [''] * 4, 'warnings': [], 'files': ['run.log'], 'error': None,
+    }))
     server = ThreadingHTTPServer(('127.0.0.1', 0), make_handler(app))
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -116,15 +147,18 @@ def test_http_access_guard_and_static_ui(tmp_path):
     try:
         with urlopen(url) as response:
             page = response.read()
-            assert 'Bắt đầu một nghiên cứu'.encode() in page
+            assert b'Start a research project.' in page
             assert b'data-language="vi"' in page
             assert b'data-language="en"' in page
         with urlopen(url + '/app.js') as response:
             javascript = response.read()
-            assert b'Start a research project.' in javascript
             assert b'research-assistant-language' in javascript
+        with urlopen(url + '/i18n.js') as response:
+            assert b'Start a research project.' in response.read()
         with urlopen(url + '/i18n.css') as response:
             assert b'.language-switch' in response.read()
+        with urlopen(url + f'/api/runs/{run_id}/log') as response:
+            assert response.read() == b'INFO pipeline started\n'
         with urlopen(url + '/api/settings') as response:
             settings = json.load(response)
             assert len(settings['schema']) == 4

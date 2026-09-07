@@ -2,100 +2,6 @@
 
 const $ = id => document.getElementById(id);
 
-const messages = {
-  vi: {
-    pageTitle: 'Research Assistant · Không gian nghiên cứu',
-    languageAria: 'Ngôn ngữ giao diện', localWorkspace: 'Không gian làm việc cục bộ',
-    eyebrow: 'TỪ CHỦ ĐỀ ĐẾN LITERATURE REVIEW', heading: 'Bắt đầu một nghiên cứu.',
-    intro: 'Nhập chủ đề, thiết lập cấu hình và để pipeline thực hiện cả 4 giai đoạn.',
-    researchSetup: 'Thiết lập nghiên cứu', researchTopic: 'Chủ đề cần tìm',
-    topicPlaceholder: 'Ví dụ: Retrieval-augmented generation for scientific literature review',
-    topicHint: 'Mô tả rõ phương pháp, lĩnh vực hoặc vấn đề bạn muốn khảo sát.',
-    envConfig: 'API & cấu hình .env', enterOnce: 'Nhập một lần',
-    envHint: 'Nhập key của ít nhất một nhà cung cấp và quota thực tế. Key đã lưu được giữ nguyên khi ô nhập để trống.',
-    stageConfig: 'Cấu hình từng stage', advanced: 'Nâng cao',
-    stageHint: 'Tên biến được giữ giống cấu hình Python. Đường dẫn tương đối tính từ thư mục dự án.',
-    runPipeline: 'Chạy toàn bộ pipeline', saveConfig: 'Lưu cấu hình .env',
-    runHint: 'Nút chạy dùng cấu hình hiện tại. Chọn lưu để dùng lại trong các lần sau.',
-    outputLabel: 'Theo dõi và kết quả', pipelineProgress: 'Tiến trình pipeline',
-    idleDescription: 'Kết quả từng giai đoạn sẽ xuất hiện tại đây.',
-    progress: '{count} / 4 giai đoạn hoàn tất', cancelPipeline: 'Dừng pipeline',
-    researchResults: 'Kết quả nghiên cứu', outputFiles: 'TỆP ĐẦU RA',
-    reviewHere: 'Bản review của bạn sẽ ở đây',
-    reviewDescription: 'Pipeline tìm bài báo, trích xuất bằng chứng, tổng hợp và viết bản review có trích dẫn.',
-    reviewAria: 'Nội dung review Markdown', researchRuns: 'Các lượt nghiên cứu', refresh: 'Làm mới',
-    noRuns: 'Chưa có lượt chạy nào.',
-    footer: 'Dữ liệu và API key được lưu trên máy của bạn. Các stage có thể gọi dịch vụ bên ngoài theo cấu hình.',
-    noLimit: 'Không giới hạn', savedSecret: 'Đã lưu · để trống để giữ nguyên', enterApiKey: 'Nhập API key',
-    clearSavedKey: 'Xóa key đã lưu', requestsMinute: 'Requests / phút', tokensMinute: 'Tokens / phút',
-    requestsDay: 'Requests / ngày', checkingConfig: 'Đang kiểm tra cấu hình…',
-    pipelineStarted: 'Pipeline đã bắt đầu. Bạn có thể theo dõi các giai đoạn ở bên phải.',
-    configSaved: 'Đã lưu cấu hình vào .env.', connectionFailed: 'Không thể kết nối',
-    reviewReadFailed: 'Không đọc được bản review', reconnecting: 'Mất kết nối: {error}. Đang thử lại…',
-    settingsLoadFailed: 'Không tải được cấu hình: {error}. Hãy tải lại trang.',
-    'group.quota': 'Quota LLM (bắt buộc khi dùng LLM)', 'group.openai': 'OpenAI / API tương thích',
-    'group.other': 'Tùy chọn khác',
-    'field.top_k': 'Số bài báo', 'field.language': 'Ngôn ngữ bản review',
-    'field.target_words': 'Số từ mục tiêu', 'field.artifacts_dir': 'Thư mục dữ liệu SPECTER2',
-    'field.use_llm': 'Dùng LLM để viết review', 'field.summarize': 'Dùng LLM để tổng hợp',
-    'reviewLanguage.vi': 'Tiếng Việt', 'reviewLanguage.en': 'English',
-    'stage.0': 'Tìm kiếm bài báo', 'stage.1': 'Trích xuất bằng chứng',
-    'stage.2': 'Tổng hợp nghiên cứu', 'stage.3': 'Viết literature review',
-    'stageDescription.0': 'SPECTER2 · tìm kiếm và xếp hạng',
-    'stageDescription.1': 'Đọc nguồn · trích xuất thông tin có căn cứ',
-    'stageDescription.2': 'Phân nhóm phương pháp · đối chiếu kết quả',
-    'stageDescription.3': 'Bản review và danh mục trích dẫn',
-    'status.pending': 'Đang chờ', 'status.running': 'Đang chạy', 'status.complete': 'Hoàn tất',
-    'status.failed': 'Thất bại', 'status.skipped': 'Bỏ qua', 'status.cancelled': 'Đã dừng',
-    'status.completed': 'Hoàn tất', 'status.completed_with_warnings': 'Có lưu ý', 'status.ready': 'Sẵn sàng',
-  },
-  en: {
-    pageTitle: 'Research Assistant · Research workspace',
-    languageAria: 'Interface language', localWorkspace: 'Local workspace',
-    eyebrow: 'FROM TOPIC TO LITERATURE REVIEW', heading: 'Start a research project.',
-    intro: 'Enter a topic, adjust the configuration, and run all four pipeline stages.',
-    researchSetup: 'Research setup', researchTopic: 'Research topic',
-    topicPlaceholder: 'Example: Retrieval-augmented generation for scientific literature review',
-    topicHint: 'Describe the method, field, or problem you want to investigate.',
-    envConfig: 'API & .env configuration', enterOnce: 'Enter once',
-    envHint: 'Enter at least one provider key and its actual quota. Leave a saved key blank to keep it unchanged.',
-    stageConfig: 'Stage configuration', advanced: 'Advanced',
-    stageHint: 'Variable names match the Python configuration. Relative paths start from the project directory.',
-    runPipeline: 'Run the full pipeline', saveConfig: 'Save .env configuration',
-    runHint: 'Run uses the values currently shown. Save them if you want to reuse them later.',
-    outputLabel: 'Progress and results', pipelineProgress: 'Pipeline progress',
-    idleDescription: 'Results from each stage will appear here.',
-    progress: '{count} / 4 stages complete', cancelPipeline: 'Stop pipeline',
-    researchResults: 'Research results', outputFiles: 'OUTPUT FILES',
-    reviewHere: 'Your review will appear here',
-    reviewDescription: 'The pipeline finds papers, extracts evidence, synthesizes findings, and writes a cited review.',
-    reviewAria: 'Markdown review content', researchRuns: 'Research runs', refresh: 'Refresh',
-    noRuns: 'No research runs yet.',
-    footer: 'Your data and API keys are stored on this computer. Stages may call external services according to your configuration.',
-    noLimit: 'No limit', savedSecret: 'Saved · leave blank to keep unchanged', enterApiKey: 'Enter API key',
-    clearSavedKey: 'Delete saved key', requestsMinute: 'Requests / minute', tokensMinute: 'Tokens / minute',
-    requestsDay: 'Requests / day', checkingConfig: 'Checking configuration…',
-    pipelineStarted: 'The pipeline has started. You can follow each stage on the right.',
-    configSaved: 'Configuration saved to .env.', connectionFailed: 'Unable to connect',
-    reviewReadFailed: 'Unable to read the review', reconnecting: 'Connection lost: {error}. Retrying…',
-    settingsLoadFailed: 'Unable to load settings: {error}. Reload the page.',
-    'group.quota': 'LLM quota (required when using an LLM)', 'group.openai': 'OpenAI / compatible API',
-    'group.other': 'Other options',
-    'field.top_k': 'Number of papers', 'field.language': 'Review language',
-    'field.target_words': 'Target word count', 'field.artifacts_dir': 'SPECTER2 data directory',
-    'field.use_llm': 'Use an LLM to write the review', 'field.summarize': 'Use an LLM for synthesis',
-    'reviewLanguage.vi': 'Vietnamese', 'reviewLanguage.en': 'English',
-    'stage.0': 'Find papers', 'stage.1': 'Extract evidence',
-    'stage.2': 'Synthesize research', 'stage.3': 'Write literature review',
-    'stageDescription.0': 'SPECTER2 · search and ranking',
-    'stageDescription.1': 'Read sources · extract grounded evidence',
-    'stageDescription.2': 'Cluster methods · compare findings',
-    'stageDescription.3': 'Review and bibliography',
-    'status.pending': 'Pending', 'status.running': 'Running', 'status.complete': 'Complete',
-    'status.failed': 'Failed', 'status.skipped': 'Skipped', 'status.cancelled': 'Stopped',
-    'status.completed': 'Complete', 'status.completed_with_warnings': 'Needs attention', 'status.ready': 'Ready',
-  },
-};
 
 let language = getStoredLanguage();
 let token, definition, currentRun, timer, previewed, lastState, lastRuns = [];
@@ -111,7 +17,7 @@ function getStoredLanguage() {
 }
 
 function t(key, values = {}) {
-  let value = messages[language][key] ?? messages.vi[key] ?? key;
+  let value = messages[language][key] ?? messages.en[key] ?? key;
   for (const [name, replacement] of Object.entries(values)) value = value.replace(`{${name}}`, replacement);
   return value;
 }
@@ -147,31 +53,13 @@ function applyLanguage(nextLanguage, remember = true) {
 }
 
 function translateMessage(value) {
-  if (language === 'vi' || !value) return value;
-  const exact = {
-    'Người dùng đã dừng pipeline.': 'The user stopped the pipeline.',
-    'Một số bài bị bỏ qua ở stage 2; xem JSON để biết lý do.': 'Some papers were skipped in stage 2; see the JSON output for details.',
-    'Không tìm thấy bài báo. Hãy đổi chủ đề hoặc nới bộ lọc.': 'No papers were found. Try another topic or broaden the filters.',
-    'Không trích xuất được bài nào để tổng hợp.': 'No papers could be extracted for synthesis.',
-    'Stage 3 không có bài đủ điều kiện để viết review.': 'Stage 3 found no eligible papers for the review.',
-    'Stage 4 không tạo được bản review hợp lệ.': 'Stage 4 could not create a valid review.',
-    'Pipeline đang chạy. Hãy chờ hoàn tất hoặc dừng lượt hiện tại.': 'A pipeline is already running. Wait for it to finish or stop the current run.',
-    'Nhập chủ đề từ 1 đến 2000 ký tự': 'Enter a topic between 1 and 2,000 characters.',
-    'Nhập ít nhất một API key để dùng LLM, hoặc tắt summarize và use_llm.': 'Enter at least one API key to use an LLM, or disable summarize and use_llm.',
-    'Nhập đủ LLM_RPM, LLM_TPM, LLM_RPD theo quota của bạn.': 'Enter LLM_RPM, LLM_TPM, and LLM_RPD according to your quota.',
-  };
-  if (exact[value]) return exact[value];
-  let match = value.match(/^(\d+) bài báo$/);
-  if (match) return `${match[1]} papers`;
-  match = value.match(/^(\d+)\/(\d+) bài được trích xuất$/);
-  if (match) return `${match[1]}/${match[2]} papers extracted`;
-  match = value.match(/^(\d+) nhóm · (.+)$/);
-  if (match) return `${match[1]} clusters · ${match[2]}`;
-  match = value.match(/^Tổng hợp: (.+)$/);
-  if (match) return `Synthesis: ${match[1]}`;
-  match = value.match(/^Bản review: (.+)$/);
-  if (match) return `Review: ${match[1]}`;
-  return value;
+  if (!value) return value;
+  let translated = value;
+  for (const [vietnamese, english] of backendTranslations) {
+    translated = translated.split(language === 'vi' ? english : vietnamese)
+      .join(language === 'vi' ? vietnamese : english);
+  }
+  return translated;
 }
 
 function notice(text, error = false) {
@@ -340,6 +228,7 @@ async function refresh() {
   if (!currentRun) return;
   const state = await api(`/api/runs/${currentRun}`);
   draw(state);
+  await refreshLog();
   if (state.files.includes('review.md') && previewed !== currentRun) {
     const response = await fetch(`/api/runs/${currentRun}/files/review.md`);
     if (!response.ok) throw new Error(t('reviewReadFailed'));
@@ -349,6 +238,21 @@ async function refresh() {
   }
   if (busy) timer = setTimeout(poll, 2000);
   else await history();
+}
+
+async function refreshLog() {
+  if (!currentRun) return;
+  const response = await fetch(`/api/runs/${currentRun}/log`, {cache: 'no-store'});
+  if (!response.ok) return;
+  const content = await response.text();
+  const output = $('run-log');
+  const wasNearBottom = output.scrollHeight - output.scrollTop - output.clientHeight < 40;
+  output.textContent = content;
+  output.hidden = !content;
+  $('empty-log').hidden = Boolean(content);
+  $('log-download').href = `/api/runs/${currentRun}/files/run.log`;
+  $('log-download').hidden = false;
+  if (wasNearBottom) output.scrollTop = output.scrollHeight;
 }
 
 async function poll() {
@@ -364,6 +268,9 @@ async function selectRun(id) {
   currentRun = id;
   previewed = null;
   $('review').hidden = true;
+  $('run-log').hidden = true;
+  $('empty-log').hidden = false;
+  $('log-download').hidden = true;
   await refresh();
 }
 
@@ -435,6 +342,7 @@ $('cancel').onclick = async () => {
 };
 
 $('refresh').onclick = () => history(true).catch(error => notice(error.message, true));
+$('log-refresh').onclick = () => refreshLog().catch(error => notice(error.message, true));
 
 applyLanguage(language, false);
 draw();

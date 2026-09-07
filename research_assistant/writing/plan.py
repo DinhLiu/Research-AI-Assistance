@@ -3,6 +3,8 @@ import json
 import math
 import re
 
+from research_assistant.writing.locales import VI
+
 from research_assistant.llm.client import estimate_tokens
 from research_assistant.synthesis.validate import validate_claim, validate_comparison, kinds_for
 from research_assistant.writing.fingerprint import digest
@@ -55,13 +57,13 @@ def build_plan(snapshot, cfg, quota=None):
     for index, cluster in enumerate(sorted(snapshot.assignments, key=lambda c: c.cluster_id), 1):
         title = cluster.label
         if not title.strip() or title.strip().lower() == "unlabeled":
-            title = f"Nhóm phương pháp {index}" if cfg.language == "vi" else f"Method group {index}"
+            title = VI["method_group"].format(index=index) if cfg.language == "vi" else f"Method group {index}"
         plan.sections.append(ReviewSection(section_id=cluster.cluster_id, title=title))
     if snapshot.unassigned:
-        plan.sections.append(ReviewSection(section_id="unassigned", title="Chưa phân nhóm" if cfg.language == "vi" else "Unassigned papers"))
+        plan.sections.append(ReviewSection(section_id="unassigned", title=VI["unassigned"] if cfg.language == "vi" else "Unassigned papers"))
     plan.sections.extend([
-        ReviewSection(section_id="comparisons", title="So sánh định tính" if cfg.language == "vi" else "Qualitative comparisons"),
-        ReviewSection(section_id="gaps", title="Hạn chế và hướng cần kiểm chứng" if cfg.language == "vi" else "Limitations and questions for verification"),
+        ReviewSection(section_id="comparisons", title=VI["comparisons"] if cfg.language == "vi" else "Qualitative comparisons"),
+        ReviewSection(section_id="gaps", title=VI["gaps"] if cfg.language == "vi" else "Limitations and questions for verification"),
     ])
     sections = {s.section_id: s for s in plan.sections}
     used = set()

@@ -64,24 +64,24 @@ def parse_value(field, value):
             return True
         if value in (False, "false", "False", "0"):
             return False
-        raise ValueError(f"{name}: cần giá trị true/false")
+        raise ValueError(f"{name}: expected true or false")
     if kind in {"integer", "number"}:
         if isinstance(value, bool):
-            raise ValueError(f"{name}: cần nhập số")
+            raise ValueError(f"{name}: expected a number")
         parsed = int(str(value)) if kind == "integer" else float(value)
         if not math.isfinite(parsed) or parsed < 0:
-            raise ValueError(f"{name}: cần số hữu hạn không âm")
+            raise ValueError(f"{name}: expected a finite non-negative number")
         zero_ok = name in {"n_query_variants", "max_retries", "max_llm_calls_per_run", "max_logical_calls",
                            "max_repair_calls", "max_http_attempts_per_run", "max_run_tokens", "keyword_weight",
                            "arxiv_delay_s", "llm_min_interval_s"}
         if parsed == 0 and not zero_ok:
-            raise ValueError(f"{name}: phải lớn hơn 0")
+            raise ValueError(f"{name}: must be greater than zero")
         return parsed
     if not isinstance(value, str) or len(value) > 4096 or "\n" in value or "\x00" in value:
-        raise ValueError(f"{name}: giá trị không hợp lệ")
+        raise ValueError(f"{name}: invalid value")
     if kind == "path":
         if not value.strip():
-            raise ValueError(f"{name}: cần đường dẫn")
+            raise ValueError(f"{name}: a path is required")
         path = Path(value).expanduser()
         return path if path.is_absolute() else REPO_ROOT / path
     if kind == "list":
@@ -100,40 +100,40 @@ def load_settings(env_path=REPO_ROOT / ".env"):
 
 def validate(env, configs, *, preflight=False):
     if set(env) - ENV_DEFAULTS.keys() or set(configs) - STAGES.keys():
-        raise ValueError("Cấu hình không được hỗ trợ")
+        raise ValueError("Unsupported configuration")
     clean_env = {}
     for key, default in ENV_DEFAULTS.items():
         value = env.get(key, default)
         if not isinstance(value, str) or len(value) > 4096 or any(c in value for c in "\n\r\x00"):
-            raise ValueError(f"{key}: giá trị không hợp lệ")
+            raise ValueError(f"{key}: invalid value")
         clean_env[key] = value.strip()
     for key in ("LLM_RPM", "LLM_TPM", "LLM_RPD"):
         if clean_env[key] and (not clean_env[key].isdigit() or int(clean_env[key]) <= 0):
-            raise ValueError(f"{key}: cần số nguyên dương")
+            raise ValueError(f"{key}: expected a positive integer")
     parsed = {}
     for stage, fields_ in schema().items():
         values = configs.get(stage, {})
         if not isinstance(values, dict) or set(values) - {f["name"] for f in fields_}:
-            raise ValueError(f"{stage}: cấu hình không hợp lệ")
+            raise ValueError(f"{stage}: invalid configuration")
         parsed[stage] = STAGES[stage](**{f["name"]: parse_value(f, values.get(f["name"], f["default"])) for f in fields_})
     r = parsed["retrieval"]
     if r.top_k > r.candidate_pool_size:
-        raise ValueError("top_k không được lớn hơn candidate_pool_size")
+        raise ValueError("top_k must not exceed candidate_pool_size")
     if r.year_from and r.year_to and r.year_from > r.year_to:
-        raise ValueError("Năm bắt đầu không được lớn hơn năm kết thúc")
+        raise ValueError("The start year must not exceed the end year")
     if r.device not in {"auto", "cpu", "cuda", "mps"}:
-        raise ValueError("device: chọn auto, cpu, cuda hoặc mps")
+        raise ValueError("device: choose auto, cpu, cuda, or mps")
     for stage in ("extraction", "synthesis", "writing"):
         if parsed[stage].prefer_provider not in {"gemini", "openai", "groq"}:
-            raise ValueError("Provider phải là gemini, openai hoặc groq")
+            raise ValueError("Provider must be gemini, openai, or groq")
     if preflight:
         if not (r.artifacts_dir / "manifest.json").is_file():
-            raise ValueError(f"Thiếu dữ liệu SPECTER2: {r.artifacts_dir / 'manifest.json'}")
+            raise ValueError(f"Missing SPECTER2 data: {r.artifacts_dir / 'manifest.json'}")
         if parsed["writing"].use_llm or parsed["synthesis"].summarize:
             if not any(clean_env[k] for k in ("GEMINI_API_KEY", "OPENAI_API_KEY", "GROQ_API_KEY")):
-                raise ValueError("Nhập ít nhất một API key để dùng LLM, hoặc tắt summarize và use_llm.")
+                raise ValueError("Enter at least one API key to use an LLM, or disable summarize and use_llm.")
             if not all(clean_env[k] for k in ("LLM_RPM", "LLM_TPM", "LLM_RPD")):
-                raise ValueError("Nhập đủ LLM_RPM, LLM_TPM, LLM_RPD theo quota của bạn.")
+                raise ValueError("Enter LLM_RPM, LLM_TPM, and LLM_RPD according to your quota.")
     return clean_env, parsed
 
 
