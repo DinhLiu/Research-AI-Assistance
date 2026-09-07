@@ -106,6 +106,20 @@ Alternatively, launch the UI server using your terminal:
 > [!NOTE]
 > The server listens strictly on local loopback (`127.0.0.1`). API keys and settings are read from and saved to `.env`.
 
+### 3. Pre-built SPECTER2 Data Download
+To run local vector retrieval without generating embeddings from scratch, download the pre-computed SPECTER2 dataset:
+
+📥 **[Download Pre-built SPECTER2 Artifacts (Google Drive)](https://drive.google.com/file/d/1Jyh-wA6AkJEMtzwz7YyjEeHhqfH0v906/view?usp=sharing)**
+
+Extract the downloaded package into `data/specter2_artifacts/` within the project root directory:
+
+```bash
+mkdir -p data/specter2_artifacts
+# Unpack the downloaded archive into data/specter2_artifacts/
+```
+
+Verify that `data/specter2_artifacts/manifest.json` exists before running the pipeline.
+
 ---
 
 ## 🎛️ Complete UI Configuration Guide
@@ -124,7 +138,7 @@ These essential fields control the core target of your research session:
 | **Number of papers** | `retrieval.top_k` | `int` | `25` | The target number of candidate papers selected by Stage 1 to pass to evidence extraction. Higher values yield broader reviews but increase LLM processing time. |
 | **Review language** | `writing.language` | `select` | `vi` (UI) / `en` | Target language for the written output review (`en` for English, `vi` for Vietnamese). *Note: UI language switch (VI/EN in top right) controls interface text; this setting controls the output document language.* |
 | **Target word count** | `writing.target_words` | `int` | `1500` | Target word length for the final literature review document. |
-| **SPECTER2 data directory** | `retrieval.artifacts_dir` | `path` | `data/specter2_artifacts` | Path to the directory containing pre-computed SPECTER2 embeddings, FAISS vector index, and paper `manifest.json`. |
+| **SPECTER2 data directory** | `retrieval.artifacts_dir` | `path` | `data/specter2_artifacts` | Path to directory containing pre-computed SPECTER2 embeddings, FAISS vector index, and `manifest.json`. ([Download pre-built artifacts](https://drive.google.com/file/d/1Jyh-wA6AkJEMtzwz7YyjEeHhqfH0v906/view?usp=sharing)). |
 
 ---
 
@@ -308,7 +322,7 @@ results/ui/<run-id>/
 ### Environment Requirements
 - **Python**: `>= 3.10`
 - **Dependencies**: Declared in `pyproject.toml`
-- **Corpus**: SPECTER2 FAISS index directory (`data/specter2_artifacts/`) containing `manifest.json`.
+- **Corpus Data**: Pre-computed SPECTER2 FAISS index directory (`data/specter2_artifacts/`) containing `manifest.json`. 👉 **[Download specter2_artifacts (Google Drive)](https://drive.google.com/file/d/1Jyh-wA6AkJEMtzwz7YyjEeHhqfH0v906/view?usp=sharing)**
 
 ### 1. Installation
 
