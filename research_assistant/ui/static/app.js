@@ -126,6 +126,7 @@ async function load() {
   definition = await api('/api/settings');
   token = definition.token;
   const stageNames = Object.keys(definition.schema);
+  const profileGroups = [];
   const quick = new Set(['retrieval.top_k', 'writing.language', 'writing.target_words', 'retrieval.artifacts_dir']);
   for (const [stage, stageSchema] of Object.entries(definition.schema)) {
     const index = stageNames.indexOf(stage);
@@ -134,24 +135,58 @@ async function load() {
     summary.dataset.stageIndex = String(index);
     details.append(summary);
     $('stage-fields').append(details);
-    for (const field of stageSchema) inputField(stage, field, definition.configs[stage][field.name], quick.has(`${stage}.${field.name}`) ? $('quick-config') : details);
+    details.open = true;
+    const providerKey = `RA_${stage.toUpperCase()}_LLM_PROVIDER`;
+    const pickerWrap = element('div', undefined, 'field');
+    const pickerLabel = element('label', t('stageProvider'));
+    pickerLabel.dataset.i18n = 'stageProvider';
+    pickerLabel.htmlFor = `env.${providerKey}`;
+    const picker = element('select');
+    picker.id = `env.${providerKey}`;
+    for (const [value, label] of [['groq', 'Groq'], ['openai', 'OpenAI'], ['gemini', 'Gemini']]) {
+      const option = element('option', label); option.value = value; picker.append(option);
+    }
+    const preferred = definition.configs[stage].prefer_provider || 'groq';
+    const available = [preferred, 'gemini', 'openai', 'groq'].find(p => definition.secrets[`${p.toUpperCase()}_API_KEY`]);
+    picker.value = definition.env[providerKey] || available || preferred;
+    fields.set(`env.${providerKey}`, picker);
+    pickerWrap.append(pickerLabel, picker);
+    details.append(pickerWrap);
+    const hint = element('p', t('stageProfileHint'), 'hint');
+    hint.dataset.i18n = 'stageProfileHint'; details.append(hint);
+    const panels = [];
+    for (const provider of ['groq', 'openai', 'gemini']) {
+      const panel = element('div');
+      panel.hidden = picker.value !== provider;
+      details.append(panel); panels.push([provider, panel]);
+      const names = ['API_KEY', 'MODEL', ...(provider === 'openai' ? ['BASE_URL'] : []), 'LLM_RPM', 'LLM_TPM', 'LLM_RPD', 'LLM_QUOTA_GROUP'];
+      profileGroups.push([provider, names.map(name => `RA_${stage.toUpperCase()}_${provider.toUpperCase()}_${name}`), panel]);
+    }
+    picker.onchange = () => panels.forEach(([provider, panel]) => { panel.hidden = picker.value !== provider; });
+    for (const field of stageSchema.filter(field => field.name !== 'prefer_provider')) inputField(stage, field, definition.configs[stage][field.name], quick.has(`${stage}.${field.name}`) ? $('quick-config') : details);
   }
   const groups = [
     ['group.quota', ['LLM_RPM', 'LLM_TPM', 'LLM_RPD']], ['Gemini', ['GEMINI_API_KEY', 'GEMINI_MODEL']],
     ['group.openai', ['OPENAI_API_KEY', 'OPENAI_MODEL', 'OPENAI_BASE_URL']], ['Groq', ['GROQ_API_KEY', 'GROQ_MODEL']],
     ['group.other', ['SEMANTIC_SCHOLAR_API_KEY', 'LLM_QUOTA_GROUP', 'LLM_STATE_DIR']],
   ];
-  for (const [titleKey, keys] of groups) {
+  for (const [titleKey, keys, panel] of [...groups, ...profileGroups]) {
     const group = element('details');
     group.open = titleKey === 'group.quota' || keys.some(key => definition.secrets[key]);
     const summary = element('summary', messages.vi[titleKey] ? t(titleKey) : titleKey);
     if (messages.vi[titleKey]) summary.dataset.i18n = titleKey;
     group.append(summary);
-    $('env-fields').append(group);
+    (panel || $('env-fields')).append(group);
+    if (panel) { group.open = true; summary.hidden = true; }
     for (const key of keys) {
       const secret = key.endsWith('API_KEY');
       const wrap = inputField('env', {name: key, kind: 'text'}, secret ? '' : definition.env[key], group);
       const input = fields.get(`env.${key}`);
+      if (panel) {
+        const shortName = key.replace(/^RA_[A-Z]+_(GROQ|OPENAI|GEMINI)_/, '');
+        wrap.querySelector('label span').textContent = shortName;
+        if (!secret) { input.placeholder = t('inheritShared'); input.dataset.i18nPlaceholder = 'inheritShared'; }
+      }
       if (secret) {
         input.type = 'password';
         input.autocomplete = 'new-password';
@@ -234,6 +269,7 @@ async function refresh() {
     if (!response.ok) throw new Error(t('reviewReadFailed'));
     $('review').textContent = await response.text();
     $('review').hidden = false;
+    if ($('copy-review')) $('copy-review').hidden = false;
     previewed = currentRun;
   }
   if (busy) timer = setTimeout(poll, 2000);
@@ -268,6 +304,7 @@ async function selectRun(id) {
   currentRun = id;
   previewed = null;
   $('review').hidden = true;
+  if ($('copy-review')) $('copy-review').hidden = true;
   $('run-log').hidden = true;
   $('empty-log').hidden = false;
   $('log-download').hidden = true;
@@ -297,7 +334,63 @@ async function history(restore = false) {
   }
 }
 
+function setupTabs() {
+  const tabs = document.querySelectorAll('.tab-btn');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      tabs.forEach(t => {
+        const active = t.dataset.tab === target;
+        t.classList.toggle('active', active);
+        t.setAttribute('aria-selected', String(active));
+      });
+      document.querySelectorAll('.tab-pane').forEach(pane => {
+        const active = pane.id === `pane-${target}`;
+        pane.classList.toggle('active', active);
+        pane.hidden = !active;
+      });
+    });
+  });
+
+  if ($('copy-review')) {
+    $('copy-review').onclick = async () => {
+      const text = $('review').textContent;
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        $('copy-review').textContent = t('copied');
+        setTimeout(() => { $('copy-review').textContent = t('copyReview'); }, 2000);
+      } catch (_) {}
+    };
+  }
+}
+
+let theme = getStoredTheme();
+
+function getStoredTheme() {
+  try {
+    const saved = localStorage.getItem('research-assistant-theme');
+    if (saved === 'light' || saved === 'dark') return saved;
+  } catch (_) {}
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+function applyTheme(nextTheme, remember = true) {
+  theme = nextTheme === 'light' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  const switcher = document.querySelector('.theme-switch');
+  if (switcher) {
+    switcher.querySelectorAll('button').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.themeBtn === theme));
+    });
+  }
+  if (remember) {
+    try { localStorage.setItem('research-assistant-theme', theme); } catch (_) {}
+  }
+}
+
 document.querySelectorAll('[data-language]').forEach(button => { button.onclick = () => applyLanguage(button.dataset.language); });
+document.querySelectorAll('[data-theme-btn]').forEach(button => { button.onclick = () => applyTheme(button.dataset.themeBtn); });
 
 $('research-form').onsubmit = async event => {
   event.preventDefault();
@@ -345,7 +438,11 @@ $('refresh').onclick = () => history(true).catch(error => notice(error.message, 
 $('log-refresh').onclick = () => refreshLog().catch(error => notice(error.message, true));
 
 applyLanguage(language, false);
+applyTheme(theme, false);
 draw();
+setupTabs();
 $('run').disabled = true;
 load().then(() => { $('run').disabled = busy; })
   .catch(error => notice(t('settingsLoadFailed', {error: translateMessage(error.message)}), true));
+
+

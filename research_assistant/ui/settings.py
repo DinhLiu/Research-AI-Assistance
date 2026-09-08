@@ -23,6 +23,15 @@ ENV_DEFAULTS = {
     "LLM_RPM": "", "LLM_TPM": "", "LLM_RPD": "",
     "LLM_QUOTA_GROUP": "", "LLM_STATE_DIR": "",
 }
+# Credentials remain in env, never in the public stage config snapshot.
+PROVIDERS = ("groq", "openai", "gemini")
+PROFILE_FIELDS = ("API_KEY", "MODEL", "LLM_RPM", "LLM_TPM", "LLM_RPD", "LLM_QUOTA_GROUP")
+for _stage in STAGES:
+    ENV_DEFAULTS[f"RA_{_stage.upper()}_LLM_PROVIDER"] = ""
+    for _provider in PROVIDERS:
+        for _field in PROFILE_FIELDS + (("BASE_URL",) if _provider == "openai" else ()):
+            ENV_DEFAULTS[f"RA_{_stage.upper()}_{_provider.upper()}_{_field}"] = ""
+
 SECRETS = {key for key in ENV_DEFAULTS if key.endswith("API_KEY")}
 HIDDEN = {"run_id", "dry_run"}
 
@@ -110,6 +119,15 @@ def validate(env, configs, *, preflight=False):
     for key in ("LLM_RPM", "LLM_TPM", "LLM_RPD"):
         if clean_env[key] and (not clean_env[key].isdigit() or int(clean_env[key]) <= 0):
             raise ValueError(f"{key}: expected a positive integer")
+    for stage in STAGES:
+        selected = clean_env[f"RA_{stage.upper()}_LLM_PROVIDER"]
+        if selected and selected not in PROVIDERS:
+            raise ValueError(f"{stage}: provider must be groq, openai, or gemini")
+        for provider in PROVIDERS:
+            for name in ("LLM_RPM", "LLM_TPM", "LLM_RPD"):
+                key = f"RA_{stage.upper()}_{provider.upper()}_{name}"
+                if clean_env[key] and (not clean_env[key].isdigit() or int(clean_env[key]) <= 0):
+                    raise ValueError(f"{key}: expected a positive integer")
     parsed = {}
     for stage, fields_ in schema().items():
         values = configs.get(stage, {})
@@ -129,11 +147,23 @@ def validate(env, configs, *, preflight=False):
     if preflight:
         if not (r.artifacts_dir / "manifest.json").is_file():
             raise ValueError(f"Missing SPECTER2 data: {r.artifacts_dir / 'manifest.json'}")
-        if parsed["writing"].use_llm or parsed["synthesis"].summarize:
-            if not any(clean_env[k] for k in ("GEMINI_API_KEY", "OPENAI_API_KEY", "GROQ_API_KEY")):
+        for stage, enabled in {
+            "retrieval": r.n_query_variants > 0,
+            "extraction": parsed["extraction"].max_llm_calls_per_run > 0,
+            "synthesis": parsed["synthesis"].summarize and not parsed["synthesis"].strict_evidence,
+            "writing": parsed["writing"].use_llm,
+        }.items():
+            if not enabled:
+                continue
+            effective = stage_environment(stage, clean_env)
+            selected = clean_env[f"RA_{stage.upper()}_LLM_PROVIDER"]
+            has_key = any(effective.get(f"{p.upper()}_API_KEY") for p in PROVIDERS)
+            if selected and not has_key:
+                raise ValueError(f"{stage}: enter an API key for {selected}")
+            if not has_key and stage in {"synthesis", "writing"}:
                 raise ValueError("Enter at least one API key to use an LLM, or disable summarize and use_llm.")
-            if not all(clean_env[k] for k in ("LLM_RPM", "LLM_TPM", "LLM_RPD")):
-                raise ValueError("Enter LLM_RPM, LLM_TPM, and LLM_RPD according to your quota.")
+            if has_key and not all(effective.get(k) for k in ("LLM_RPM", "LLM_TPM", "LLM_RPD")):
+                raise ValueError(f"{stage}: enter LLM_RPM, LLM_TPM, and LLM_RPD according to your quota.")
     return clean_env, parsed
 
 
@@ -157,3 +187,21 @@ def save_settings(env, configs, env_path=REPO_ROOT / ".env"):
         os.replace(temp, env_path)
     finally:
         temp.unlink(missing_ok=True)
+
+
+def stage_environment(stage, env):
+    """Resolve a UI stage profile. Blank fields inherit shared provider settings."""
+    result = dict(env)
+    provider = env.get(f"RA_{stage.upper()}_LLM_PROVIDER", "")
+    if not provider:
+        return result  # Legacy settings retain their provider cascade.
+    prefix = f"RA_{stage.upper()}_{provider.upper()}_"
+    for other in PROVIDERS:
+        if other != provider:
+            result[f"{other.upper()}_API_KEY"] = ""
+    result["GOOGLE_API_KEY"] = ""
+    for field in PROFILE_FIELDS + (("BASE_URL",) if provider == "openai" else ()):
+        target = field if field.startswith("LLM_") else f"{provider.upper()}_{field}"
+        if env.get(prefix + field):
+            result[target] = env[prefix + field]
+    return result

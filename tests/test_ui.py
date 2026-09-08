@@ -178,3 +178,67 @@ def test_http_access_guard_and_static_ui(tmp_path):
         server.shutdown()
         server.server_close()
         thread.join()
+
+
+def test_stage_profiles_roundtrip_and_secret_masking(tmp_path):
+    app = Application(tmp_path)
+    env, configs = defaults(tmp_path)
+    env.update(RA_RETRIEVAL_LLM_PROVIDER='groq',
+               RA_RETRIEVAL_GROQ_API_KEY='private-stage-key',
+               RA_RETRIEVAL_GROQ_MODEL='custom-small-model')
+    save_settings(env, configs, tmp_path / '.env')
+    assert 'private-stage-key' not in json.dumps(app.settings())
+    assert app.settings()['secrets']['RA_RETRIEVAL_GROQ_API_KEY']
+    merged, _ = app.merge({'env': {'RA_RETRIEVAL_GROQ_API_KEY': ''}})
+    assert merged['RA_RETRIEVAL_GROQ_API_KEY'] == 'private-stage-key'
+    assert merged['RA_RETRIEVAL_GROQ_MODEL'] == 'custom-small-model'
+    merged, _ = app.merge({'clear_secrets': ['RA_RETRIEVAL_GROQ_API_KEY']})
+    assert merged['RA_RETRIEVAL_GROQ_API_KEY'] == ''
+
+
+def test_stage_profile_routes_client_and_restores_environment(monkeypatch):
+    import os
+    from research_assistant.ui.worker import stage_profile
+    from research_assistant.llm.client import expansion_provider, extraction_provider, model_for_provider, env_key
+    for provider in ('GROQ', 'GEMINI', 'OPENAI'):
+        monkeypatch.setenv(f'{provider}_API_KEY', 'shared-key')
+    monkeypatch.setenv('OPENAI_MODEL', 'shared-model')
+    monkeypatch.setenv('LLM_RPM', '10')
+    monkeypatch.setenv('RA_RETRIEVAL_LLM_PROVIDER', 'openai')
+    monkeypatch.setenv('RA_RETRIEVAL_OPENAI_API_KEY', 'stage-key')
+    monkeypatch.setenv('RA_RETRIEVAL_OPENAI_MODEL', 'stage-model')
+    monkeypatch.setenv('RA_RETRIEVAL_OPENAI_LLM_RPM', '50')
+    with pytest.raises(RuntimeError):
+        with stage_profile('retrieval'):
+            assert expansion_provider() == extraction_provider('gemini') == 'openai'
+            assert model_for_provider('openai') == 'stage-model'
+            assert env_key('OPENAI_API_KEY') == 'stage-key'
+            assert os.environ['LLM_RPM'] == '50'
+            raise RuntimeError('simulate stage failure')
+    assert env_key('OPENAI_API_KEY') == 'shared-key'
+    assert model_for_provider('openai') == 'shared-model'
+    assert os.environ['LLM_RPM'] == '10'
+    assert expansion_provider() == 'groq'
+
+
+def test_selected_provider_requires_its_own_key(tmp_path):
+    from research_assistant.ui.settings import ENV_DEFAULTS
+    env = dict(ENV_DEFAULTS)
+    _, configs = defaults(tmp_path)
+    configs['retrieval']['artifacts_dir'] = str(tmp_path)
+    (tmp_path / 'manifest.json').write_text('{}')
+    env.update(GEMINI_API_KEY='another-provider', RA_RETRIEVAL_LLM_PROVIDER='groq')
+    with pytest.raises(ValueError, match='retrieval: enter an API key for groq'):
+        validate(env, configs, preflight=True)
+
+
+@pytest.mark.parametrize('key,value', [
+    ('RA_WRITING_LLM_PROVIDER', 'unknown'),
+    ('RA_WRITING_OPENAI_LLM_TPM', '-1'),
+    ('RA_WRITING_GROQ_LLM_RPM', '0'),
+])
+def test_invalid_stage_profile(tmp_path, key, value):
+    env, configs = defaults(tmp_path)
+    env[key] = value
+    with pytest.raises(ValueError):
+        validate(env, configs)

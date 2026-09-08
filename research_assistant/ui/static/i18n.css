@@ -1,29 +1,14 @@
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
+/* i18n alignment utilities */
 
 .language-switch {
   display: flex;
-  padding: 3px;
-  background: #eef2f8;
-  border-radius: 8px;
-}
-
-.language-switch button {
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  border-radius: 6px;
-  padding: 6px 9px;
-  font-size: 12px;
 }
 
 .language-switch button[aria-pressed="true"] {
-  background: white;
-  color: var(--blue);
-  box-shadow: 0 1px 4px #1a335526;
+  background: var(--accent-primary);
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
 }
 
 summary > span[data-i18n]:first-child {
@@ -31,35 +16,4 @@ summary > span[data-i18n]:first-child {
   color: inherit;
   font-size: inherit;
   font-weight: inherit;
-}
-
-.log-actions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.text-link {
-  color: var(--blue);
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-#run-log {
-  max-height: 360px;
-  margin: 0;
-  overflow: auto;
-  padding: 16px;
-  border: 1px solid #1d2d43;
-  border-radius: 8px;
-  background: #101a29;
-  color: #d7e3f6;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  font: 12px/1.65 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-}
-
-@media (max-width: 760px) {
-  .header-actions { gap: 8px; }
 }

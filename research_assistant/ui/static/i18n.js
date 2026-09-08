@@ -46,6 +46,10 @@ const messages = {
     'status.pending': 'Đang chờ', 'status.running': 'Đang chạy', 'status.complete': 'Hoàn tất',
     'status.failed': 'Thất bại', 'status.skipped': 'Bỏ qua', 'status.cancelled': 'Đã dừng',
     'status.completed': 'Hoàn tất', 'status.completed_with_warnings': 'Có lưu ý', 'status.ready': 'Sẵn sàng',
+    tabReview: 'Bản Literature Review', tabLog: 'Nhật ký Terminal',
+    tabArtifacts: 'Tệp đầu ra', tabHistory: 'Lịch sử nghiên cứu',
+    copyReview: 'Sao chép Review', copied: 'Đã sao chép!',
+    themeLight: 'Sáng', themeDark: 'Tối', themeAria: 'Giao diện sáng/tối',
   },
   en: {
     pageTitle: 'Research Assistant · Research workspace',
@@ -94,6 +98,10 @@ const messages = {
     'status.pending': 'Pending', 'status.running': 'Running', 'status.complete': 'Complete',
     'status.failed': 'Failed', 'status.skipped': 'Skipped', 'status.cancelled': 'Stopped',
     'status.completed': 'Complete', 'status.completed_with_warnings': 'Needs attention', 'status.ready': 'Ready',
+    tabReview: 'Literature Review', tabLog: 'Terminal Log',
+    tabArtifacts: 'Output Files', tabHistory: 'Research History',
+    copyReview: 'Copy Review', copied: 'Copied!',
+    themeLight: 'Light', themeDark: 'Dark', themeAria: 'Color theme',
   },
 };
 
@@ -268,3 +276,14 @@ const backendTranslations = [
     "clusters ·"
   ]
 ];
+
+Object.assign(messages.vi, {
+  stageProvider: 'Nhà cung cấp AI cho giai đoạn này',
+  stageProfileHint: 'Chọn nhà cung cấp rồi nhập model, API key và quota riêng. Ô trống dùng cấu hình chung của nhà cung cấp đã chọn. Không tự chuyển sang nhà cung cấp khác.',
+  inheritShared: 'Dùng cấu hình chung',
+});
+Object.assign(messages.en, {
+  stageProvider: 'AI provider for this stage',
+  stageProfileHint: 'Choose a provider and enter a model, API key and quota for this stage. Blank fields inherit shared settings for the selected provider. No fallback to another provider.',
+  inheritShared: 'Use shared settings',
+});

@@ -1,6 +1,8 @@
 """Isolated pipeline worker. Never persist provider credentials in run artifacts."""
 from __future__ import annotations
 
+from contextlib import contextmanager
+
 import json
 import logging
 import os
@@ -8,7 +10,7 @@ import sys
 import time
 from pathlib import Path
 
-from research_assistant.ui.settings import ENV_DEFAULTS, validate
+from research_assistant.ui.settings import ENV_DEFAULTS, validate, stage_environment
 
 logger = logging.getLogger("research_assistant.pipeline")
 
@@ -51,6 +53,22 @@ def atomic_json(path, value):
     temp.replace(path)
 
 
+@contextmanager
+def stage_profile(stage):
+    # The UI runs stages sequentially in a dedicated worker process.
+    original = dict(os.environ)
+    effective = stage_environment(stage, original)
+    try:
+        os.environ.update(effective)
+        yield
+    finally:
+        for key in effective:
+            if key not in original:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = original[key]
+
+
 def run_pipeline(topic, configs, directory, update, services=None):
     if services is None:
         from research_assistant.retrieval.pipeline import RetrievalPipeline
@@ -78,7 +96,8 @@ def run_pipeline(topic, configs, directory, update, services=None):
             stages[index] = "running"
             emit()
             logger.info("Stage %s/4 started | name=%s", index + 1, stage)
-            result = function(topic if index == 0 else result, configs[stage])
+            with stage_profile(stage):
+                result = function(topic if index == 0 else result, configs[stage])
             name = f"stage-{index + 1}-{stage}.json"
             (directory / name).write_text(result.model_dump_json(indent=2), encoding="utf-8")
             files.append(name)
