@@ -12,7 +12,7 @@
 
 **An autonomous, local-first research pipeline that transforms scientific topics into comprehensive, grounded, and fully cited literature reviews.**
 
-[Key Features](#-key-features) • [Architecture](#-pipeline-architecture) • [Quick Start](#-quick-start--web-interface) • [UI Configuration Guide](#%EF%B8%8F-complete-ui-configuration-guide) • [Results & Artifacts](#-results--artifacts) • [Developer Setup](#-developer-setup)
+[Key Features](#-key-features) • [Architecture](#-pipeline-architecture) • [Quick Start](#-quick-start--web-interface) • [UI Configuration Guide](#%EF%B8%8F-complete-ui-configuration-guide) • [Results & Artifacts](#-results--artifacts) • [Developer Setup](#%EF%B8%8F-developer-setup--installation)
 
 </div>
 
@@ -24,9 +24,10 @@
 - **🧠 Semantic Neural Search**: Uses **AllenAI SPECTER2** embeddings + FAISS vector search combined with BM25 hybrid ranking and query expansion to retrieve relevant scientific literature.
 - **📄 Full-Text Source Parsing**: Downloads and extracts LaTeX source archives (`.tar.gz`) or PDFs from arXiv to parse claims, methodologies, and exact evidentiary quotes.
 - **🛡️ Strict Grounding & Citation Alignment**: Validates every synthesized claim against raw paper content, preventing LLM hallucinations and generating inline bib-style references `[Author, Year]`.
-- **🎛️ Flexible Multi-LLM Orchestration**: Native support for **Google Gemini**, **OpenAI / OpenAI-Compatible endpoints** (vLLM, Ollama, LM Studio), and **Groq** fast inference, featuring automatic fallback and token-bucket rate limiting.
-- **🌐 Privacy-Preserving Local UI**: Built-in web workspace running strictly on `127.0.0.1`. All API keys are stored locally on your machine with owner-only file permissions (`0600`).
+- **🎛️ Per-Stage LLM Provider Routing**: Route each pipeline stage independently to **Google Gemini**, **OpenAI / OpenAI-Compatible endpoints**, or **Groq**, with stage-specific models, credentials, endpoints, and rate-limit quotas. Selecting a provider locks that stage to it, avoiding silent cross-provider fallback.
+- **🌐 Privacy-Preserving Local UI Workspace**: Modern two-column web workspace (`127.0.0.1:8765`) with real-time terminal logs, a Markdown review preview with 1-click copy, downloadable output artifacts, and run history navigation. All credentials are stored locally with owner-only file permissions (`0600`).
 - **🌍 Multilingual Interface & Output**: Bilingual Web UI (English / Vietnamese) with separate control over the target language of the generated literature review document (`en` or `vi`).
+- **🌗 Persistent Light & Dark Themes**: Switch between light and dark modes from the header; the browser remembers the selected theme and interface language for future sessions.
 
 ---
 
@@ -120,6 +121,22 @@ mkdir -p data/specter2_artifacts
 
 Verify that `data/specter2_artifacts/manifest.json` exists before running the pipeline.
 
+### 4. Interactive Web Workspace
+
+The Web UI features an interactive dashboard split into two main sections:
+
+- **Setup Panel (Left)**:
+  - **Quick Parameters**: Input research topic, candidate paper count (`top_k`), output review language (`en`/`vi`), word count target, and SPECTER2 directory.
+  - **API & .env Configuration**: Set global API provider keys (Gemini, OpenAI, Groq) and default rate limit quotas.
+  - **Stage Configuration (Advanced)**: Customize low-level stage parameters and select a dedicated **LLM provider, model, credentials, endpoint, and quota profile** for each stage.
+- **Progress & Results Panel (Right)**:
+  - 📊 **Pipeline Progress**: Follow all four stages, inspect warnings, and stop an active run.
+  - 📜 **Literature Review Tab**: Preview the generated `review.md` and copy its complete Markdown source with one click.
+  - 🪵 **Terminal Log Tab**: Real-time log streaming from pipeline execution with auto-scroll and download (`run.log`).
+  - 📁 **Output Files Tab**: Direct download grid for stage artifacts (`stage-1-retrieval.json` through `stage-4-writing.json`, `review.md`, `config.json`, `run.log`).
+  - 📜 **Research History Tab**: Browse, refresh, and inspect past research execution runs.
+- **Header Controls**: Switch the UI between Vietnamese and English independently of the review output language, and choose a persistent light or dark theme.
+
 ---
 
 ## 🎛️ Complete UI Configuration Guide
@@ -169,6 +186,33 @@ To prevent API rate limit crashes (HTTP 429 errors), the pipeline uses token-buc
 
 > [!TIP]
 > **OpenAI-Compatible Local Models**: You can connect local LLM engines (such as vLLM, Ollama, or LM Studio) by setting `OPENAI_BASE_URL` to your local server URL (e.g. `http://localhost:11434/v1`) and specifying your local model name in `OPENAI_MODEL`.
+
+#### C. Per-Stage LLM Provider Routing & Model Selection
+
+Each pipeline stage (**Retrieval**, **Extraction**, **Synthesis**, **Review Writing**) can be independently routed to **Groq**, **OpenAI**, or **Gemini**.
+
+- **Granular Override Form**: Selecting a provider expands its stage-specific API key, model, quota group, RPM/TPM/RPD limits, and—for OpenAI-compatible services—Base URL fields.
+- **Selected-Provider Inheritance**: A blank stage field inherits the corresponding global setting for the selected provider. The stage remains locked to that provider and does not silently fall back to another one.
+- **Environment Variable Format**: Stage-specific settings are persisted in `.env` using the format `RA_<STAGE>_LLM_PROVIDER` and `RA_<STAGE>_<PROVIDER>_<FIELD>`:
+  - Example: `RA_WRITING_LLM_PROVIDER=openai`, `RA_WRITING_OPENAI_MODEL=gpt-4o-mini`, `RA_EXTRACTION_GEMINI_API_KEY=...`
+- **Quota Grouping**: `RA_<STAGE>_<PROVIDER>_LLM_QUOTA_GROUP` lets stages share or separate token-bucket state. Use separate groups only for API accounts or keys with independent limits.
+- **Validation**: Before a run starts, the UI verifies that the selected provider has an effective API key and that RPM, TPM, and RPD quotas are present and positive.
+- **API Key Security**: Global and stage-specific keys are masked in the Web UI, never returned to the browser, and omitted from run artifacts such as `config.json`.
+
+Supported stage profile variables:
+
+```text
+RA_<STAGE>_LLM_PROVIDER
+RA_<STAGE>_<PROVIDER>_API_KEY
+RA_<STAGE>_<PROVIDER>_MODEL
+RA_<STAGE>_OPENAI_BASE_URL
+RA_<STAGE>_<PROVIDER>_LLM_RPM
+RA_<STAGE>_<PROVIDER>_LLM_TPM
+RA_<STAGE>_<PROVIDER>_LLM_RPD
+RA_<STAGE>_<PROVIDER>_LLM_QUOTA_GROUP
+```
+
+`<STAGE>` is `RETRIEVAL`, `EXTRACTION`, `SYNTHESIS`, or `WRITING`; `<PROVIDER>` is `GROQ`, `OPENAI`, or `GEMINI`.
 
 ---
 
@@ -235,6 +279,7 @@ Env Prefix: RA_EXTRACTION_
 | `include_bibliography` | `bool` | `False` | Include bibliography reference list in source parsing. |
 | `abstract_only` | `bool` | `False` | Restricts extraction strictly to abstracts, skipping full-text LaTeX/PDF parsing. |
 | `max_input_chars` | `int` | `24000` | Maximum character length cap for paper text sent in an LLM prompt. |
+| `max_input_tokens` | `int?` | `None` | Optional token limit for each extraction prompt; leave blank to use the character-based limit. |
 | `max_tar_files` | `int` | `400` | Safety threshold for maximum extracted files in `.tar.gz` archives (zip bomb prevention). |
 | `max_tar_bytes` | `int` | `80000000`| Maximum decompressed byte limit (80 MB) for paper archives. |
 | `max_tar_nesting` | `int` | `8` | Maximum directory nesting depth allowed when unpacking `.tar.gz`. |
@@ -283,6 +328,7 @@ Env Prefix: RA_WRITING_
 | Parameter | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `cache_dir` | `path` | `data/writing_cache` | Directory path for storing written review draft caches. |
+| `use_cache` | `bool` | `True` | Reuses a compatible cached writing result when available. |
 | `use_llm` | `bool` | `True` (UI) / `False` | Enables LLM generation pass for writing the literature review. |
 | `prefer_provider` | `select`| `"gemini"` | Preferred LLM provider for Stage 4 review writing (`gemini`, `openai`, `groq`). |
 | `language` | `select`| `"vi"` (UI) / `"en"` | Document language for output review (`en` or `vi`). |
