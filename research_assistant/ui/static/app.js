@@ -117,6 +117,7 @@ function inputField(stage, field, value, parent) {
   if (field.kind !== 'boolean') wrap.append(input);
   if (field.nullable) { input.placeholder = t('noLimit'); input.dataset.i18nPlaceholder = 'noLimit'; }
   if (stage !== 'env') wrap.append(element('small', `RA_${stage}_${field.name}`.toUpperCase()));
+  if (field.name === 'artifacts_dir') wrap.classList.add('field-wide');
   fields.set(key, input);
   parent.append(wrap);
   return wrap;
@@ -135,7 +136,7 @@ async function load() {
     summary.dataset.stageIndex = String(index);
     details.append(summary);
     $('stage-fields').append(details);
-    details.open = true;
+    details.open = false;
     const providerKey = `RA_${stage.toUpperCase()}_LLM_PROVIDER`;
     const pickerWrap = element('div', undefined, 'field');
     const pickerLabel = element('label', t('stageProvider'));
@@ -210,6 +211,8 @@ async function load() {
     }
   }
   applyLanguage(language, false);
+  $('provider-settings').open = !Object.entries(definition.secrets)
+    .some(([key, saved]) => saved && /(?:GEMINI|OPENAI|GROQ)_API_KEY$/.test(key));
   await history(true);
 }
 
@@ -241,8 +244,10 @@ function draw(state = {stages: ['pending', 'pending', 'pending', 'pending'], sum
   });
   const count = state.stages.filter(status => status === 'complete').length;
   $('progress').style.width = `${count * 25}%`;
+  document.querySelector('.progress-track').setAttribute('aria-valuenow', String(count));
   $('progress-label').textContent = t('progress', {count});
   $('run-status').textContent = t(`status.${state.status || 'ready'}`);
+  $('run-status').dataset.status = state.status || 'ready';
   $('run-topic').textContent = state.topic || t('idleDescription');
   busy = state.status === 'running';
   $('run').disabled = busy;
@@ -256,7 +261,8 @@ function draw(state = {stages: ['pending', 'pending', 'pending', 'pending'], sum
     link.download = file;
     $('downloads').append(link);
   }
-  $('empty-result').hidden = (state.files || []).length > 0;
+  $('empty-files').hidden = (state.files || []).length > 0;
+  $('empty-result').hidden = previewed === currentRun && Boolean(currentRun);
 }
 
 async function refresh() {
@@ -271,6 +277,7 @@ async function refresh() {
     $('review').hidden = false;
     if ($('copy-review')) $('copy-review').hidden = false;
     previewed = currentRun;
+    $('empty-result').hidden = true;
   }
   if (busy) timer = setTimeout(poll, 2000);
   else await history();
@@ -302,6 +309,7 @@ async function poll() {
 async function selectRun(id) {
   clearTimeout(timer);
   currentRun = id;
+  renderHistory(lastRuns);
   previewed = null;
   $('review').hidden = true;
   if ($('copy-review')) $('copy-review').hidden = true;
@@ -318,6 +326,7 @@ function renderHistory(runs) {
   for (const run of runs) {
     const button = element('button', undefined, 'history-item');
     button.type = 'button';
+    button.setAttribute('aria-current', String(run.run_id === currentRun));
     button.disabled = Boolean(active) && active.run_id !== run.run_id;
     button.append(element('span', run.topic), element('small', t(`status.${run.status}`)));
     button.onclick = () => selectRun(run.run_id).catch(error => notice(error.message, true));
@@ -337,12 +346,27 @@ async function history(restore = false) {
 function setupTabs() {
   const tabs = document.querySelectorAll('.tab-btn');
   tabs.forEach(tab => {
+    tab.setAttribute('aria-controls', `pane-${tab.dataset.tab}`);
+    tab.tabIndex = tab.classList.contains('active') ? 0 : -1;
+    $(`pane-${tab.dataset.tab}`).tabIndex = 0;
+    tab.addEventListener('keydown', event => {
+      const list = [...tabs];
+      const index = list.indexOf(tab);
+      const next = event.key === 'ArrowRight' ? (index + 1) % list.length
+        : event.key === 'ArrowLeft' ? (index - 1 + list.length) % list.length
+        : event.key === 'Home' ? 0 : event.key === 'End' ? list.length - 1 : null;
+      if (next === null) return;
+      event.preventDefault();
+      list[next].click();
+      list[next].focus();
+    });
     tab.addEventListener('click', () => {
       const target = tab.dataset.tab;
       tabs.forEach(t => {
         const active = t.dataset.tab === target;
         t.classList.toggle('active', active);
         t.setAttribute('aria-selected', String(active));
+        t.tabIndex = active ? 0 : -1;
       });
       document.querySelectorAll('.tab-pane').forEach(pane => {
         const active = pane.id === `pane-${target}`;
@@ -360,7 +384,7 @@ function setupTabs() {
         await navigator.clipboard.writeText(text);
         $('copy-review').textContent = t('copied');
         setTimeout(() => { $('copy-review').textContent = t('copyReview'); }, 2000);
-      } catch (_) {}
+      } catch (_) { notice(t('copyFailed'), true); }
     };
   }
 }
@@ -392,9 +416,19 @@ function applyTheme(nextTheme, remember = true) {
 document.querySelectorAll('[data-language]').forEach(button => { button.onclick = () => applyLanguage(button.dataset.language); });
 document.querySelectorAll('[data-theme-btn]').forEach(button => { button.onclick = () => applyTheme(button.dataset.themeBtn); });
 
+// Native validation must be able to focus fields inside collapsed settings.
+$('research-form').addEventListener('invalid', event => {
+  let parent = event.target.parentElement;
+  while (parent && parent !== event.currentTarget) {
+    if (parent.tagName === 'DETAILS') parent.open = true;
+    parent = parent.parentElement;
+  }
+}, true);
+
 $('research-form').onsubmit = async event => {
   event.preventDefault();
   $('run').disabled = true;
+  $('run').setAttribute('aria-busy', 'true');
   notice(t('checkingConfig'));
   try {
     const result = await api('/api/runs', payload());
@@ -404,11 +438,13 @@ $('research-form').onsubmit = async event => {
     notice(error.message, true);
     $('run').disabled = busy;
   }
+  finally { $('run').removeAttribute('aria-busy'); }
 };
 
 $('save').onclick = async () => {
   const button = $('save');
   button.disabled = true;
+  button.setAttribute('aria-busy', 'true');
   try {
     await api('/api/settings', payload());
     const updated = await api('/api/settings');
@@ -421,7 +457,7 @@ $('save').onclick = async () => {
     }
     notice(t('configSaved'));
   } catch (error) { notice(error.message, true); }
-  finally { button.disabled = false; }
+  finally { button.disabled = false; button.removeAttribute('aria-busy'); }
 };
 
 $('cancel').onclick = async () => {
@@ -442,7 +478,5 @@ applyTheme(theme, false);
 draw();
 setupTabs();
 $('run').disabled = true;
-load().then(() => { $('run').disabled = busy; })
+load().then(() => { $('run').disabled = busy; $('save').disabled = false; })
   .catch(error => notice(t('settingsLoadFailed', {error: translateMessage(error.message)}), true));
-
-

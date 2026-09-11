@@ -4,13 +4,6 @@
   display: flex;
 }
 
-.language-switch button[aria-pressed="true"] {
-  background: var(--accent-primary);
-  color: #ffffff !important;
-  font-weight: 700;
-  box-shadow: var(--shadow-sm);
-}
-
 summary > span[data-i18n]:first-child {
   float: none;
   color: inherit;
