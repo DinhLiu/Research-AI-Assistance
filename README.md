@@ -33,6 +33,18 @@
 
 ## 🏗️ Pipeline Architecture
 
+### System architecture
+
+The local Web UI calls a loopback HTTP API, which starts an isolated Python worker. The worker runs retrieval, extraction, synthesis, and review writing sequentially, saving structured results after each stage. All four stages share the LLM client and quota governor, with independent provider settings per stage.
+
+![Research Assistance Agent system architecture (English)](docs/architecture/system-architecture.en.visual-check.2048x1320.light.png)
+
+**Interactive diagrams:** [English](docs/architecture/system-architecture.en.html) · [Tiếng Việt](docs/architecture/system-architecture.html). Download an HTML file and open it in a browser to use zoom, search, theme switching, and export; GitHub displays HTML source rather than running the viewer.
+
+**Editable Archify specifications:** [English JSON](docs/architecture/system-architecture.en.json) · [Vietnamese JSON](docs/architecture/system-architecture.json). Diagram content is available in both languages; viewer controls use English.
+
+### Pipeline flow
+
 The pipeline processes research requests through four sequential, decoupled stages. Each stage saves its structured state as JSON before passing evidence to the next.
 
 ```mermaid

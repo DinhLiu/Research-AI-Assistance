@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/liu/Code/Projects/Research-Assistance-Agent/docs/architecture/system-architecture.en.json",
+  "output": "/home/liu/Code/Projects/Research-Assistance-Agent/docs/architecture/system-architecture.en.html",
+  "specification": {
+    "sha256": "05c2b9d6f3ba93008ee3f75b3e2e5507b9e4649db53bac26e2db51039eb2aa43",
+    "bytes": 5074
+  },
+  "artifact": {
+    "sha256": "4e3d63866c85e38b5d689838c0ebfbe0235dfd715601caa0d8159dbff7a39fed",
+    "bytes": 812161
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  },
+  "browser_evidence": "passed",
+  "visual_review": "passed",
+  "correction_rounds": 0,
+  "visual_review_scope": "Reviewed light and dark screenshots at 2048x1320; labels fit, routes are clear, composition is balanced."
+}

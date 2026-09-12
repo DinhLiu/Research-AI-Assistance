@@ -1,0 +1,262 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Research Assistance Agent Architecture",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1380,
+      650
+    ],
+    "locale": "en"
+  },
+  "components": [
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "Web UI",
+      "sublabel": "Topic · settings · history",
+      "pos": [
+        740,
+        40
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "server",
+      "type": "backend",
+      "label": "HTTP Server",
+      "sublabel": "127.0.0.1:8765 · local API",
+      "pos": [
+        390,
+        40
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "Python Worker",
+      "sublabel": "Separate process · 4 sequential stages",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "retrieve",
+      "type": "backend",
+      "label": "1 · Retrieval",
+      "sublabel": "SPECTER2 · FAISS · BM25 / RRF",
+      "pos": [
+        40,
+        260
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "extract",
+      "type": "backend",
+      "label": "2 · Extraction",
+      "sublabel": "LaTeX / PDF → evidence cards",
+      "pos": [
+        390,
+        260
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "synthesize",
+      "type": "backend",
+      "label": "3 · Synthesis",
+      "sublabel": "Clustering · comparative matrix",
+      "pos": [
+        740,
+        260
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "write",
+      "type": "backend",
+      "label": "4 · Review Writing",
+      "sublabel": "Citation validation · draft repair",
+      "pos": [
+        1090,
+        260
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "corpus",
+      "type": "database",
+      "label": "Local Index",
+      "sublabel": "data/specter2_artifacts",
+      "pos": [
+        40,
+        500
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "arxiv",
+      "type": "external",
+      "label": "arXiv",
+      "sublabel": "Metadata · source archives · PDF",
+      "pos": [
+        390,
+        500
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "llm",
+      "type": "external",
+      "label": "LLM Services",
+      "sublabel": "Gemini · OpenAI-compatible · Groq",
+      "pos": [
+        740,
+        500
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "results",
+      "type": "database",
+      "label": "Run Artifacts",
+      "sublabel": "JSON · review.md · logs · status",
+      "pos": [
+        1090,
+        500
+      ],
+      "size": [
+        250,
+        84
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "web-server",
+      "from": "web",
+      "to": "server",
+      "label": "HTTP / JSON"
+    },
+    {
+      "id": "server-worker",
+      "from": "server",
+      "to": "worker",
+      "label": "subprocess"
+    },
+    {
+      "id": "worker-retrieve",
+      "from": "worker",
+      "to": "retrieve",
+      "label": "Start pipeline",
+      "labelDy": 75
+    },
+    {
+      "id": "retrieve-extract",
+      "from": "retrieve",
+      "to": "extract",
+      "label": "Candidates"
+    },
+    {
+      "id": "extract-synthesize",
+      "from": "extract",
+      "to": "synthesize",
+      "label": "Evidence"
+    },
+    {
+      "id": "synthesize-write",
+      "from": "synthesize",
+      "to": "write",
+      "label": "Matrix"
+    },
+    {
+      "id": "retrieve-corpus",
+      "from": "retrieve",
+      "to": "corpus",
+      "label": "Read index",
+      "labelDy": 75
+    },
+    {
+      "id": "extract-arxiv",
+      "from": "extract",
+      "to": "arxiv",
+      "label": "Fetch full text",
+      "labelDy": 75
+    },
+    {
+      "id": "synthesize-llm",
+      "from": "synthesize",
+      "to": "llm",
+      "label": "Via LLM client",
+      "labelDy": 75
+    },
+    {
+      "id": "write-results",
+      "from": "write",
+      "to": "results",
+      "label": "Save outputs",
+      "labelDy": 75
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Orchestration and data",
+      "items": [
+        "The Web UI calls the API; the server starts a worker subprocess.",
+        "The worker passes results between stages and saves JSON after each stage."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Shared LLM access across all 4 stages",
+      "items": [
+        "llm/client.py and governor.py manage providers and quotas.",
+        "Each stage has its own profile; the synthesis edge illustrates shared access."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Local storage and additional sources",
+      "items": [
+        "Extraction, synthesis, and draft caches are stored on local disk.",
+        "Retrieval also calls arXiv; optional citation expansion uses Semantic Scholar."
+      ]
+    }
+  ]
+}
