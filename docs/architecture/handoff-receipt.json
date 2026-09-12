@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/liu/Code/Projects/Research-Assistance-Agent/docs/architecture/system-architecture.json",
+  "output": "/home/liu/Code/Projects/Research-Assistance-Agent/docs/architecture/system-architecture.html",
+  "specification": {
+    "sha256": "0c179b08f98fb17e6fbd915271845bd7e4d60747b12c941a963b5bc9eab177f8",
+    "bytes": 5236
+  },
+  "artifact": {
+    "sha256": "f7030d0613c7e34e6ad69e656ec5fe7221652cc9b125bc65d22e96fbeed36310",
+    "bytes": 812744
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  },
+  "browser_evidence": "passed",
+  "visual_review": "passed",
+  "correction_rounds": 2,
+  "visual_review_scope": "Inspected delivered screenshots: 2048x1320 light and 1440x900 dark; readable nodes, clear routes, no overlaps, balanced desktop composition."
+}

@@ -1,0 +1,261 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Kiến trúc Research Assistance Agent",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1380,
+      650
+    ]
+  },
+  "components": [
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "Giao diện Web",
+      "sublabel": "Chủ đề · cấu hình · lịch sử",
+      "pos": [
+        740,
+        40
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "server",
+      "type": "backend",
+      "label": "Máy chủ HTTP",
+      "sublabel": "127.0.0.1:8765 · API cục bộ",
+      "pos": [
+        390,
+        40
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "Worker Python",
+      "sublabel": "Tiến trình riêng · 4 bước tuần tự",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "retrieve",
+      "type": "backend",
+      "label": "1 · Tìm bài",
+      "sublabel": "SPECTER2 · FAISS · BM25 / RRF",
+      "pos": [
+        40,
+        260
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "extract",
+      "type": "backend",
+      "label": "2 · Trích xuất",
+      "sublabel": "LaTeX / PDF → thẻ bằng chứng",
+      "pos": [
+        390,
+        260
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "synthesize",
+      "type": "backend",
+      "label": "3 · Tổng hợp",
+      "sublabel": "Phân cụm · ma trận so sánh",
+      "pos": [
+        740,
+        260
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "write",
+      "type": "backend",
+      "label": "4 · Viết tổng quan",
+      "sublabel": "Kiểm tra trích dẫn · sửa bản thảo",
+      "pos": [
+        1090,
+        260
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "corpus",
+      "type": "database",
+      "label": "Kho chỉ mục cục bộ",
+      "sublabel": "data/specter2_artifacts",
+      "pos": [
+        40,
+        500
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "arxiv",
+      "type": "external",
+      "label": "arXiv",
+      "sublabel": "Metadata · mã nguồn · PDF",
+      "pos": [
+        390,
+        500
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "llm",
+      "type": "external",
+      "label": "Dịch vụ LLM",
+      "sublabel": "Gemini · OpenAI / tương thích · Groq",
+      "pos": [
+        740,
+        500
+      ],
+      "size": [
+        250,
+        84
+      ]
+    },
+    {
+      "id": "results",
+      "type": "database",
+      "label": "Kết quả trên đĩa",
+      "sublabel": "JSON · review.md · log · trạng thái",
+      "pos": [
+        1090,
+        500
+      ],
+      "size": [
+        250,
+        84
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "web-server",
+      "from": "web",
+      "to": "server",
+      "label": "HTTP / JSON"
+    },
+    {
+      "id": "server-worker",
+      "from": "server",
+      "to": "worker",
+      "label": "subprocess"
+    },
+    {
+      "id": "worker-retrieve",
+      "from": "worker",
+      "to": "retrieve",
+      "label": "Khởi chạy",
+      "labelDy": 75
+    },
+    {
+      "id": "retrieve-extract",
+      "from": "retrieve",
+      "to": "extract",
+      "label": "Bài ứng viên"
+    },
+    {
+      "id": "extract-synthesize",
+      "from": "extract",
+      "to": "synthesize",
+      "label": "Bằng chứng"
+    },
+    {
+      "id": "synthesize-write",
+      "from": "synthesize",
+      "to": "write",
+      "label": "Ma trận"
+    },
+    {
+      "id": "retrieve-corpus",
+      "from": "retrieve",
+      "to": "corpus",
+      "label": "Đọc chỉ mục",
+      "labelDy": 75
+    },
+    {
+      "id": "extract-arxiv",
+      "from": "extract",
+      "to": "arxiv",
+      "label": "Tải toàn văn",
+      "labelDy": 75
+    },
+    {
+      "id": "synthesize-llm",
+      "from": "synthesize",
+      "to": "llm",
+      "label": "Gọi qua LLM client",
+      "labelDy": 75
+    },
+    {
+      "id": "write-results",
+      "from": "write",
+      "to": "results",
+      "label": "Lưu kết quả",
+      "labelDy": 75
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Điều phối và dữ liệu",
+      "items": [
+        "Web UI gọi API; máy chủ khởi tạo worker bằng subprocess.",
+        "Worker truyền kết quả giữa 4 bước và lưu JSON sau mỗi bước."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "LLM dùng chung cho cả 4 bước",
+      "items": [
+        "llm/client.py và governor.py quản lý provider và hạn mức.",
+        "Mỗi bước có cấu hình riêng; đường nối minh họa tại bước tổng hợp."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Lưu trữ và nguồn bổ sung",
+      "items": [
+        "Cache trích xuất, tổng hợp và bản thảo nằm trên đĩa cục bộ.",
+        "Tìm bài cũng gọi arXiv; Semantic Scholar mở rộng trích dẫn khi bật."
+      ]
+    }
+  ]
+}
