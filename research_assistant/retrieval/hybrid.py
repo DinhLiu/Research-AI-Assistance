@@ -9,11 +9,11 @@ from urllib.parse import quote_plus
 import httpx
 
 from research_assistant.arxiv_ids import normalize_arxiv_id
+from research_assistant.arxiv_ids import normalize_arxiv_id as _normalize_arxiv_id
 
 logger = logging.getLogger(__name__)
 
 ARXIV_ATOM = "{http://www.w3.org/2005/Atom}"
-ARXIV_NS = "{http://arxiv.org/schemas/atom}"
 
 
 def reciprocal_rank_fusion(rankings: list[list[str]], k: int = 60) -> dict[str, float]:
@@ -161,8 +161,3 @@ def _post_paper_batch(
 
     logger.warning("Semantic Scholar lookup failed after retries: %s", last_error)
     return None
-
-
-def _normalize_arxiv_id(url_or_id: str) -> str:
-    """Backward-compatible alias used by tests."""
-    return normalize_arxiv_id(url_or_id)

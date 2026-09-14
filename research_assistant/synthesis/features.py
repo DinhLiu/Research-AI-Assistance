@@ -72,8 +72,11 @@ def build_features(
     text_docs = [normalize_text(text) for text in method_texts]
     keyword_docs = ["\t".join(normalize_keyword(item) for item in kws if normalize_keyword(item)) for kws in keyword_lists]
 
-    text_matrix = _fit_text(text_docs, max_features=max_features)
-    keyword_matrix = _fit_keywords(keyword_docs, max_features=max_features)
+    text_matrix = _fit_tfidf(
+        text_docs, max_features=max_features,
+        ngram_range=(1, 2), token_pattern=r"(?u)\b\w+\b",
+    )
+    keyword_matrix = _fit_tfidf(keyword_docs, max_features=max_features, analyzer=_keyword_analyzer)
 
     weight = float(np.clip(keyword_weight, 0.0, 1.0))
     parts: list[np.ndarray] = []
@@ -126,34 +129,15 @@ def build_features(
     )
 
 
-def _fit_text(docs: list[str], *, max_features: int) -> np.ndarray | None:
+def _fit_tfidf(docs: list[str], *, max_features: int, **kwargs) -> np.ndarray | None:
     if not any(docs):
         return None
     try:
         vectorizer = TfidfVectorizer(
-            ngram_range=(1, 2),
             min_df=1,
             sublinear_tf=True,
             max_features=max_features,
-            token_pattern=r"(?u)\b\w+\b",
-        )
-        matrix = vectorizer.fit_transform(docs).toarray().astype(np.float64)
-    except ValueError:
-        return None
-    if matrix.shape[1] == 0:
-        return None
-    return matrix
-
-
-def _fit_keywords(docs: list[str], *, max_features: int) -> np.ndarray | None:
-    if not any(docs):
-        return None
-    try:
-        vectorizer = TfidfVectorizer(
-            analyzer=_keyword_analyzer,
-            min_df=1,
-            sublinear_tf=True,
-            max_features=max_features,
+            **kwargs,
         )
         matrix = vectorizer.fit_transform(docs).toarray().astype(np.float64)
     except ValueError:

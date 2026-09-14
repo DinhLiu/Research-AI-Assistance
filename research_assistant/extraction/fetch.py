@@ -247,7 +247,7 @@ def safe_extract_tar(
             if suffix not in TEXT_SUFFIXES:
                 continue
             target = (dest / path_obj).resolve()
-            if not _is_relative_to(target, dest):
+            if not target.is_relative_to(dest):
                 logger.warning("Skipping tar member outside dest: %s", name)
                 continue
             size = member.size or 0
@@ -294,17 +294,6 @@ def unpack_tex_source(source: FetchedSource, config: ExtractionConfig) -> Path:
         else:
             raise
     return dest
-
-
-def _is_relative_to(path: Path, root: Path) -> bool:
-    try:
-        return path.is_relative_to(root)
-    except AttributeError:
-        try:
-            path.relative_to(root)
-            return True
-        except ValueError:
-            return False
 
 
 def parse_id_and_version(raw: str, fallback_version: str | None = None) -> tuple[str, str]:

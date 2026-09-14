@@ -111,6 +111,8 @@ def load_result(path: Path) -> SynthesisResult | None:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
         return SynthesisResult.model_validate(payload)
+    except FileNotFoundError:
+        return None
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         logger.warning("Ignoring corrupt synthesis cache %s: %s", path, exc)
         return None

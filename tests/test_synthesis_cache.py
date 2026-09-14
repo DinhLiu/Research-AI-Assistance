@@ -14,7 +14,7 @@ def _cfg(tmp_path, **kwargs) -> SynthesisConfig:
     return SynthesisConfig(**base)
 
 
-def test_same_upstream_fingerprint_different_records_miss_cache(tmp_path):
+def test_same_upstream_fingerprint_different_records_miss_cache(tmp_path, caplog):
     first = snapshot([paper(arxiv_id="1111.00001", method="EL2N pruning.", keywords=["el2n"])])
     second = snapshot([paper(arxiv_id="1111.00002", method="Random sampling.", keywords=["random"])])
     assert first.fingerprint == second.fingerprint
@@ -23,6 +23,7 @@ def test_same_upstream_fingerprint_different_records_miss_cache(tmp_path):
     assert a.corpus_digest != b.corpus_digest
     assert b.execution.cache_cluster_hit is False
     assert a.paper_manifest[0].paper_key != b.paper_manifest[0].paper_key
+    assert "Ignoring corrupt synthesis cache" not in caplog.text
 
 
 def test_changed_evidence_invalidates_narration(tmp_path):

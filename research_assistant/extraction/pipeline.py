@@ -124,7 +124,7 @@ def extract_papers(
     )
     completer = counter.wrap(complete_fn or _bound_complete(cfg, provider))
 
-    prepared = [_prepare(hit, cfg, fingerprint, completer) for hit in hits]
+    prepared = [_prepare(hit, cfg, fingerprint) for hit in hits]
     pending = [item for item in prepared if item.extracted is None and item.pack is not None]
     batch_size = max(1, int(cfg.llm_batch_size))
     for start in range(0, len(pending), batch_size):
@@ -175,7 +175,7 @@ def extract_one(
         min_interval_s=max(0.0, float(config.llm_min_interval_s)),
     )
     completer = counter.wrap(complete_fn)
-    prepared = _prepare(hit, config, fingerprint, completer)
+    prepared = _prepare(hit, config, fingerprint)
     if prepared.extracted is None and prepared.pack is not None:
         _extract_batch([prepared], config, fingerprint, completer, counter)
     return _finalize(prepared, fingerprint), prepared.cached
@@ -185,7 +185,6 @@ def _prepare(
     hit: PaperHit,
     config: ExtractionConfig,
     fingerprint: str,
-    complete_fn: CompleteFn,
 ) -> _Prepared:
     arxiv_id = normalize_arxiv_id(hit.arxiv_id)
     version = format_version(hit.latest_version)
@@ -194,19 +193,11 @@ def _prepare(
         return _Prepared(hit=hit, extracted=cached, cached=True)
 
     prepared = _Prepared(hit=hit)
-    paper_doc: PaperDocument | None = None
-    parsed_ok: set[str] = set()
     for source_kind in SOURCES:
         if source_kind == "abstract" and not config.allow_abstract_fallback:
             continue
-        if (
-            source_kind == "pdf"
-            and config.pdf_on_parse_fail_only
-            and "tex" in parsed_ok
-        ):
-            continue
         try:
-            prompt, parsed = _prompt_for_source(hit, source_kind, config, paper_doc)
+            prompt, parsed = _prompt_for_source(hit, source_kind, config, None)
         except Exception as exc:
             logger.warning("%s %s %s: %s", arxiv_id, version, source_kind, exc)
             prepared.attempts.append(
@@ -218,9 +209,6 @@ def _prepare(
                 )
             )
             continue
-        parsed_ok.add(source_kind)
-        if parsed is not None:
-            paper_doc = parsed
         pack = _load_or_build_pack(parsed or _paper_from_prompt(prompt), prompt, config)
         prepared.prompt = prompt
         prepared.pack = pack

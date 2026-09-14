@@ -115,21 +115,10 @@ def _resolve_input(base_dir: Path, rel: str) -> Path | None:
             continue
         if not resolved.is_file():
             continue
-        if not _under(resolved, base_dir.resolve()):
+        if not resolved.is_relative_to(base_dir.resolve()):
             continue
         return resolved
     return None
-
-
-def _under(path: Path, root: Path) -> bool:
-    try:
-        return path.is_relative_to(root)
-    except AttributeError:
-        try:
-            path.relative_to(root)
-            return True
-        except ValueError:
-            return False
 
 
 def strip_tex_comments(tex: str) -> str:

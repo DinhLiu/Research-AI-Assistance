@@ -164,7 +164,6 @@ def ground_llm(
 ) -> tuple[ExtractedPaper, GroundingReport]:
     report = GroundingReport()
     if llm.arxiv_id:
-        left = llm.arxiv_id.replace("v", "").split("v")[0]
         if pack.arxiv_id not in llm.arxiv_id and llm.arxiv_id not in pack.arxiv_id:
             # Soft check: allow missing version suffix.
             if normalize_text(llm.arxiv_id) not in {pack.arxiv_id, pack.arxiv_id + pack.version}:
