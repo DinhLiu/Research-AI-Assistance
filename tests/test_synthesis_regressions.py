@@ -3,7 +3,7 @@ import json
 import pytest
 from research_assistant.config import SynthesisConfig
 from research_assistant.synthesis.pipeline import synthesize
-from research_assistant.synthesis.prompt import build_user_prompt
+from research_assistant.synthesis.prompt import build_prompt_batches, build_user_prompt
 from research_assistant.synthesis.types import SynthesisClaim
 from research_assistant.synthesis.validate import validate_claim
 from tests.synthesis_utils import paper, snapshot
@@ -40,7 +40,7 @@ def test_compact_prompt_keeps_references_and_can_generate_valid_summary():
     dry = synthesize(extracted, SynthesisConfig(use_cache=False))
     cfg = SynthesisConfig(use_cache=False, summarize=True, max_prompt_chars=2500)
     prompt, _ = build_user_prompt(topic=dry.topic, assignments=dry.assignments, cards=dry.paper_manifest, registry=dry.evidence_registry, config=cfg)
-    assert 'Quotes omitted to fit budget' in prompt
+    assert 'Evidence quotes compacted to fit budget' in prompt
     assert len(prompt) <= cfg.max_prompt_chars
     for unit in dry.evidence_registry.units:
         assert f'[{unit.unit_id}]' in prompt
@@ -51,6 +51,66 @@ def test_compact_prompt_keeps_references_and_can_generate_valid_summary():
     result = synthesize(extracted, cfg, complete_fn=complete)
     assert result.execution.summary_status == 'complete'
     assert result.execution.logical_calls == 1
+
+
+def test_large_narration_is_batched_by_whole_cluster():
+    extracted = snapshot([
+        paper(arxiv_id='2301.00001', method='EL2N gradient norm data pruning ' + 'a' * 500),
+        paper(arxiv_id='2301.00002', method='Quantum entanglement superconducting qubits ' + 'b' * 500),
+        paper(arxiv_id='2301.00003', method='Graph molecular message passing chemistry ' + 'c' * 500),
+        paper(arxiv_id='2301.00004', method='Diffusion image generation latent denoising ' + 'd' * 500),
+    ])
+    dry = synthesize(extracted, SynthesisConfig(use_cache=False))
+    assert len(dry.assignments) == 4
+    cfg = SynthesisConfig(
+        use_cache=False,
+        summarize=True,
+        max_prompt_chars=1700,
+        max_logical_calls=8,
+    )
+    batches, oversized = build_prompt_batches(
+        topic=dry.topic,
+        assignments=dry.assignments,
+        cards=dry.paper_manifest,
+        registry=dry.evidence_registry,
+        config=cfg,
+    )
+    assert len(batches) > 1
+    assert not oversized
+    assert all(len(prompt) <= cfg.max_prompt_chars for _, prompt, _ in batches)
+    assert [cluster.cluster_id for batch, _, _ in batches for cluster in batch] == [
+        cluster.cluster_id for cluster in dry.assignments
+    ]
+
+    units = dry.evidence_registry.lookup()
+
+    def complete(**kwargs):
+        user = kwargs['user']
+        if '<CLUSTER_SUMMARY' in user:
+            return json.dumps({'summaries': [], 'comparisons': []})
+        summaries = []
+        for cluster in dry.assignments:
+            if f'<CLUSTER id="{cluster.cluster_id}"' not in user:
+                continue
+            key = cluster.paper_keys[0]
+            unit = next(unit for unit in units.values() if unit.paper_key == key and unit.kind == 'method')
+            summaries.append({
+                'cluster_id': cluster.cluster_id,
+                'claims': [{
+                    'kind': 'subset',
+                    'text': unit.text,
+                    'subject_paper_keys': [key],
+                    'support_refs': [unit.unit_id],
+                }],
+            })
+        return json.dumps({'summaries': summaries, 'comparisons': []})
+
+    result = synthesize(extracted, cfg, complete_fn=complete)
+    assert result.execution.summary_status == 'complete'
+    assert result.execution.narration_batches == len(batches)
+    assert result.execution.successful_batches == len(batches)
+    assert result.execution.comparison_status == 'complete'
+    assert all(summary.claims for summary in result.summaries)
 
 
 @pytest.mark.parametrize('repair_succeeds', [False, True])

@@ -87,6 +87,7 @@ def narration_cache_key(
         "max_claim_chars": config.max_claim_chars,
         "max_claims_per_field": config.max_claims_per_field,
         "max_quote_chars": config.max_quote_chars,
+        "max_logical_calls": config.max_logical_calls,
     }
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:20]

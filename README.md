@@ -25,7 +25,7 @@
 - **📄 Full-Text Source Parsing**: Downloads and extracts LaTeX source archives (`.tar.gz`) or PDFs from arXiv to parse claims, methodologies, and exact evidentiary quotes.
 - **🛡️ Strict Grounding & Citation Alignment**: Validates every synthesized claim against raw paper content, preventing LLM hallucinations and generating inline bib-style references `[Author, Year]`.
 - **🎛️ Per-Stage LLM Provider Routing**: Route each pipeline stage independently to **Google Gemini**, **OpenAI / OpenAI-Compatible endpoints**, or **Groq**, with stage-specific models, credentials, endpoints, and rate-limit quotas. Selecting a provider locks that stage to it, avoiding silent cross-provider fallback.
-- **🌐 Privacy-Preserving Local UI Workspace**: Modern two-column web workspace (`127.0.0.1:8765`) with real-time terminal logs, a Markdown review preview with 1-click copy, downloadable output artifacts, and run history navigation. All credentials are stored locally with owner-only file permissions (`0600`).
+- **🌐 Privacy-Preserving Local UI Workspace**: Modern two-column web workspace (`127.0.0.1:8765`) with real-time terminal logs, a linked research-document library, grouped output artifacts, and run history navigation. All credentials are stored locally with owner-only file permissions (`0600`).
 - **🌍 Multilingual Interface & Output**: Bilingual Web UI (English / Vietnamese) with separate control over the target language of the generated literature review document (`en` or `vi`).
 - **🌗 Persistent Light & Dark Themes**: Switch between light and dark modes from the header; the browser remembers the selected theme and interface language for future sessions.
 
@@ -91,7 +91,7 @@ flowchart TD
 | **Stage 1** | **Retrieval** | Topic string & filters | Ranked list of `top_k` papers | SPECTER2, FAISS, PyTorch, BM25, Reciprocal Rank Fusion |
 | **Stage 2** | **Extraction** | Candidate paper IDs | Structured evidence & claim cards | arXiv API, LaTeX parser, PyPDF, LLM extraction prompt |
 | **Stage 3** | **Synthesis** | Extracted paper cards | Methodology clusters & comparative matrix | TF-IDF / Cosine clustering, LLM matrix synthesis |
-| **Stage 4** | **Writing** | Synthesis matrix & cards | Markdown review (`review.md`) | Multi-pass LLM generation, Citation validator, Auto-repair |
+| **Stage 4** | **Writing** | Synthesis matrix & cards | Linked Markdown review bundle | Multi-pass LLM generation, Citation validator, Auto-repair |
 
 ---
 
@@ -143,9 +143,9 @@ The Web UI features an interactive dashboard split into two main sections:
   - **Stage Configuration (Advanced)**: Customize low-level stage parameters and select a dedicated **LLM provider, model, credentials, endpoint, and quota profile** for each stage.
 - **Progress & Results Panel (Right)**:
   - 📊 **Pipeline Progress**: Follow all four stages, inspect warnings, and stop an active run.
-  - 📜 **Literature Review Tab**: Preview the generated `review.md` and copy its complete Markdown source with one click.
+  - 📚 **Research Library Tab**: Browse the generated overview, section, evidence, and reference files from a document map; follow cross-file links or use previous/next navigation; copy or download the active Markdown file.
   - 🪵 **Terminal Log Tab**: Real-time log streaming from pipeline execution with auto-scroll and download (`run.log`).
-  - 📁 **Output Files Tab**: Direct download grid for stage artifacts (`stage-1-retrieval.json` through `stage-4-writing.json`, `review.md`, `config.json`, `run.log`).
+  - 📁 **Output Files Tab**: Direct download grid for stage artifacts, linked review sections, evidence chunks, references, configuration, and logs.
   - 📜 **Research History Tab**: Browse, refresh, and inspect past research execution runs.
 - **Header Controls**: Switch the UI between Vietnamese and English independently of the review output language, and choose a persistent light or dark theme.
 
@@ -319,13 +319,19 @@ Env Prefix: RA_SYNTHESIS_
 | `max_features` | `int` | `2000` | Vocabulary size limit for TF-IDF keyword extraction. |
 | `use_cache` | `bool` | `True` | Reuses existing cached synthesis state if inputs match. |
 | `llm_timeout_s` | `float`| `90.0` | Timeout in seconds for synthesis LLM generation calls. |
-| `max_logical_calls` | `int` | `2` | Maximum logical LLM synthesis turns allowed. |
+| `max_logical_calls` | `int` | `6` | Shared cap for cluster narration batches, per-batch repair, and an optional cross-batch comparison pass. |
 | `max_prompt_chars` | `int` | `24000` | Character ceiling for synthesis LLM prompt context. |
 | `max_method_chars` | `int` | `800` | Maximum character length allocated per methodology summary card. |
 | `max_problem_chars` | `int` | `400` | Maximum character length allocated per paper problem statement. |
 | `max_claim_chars` | `int` | `300` | Maximum character limit per extracted scientific claim. |
 | `max_claims_per_field` | `int` | `2` | Cap on extracted claims per category field. |
 | `max_quote_chars` | `int` | `280` | Maximum character length allowed for verbatim quote evidence snippets. |
+
+When the complete Stage 3 prompt exceeds `max_prompt_chars`, whole clusters are
+packed into bounded requests instead of dropping the entire narration. Short
+evidence quotes and their immutable IDs stay together. If more than one batch is
+needed, a compact final pass compares the validated cluster summaries while
+retaining their original evidence references.
 
 ---
 
@@ -345,9 +351,9 @@ Env Prefix: RA_WRITING_
 | `prefer_provider` | `select`| `"gemini"` | Preferred LLM provider for Stage 4 review writing (`gemini`, `openai`, `groq`). |
 | `language` | `select`| `"vi"` (UI) / `"en"` | Document language for output review (`en` or `vi`). |
 | `target_words` | `int` | `1500` | Target word count budget for the generated markdown paper review. |
-| `max_generation_batches` | `int` | `3` | Maximum sequential generation passes (e.g. section drafting → synthesis expansion). |
+| `max_generation_batches` | `int` | `6` | Maximum token-bounded sequential generation batches. |
 | `max_repair_calls` | `int` | `1` | Maximum self-correction repair passes to fix ungrounded claims or formatting errors. |
-| `max_http_attempts_per_run` | `int` | `5` | HTTP retry attempt limit for writing requests per run. |
+| `max_http_attempts_per_run` | `int` | `8` | HTTP retry attempt limit for writing requests per run. |
 | `max_run_tokens` | `int` | `100000` | Total cumulative token spending ceiling for Stage 4 execution. |
 | `max_input_tokens` | `int` | `20000` | Maximum input prompt token limit per request. |
 | `max_output_tokens` | `int` | `6000` | Maximum output generation token limit per response. |
@@ -367,11 +373,18 @@ results/ui/<run-id>/
 ├── stage-2-extraction.json  # Extracted paper cards, evidence quotes & fallback notes
 ├── stage-3-synthesis.json   # Methodology clusters & comparative matrix
 ├── stage-4-writing.json     # Writing draft history & repair diagnostics
-├── review.md                # 📜 Final literature review with inline citations
+├── review.md                # 📜 Deterministic index linking the review bundle
+├── overview.md              # Scope, coverage, verification notes & conclusion
+├── section-01.md ...        # Smaller generated research sections
+├── evidence.md              # Evidence index (large sets use evidence-01.md ...)
+├── references.md            # Bibliography with deterministic citation anchors
 ├── run.log                  # 🪵 Complete timestamped execution log (API keys masked)
 ├── config.json              # Snapshot of topic & parameters (credentials excluded)
 └── status.json              # Stage progress status & timing statistics
 ```
+
+Markdown filenames, anchors, citations, evidence backlinks, and navigation links
+are created by code after prose generation. They are never supplied by the LLM.
 
 ---
 

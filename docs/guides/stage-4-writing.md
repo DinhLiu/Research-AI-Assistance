@@ -1,8 +1,9 @@
 # Stage 4 — Writing
 
-Stage 4 consumes `SynthesisResult` JSON and produces a review in Markdown plus a
-JSON provenance report. It does not reopen papers, run retrieval, or alter
-clusters. Offline templates are the default; `--write` enables prose generation.
+Stage 4 consumes `SynthesisResult` JSON and produces a linked Markdown review
+bundle plus a JSON provenance report. It does not reopen papers, run retrieval,
+or alter clusters. Offline templates are the default; `--write` enables prose
+generation.
 
 ## Run
 
@@ -16,6 +17,12 @@ python -m research_assistant.writing results/pruning.synthesis.json \
 python -m research_assistant.writing results/pruning.synthesis.json \
   --write --md-out results/pruning.review.md --json-out results/pruning.writing.json
 ```
+
+When `--md-out` is supplied, its filename is the bundle index. Stage 4 also
+writes `overview.md`, one or more `section-NN.md` files, `evidence.md` (and
+bounded `evidence-NN.md` chunks when needed), and `references.md` beside it.
+All navigation, citation, evidence, and backlink URLs are rendered
+deterministically after generation; the model returns claim text only.
 
 `write-review` is also installed as a console entry point after `pip install -e .`.
 `--language vi` requests Vietnamese prose; template fallbacks retain the original
@@ -58,14 +65,14 @@ trigger content repair or key switching.
 ## Writing budgets, cache and resume
 
 A small review normally uses one generation request. Packing caps generation at
-three sequential batches, with one repair for missing/invalid claims across the
-whole run. There are at most five HTTP attempts, including transport retries.
+six sequential batches, with one repair for missing/invalid claims across the
+whole run. There are at most eight HTTP attempts by default, including transport retries.
 The output/context caps default to 6,000/32,768 tokens and input estimate to 20,000;
 set the CLI token flags for the actual model. Output sizing is an estimate; a
 truncated provider response is rejected and can consume the single repair.
 
 Scope text, headings and bibliography are rendered by code. Packing may split a
-section at evidence-slot boundaries. Slots that do not fit three batches retain
+section at evidence-slot boundaries. Slots that do not fit six batches retain
 template text and explicit omission reasons. Output completeness requires all
 selected slots to have valid prose and every manifest paper to have selected
 support; it does not mean every evidence unit was narrated. The plan records

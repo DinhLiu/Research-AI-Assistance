@@ -86,7 +86,7 @@ class ExtractionConfig:
 SYNTHESIS_SCHEMA_VERSION = "1"
 SYNTHESIS_NORMALIZER_VERSION = "1"
 SYNTHESIS_CLUSTERING_VERSION = "1"
-SYNTHESIS_PROMPT_VERSION = "2"
+SYNTHESIS_PROMPT_VERSION = "3"
 SYNTHESIS_VALIDATOR_VERSION = "2"
 SYNTHESIS_CARD_VERSION = "1"
 
@@ -103,7 +103,9 @@ class SynthesisConfig:
     max_features: int = 2000
     use_cache: bool = True
     llm_timeout_s: float = 90.0
-    max_logical_calls: int = 2
+    # Shared cap for narration batches, one repair per batch, and the optional
+    # cross-batch comparison pass.
+    max_logical_calls: int = 6
     max_prompt_chars: int = 24000
     max_method_chars: int = 800
     max_problem_chars: int = 400
@@ -127,9 +129,9 @@ class WritingConfig:
     dry_run: bool = False
     language: str = "en"
     target_words: int = 1500
-    max_generation_batches: int = 3
+    max_generation_batches: int = 6
     max_repair_calls: int = 1
-    max_http_attempts_per_run: int = 5
+    max_http_attempts_per_run: int = 8
     max_run_tokens: int = 100000
     max_input_tokens: int = 20000
     max_output_tokens: int = 6000
@@ -154,10 +156,10 @@ class WritingConfig:
             raise ValueError("Unsupported writing schema")
         if self.language not in {"en", "vi"}:
             raise ValueError("language must be en or vi")
-        if not 1 <= self.max_generation_batches <= 3 or not 0 <= self.max_repair_calls <= 1:
-            raise ValueError("At most three batches and one repair are supported")
-        if not 0 <= self.max_http_attempts_per_run <= 5:
-            raise ValueError("HTTP attempt cap must be between zero and five")
+        if not 1 <= self.max_generation_batches <= 6 or not 0 <= self.max_repair_calls <= 1:
+            raise ValueError("At most six batches and one repair are supported")
+        if not 0 <= self.max_http_attempts_per_run <= 12:
+            raise ValueError("HTTP attempt cap must be between zero and twelve")
         if min(self.target_words, self.max_input_tokens, self.max_output_tokens, self.context_tokens) <= 0 or self.max_run_tokens < 0:
             raise ValueError("Invalid writing token/length budgets")
         if any(not math.isfinite(n) or n <= 0 for n in (self.request_timeout_s, self.run_deadline_s)):

@@ -100,6 +100,26 @@ def test_pipeline_transfers_outputs_and_keeps_partial_review(tmp_path, caplog):
     assert 'Stage 4/4 completed | name=writing' in caplog.text
 
 
+def test_pipeline_writes_all_rendered_review_files(tmp_path):
+    env, raw = defaults(tmp_path)
+    _, configs = validate(env, raw)
+    retrieved = Result(papers=[1])
+    extracted = Result(records=[Result(status='ok')])
+    synthesized = Result(assignments=[1], paper_manifest=[1], execution=Result(summary_status='complete'))
+    written = Result(generation_status='complete', execution=Result(stop_reason=None))
+    services = (
+        lambda *_: retrieved,
+        lambda *_: extracted,
+        lambda *_: synthesized,
+        lambda *_: written,
+        lambda _: {'review.md': '# Index\n', 'overview.md': '# Overview\n', 'references.md': '# References\n'},
+    )
+    states = []
+    run_pipeline('topic', configs, tmp_path, states.append, services)
+    assert (tmp_path / 'overview.md').read_text() == '# Overview\n'
+    assert {'review.md', 'overview.md', 'references.md'} <= set(states[-1]['files'])
+
+
 def test_pipeline_stops_after_empty_retrieval(tmp_path):
     env, raw = defaults(tmp_path)
     _, configs = validate(env, raw)
@@ -150,9 +170,11 @@ def test_http_access_guard_and_static_ui(tmp_path):
             assert b'Start a research project.' in page
             assert b'data-language="vi"' in page
             assert b'data-language="en"' in page
+            assert b'id="document-workspace"' in page
         with urlopen(url + '/app.js') as response:
             javascript = response.read()
             assert b'research-assistant-language' in javascript
+            assert b'researchDocuments' in javascript
         with urlopen(url + '/i18n.js') as response:
             assert b'Start a research project.' in response.read()
         with urlopen(url + '/i18n.css') as response:

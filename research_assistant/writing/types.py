@@ -87,6 +87,7 @@ class WritingResult(BaseModel):
     validation_status: str = "structurally_validated_not_semantically_verified"
     plan: ReviewPlan
     claims: list[ReviewClaim] = Field(default_factory=list)
+    evidence: list[dict] = Field(default_factory=list)
     bibliography: list[dict] = Field(default_factory=list)
     coverage: dict = Field(default_factory=dict)
     validation_errors: list[str] = Field(default_factory=list)

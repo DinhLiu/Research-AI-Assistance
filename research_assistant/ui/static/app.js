@@ -5,6 +5,8 @@ const $ = id => document.getElementById(id);
 
 let language = getStoredLanguage();
 let token, definition, currentRun, timer, previewed, lastState, lastRuns = [];
+let currentDocument, documentFiles = [];
+let currentDocumentText = '';
 let busy = false;
 const fields = new Map();
 
@@ -232,6 +234,148 @@ function payload() {
   return data;
 }
 
+function researchDocuments(files = []) {
+  const rank = name => name === 'review.md' ? 0 : name === 'overview.md' ? 1
+    : name.startsWith('section-') ? 2 : name === 'evidence.md' ? 3
+    : name.startsWith('evidence-') ? 4 : name === 'references.md' ? 5 : 6;
+  return files.filter(name => name.endsWith('.md'))
+    .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b, undefined, {numeric: true}));
+}
+
+function documentLabel(name) {
+  if (name === 'review.md') return t('documentIndex');
+  if (name === 'overview.md') return t('documentOverview');
+  if (name === 'evidence.md') return t('documentEvidenceIndex');
+  if (name === 'references.md') return t('documentReferences');
+  const section = name.match(/^section-(\d+)\.md$/);
+  if (section) return t('documentSection', {number: section[1]});
+  const evidence = name.match(/^evidence-(\d+)\.md$/);
+  if (evidence) return t('documentEvidence', {number: evidence[1]});
+  return name;
+}
+
+function renderDocumentList(files) {
+  documentFiles = researchDocuments(files);
+  if (!documentFiles.includes(currentDocument)) currentDocument = documentFiles.includes('review.md') ? 'review.md' : documentFiles[0];
+  const list = $('document-list');
+  list.replaceChildren();
+  documentFiles.forEach((name, index) => {
+    const button = element('button', undefined, 'document-item');
+    button.type = 'button';
+    button.dataset.document = name;
+    button.setAttribute('aria-current', String(name === currentDocument));
+    button.append(element('span', String(index + 1).padStart(2, '0'), 'document-number'));
+    const copy = element('span', undefined, 'document-copy');
+    copy.append(element('strong', documentLabel(name)), element('small', name));
+    button.append(copy);
+    button.onclick = () => loadDocument(name).catch(error => notice(error.message, true));
+    list.append(button);
+  });
+  $('document-count').textContent = t('documentCount', {count: documentFiles.length});
+  $('document-count').hidden = !documentFiles.length;
+  $('document-workspace').hidden = !documentFiles.length;
+  if (currentDocument) $('current-document-title').textContent = documentLabel(currentDocument);
+}
+
+async function loadDocument(name) {
+  if (!currentRun || !documentFiles.includes(name)) return;
+  const response = await fetch(`/api/runs/${currentRun}/files/${encodeURIComponent(name)}`, {cache: 'no-store'});
+  if (!response.ok) throw new Error(t('reviewReadFailed'));
+  currentDocument = name;
+  const content = await response.text();
+  currentDocumentText = content;
+  renderMarkdownDocument(content);
+  $('current-document-title').textContent = documentLabel(name);
+  const index = documentFiles.indexOf(name);
+  $('document-position').textContent = `${index + 1} / ${documentFiles.length}`;
+  $('previous-document').disabled = index <= 0;
+  $('next-document').disabled = index >= documentFiles.length - 1;
+  $('download-document').href = `/api/runs/${currentRun}/files/${encodeURIComponent(name)}`;
+  $('download-document').download = name;
+  $('download-document').hidden = false;
+  $('copy-review').hidden = false;
+  $('empty-result').hidden = true;
+  document.querySelectorAll('.document-item').forEach(button => {
+    button.setAttribute('aria-current', String(button.dataset.document === name));
+  });
+  previewed = `${currentRun}:${name}`;
+}
+
+function renderMarkdownDocument(markdown) {
+  const root = $('review');
+  root.replaceChildren();
+  for (const line of markdown.split('\n')) {
+    const anchor = line.match(/^<a id="([a-zA-Z0-9_-]+)"><\/a>$/);
+    if (anchor) {
+      const marker = element('span');
+      marker.id = anchor[1];
+      root.append(marker);
+      continue;
+    }
+    const heading = line.match(/^(#{1,3})\s+(.+)$/);
+    const list = line.match(/^-\s+(.+)$/);
+    const node = heading ? element(`h${heading[1].length}`)
+      : list ? element('p', undefined, 'markdown-list-item') : element('p');
+    appendInlineMarkdown(node, heading ? heading[2] : list ? list[1] : line);
+    if (!line) node.className = 'markdown-spacer';
+    root.append(node);
+  }
+}
+
+function appendInlineMarkdown(parent, text) {
+  const pattern = /\[([^\]]+)\]\(([^)]+)\)/g;
+  let start = 0;
+  for (const match of text.matchAll(pattern)) {
+    parent.append(document.createTextNode(text.slice(start, match.index)));
+    const link = element('a', match[1]);
+    const [filename, fragment] = match[2].split('#', 2);
+    if (documentFiles.includes(filename)) {
+      link.href = `#${fragment || ''}`;
+      link.onclick = async event => {
+        event.preventDefault();
+        await loadDocument(filename);
+        if (fragment) document.getElementById(fragment)?.scrollIntoView({block: 'start'});
+      };
+    } else if (/^https:\/\/arxiv\.org\//.test(match[2])) {
+      link.href = match[2];
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+    } else {
+      link.href = '#';
+      link.setAttribute('aria-disabled', 'true');
+      link.onclick = event => event.preventDefault();
+    }
+    parent.append(link);
+    start = match.index + match[0].length;
+  }
+  parent.append(document.createTextNode(text.slice(start)));
+}
+
+function renderDownloads(files) {
+  const root = $('downloads');
+  root.replaceChildren();
+  const groups = [
+    [t('researchDocuments'), researchDocuments(files)],
+    [t('pipelineData'), files.filter(name => name.endsWith('.json'))],
+    [t('runFiles'), files.filter(name => !name.endsWith('.md') && !name.endsWith('.json'))],
+  ];
+  for (const [title, names] of groups) {
+    if (!names.length) continue;
+    const group = element('section', undefined, 'download-group');
+    group.append(element('h3', title));
+    const links = element('div', undefined, 'download-links');
+    for (const file of names) {
+      const link = element('a');
+      link.href = `/api/runs/${currentRun}/files/${encodeURIComponent(file)}`;
+      link.download = file;
+      link.append(element('span', '↓', 'download-mark'), element('span', file));
+      links.append(link);
+    }
+    group.append(links);
+    root.append(group);
+  }
+}
+
 function draw(state = {stages: ['pending', 'pending', 'pending', 'pending'], summaries: [], files: [], warnings: []}) {
   lastState = state;
   $('stages').replaceChildren();
@@ -254,15 +398,10 @@ function draw(state = {stages: ['pending', 'pending', 'pending', 'pending'], sum
   $('cancel').hidden = !busy;
   $('warnings').replaceChildren();
   for (const warning of [...(state.warnings || []), ...(state.error ? [state.error] : [])]) $('warnings').append(element('p', translateMessage(warning), 'warning'));
-  $('downloads').replaceChildren();
-  for (const file of state.files || []) {
-    const link = element('a', `↓ ${file}`);
-    link.href = `/api/runs/${currentRun}/files/${file}`;
-    link.download = file;
-    $('downloads').append(link);
-  }
+  renderDownloads(state.files || []);
+  renderDocumentList(state.files || []);
   $('empty-files').hidden = (state.files || []).length > 0;
-  $('empty-result').hidden = previewed === currentRun && Boolean(currentRun);
+  $('empty-result').hidden = Boolean(documentFiles.length);
 }
 
 async function refresh() {
@@ -270,15 +409,7 @@ async function refresh() {
   const state = await api(`/api/runs/${currentRun}`);
   draw(state);
   await refreshLog();
-  if (state.files.includes('review.md') && previewed !== currentRun) {
-    const response = await fetch(`/api/runs/${currentRun}/files/review.md`);
-    if (!response.ok) throw new Error(t('reviewReadFailed'));
-    $('review').textContent = await response.text();
-    $('review').hidden = false;
-    if ($('copy-review')) $('copy-review').hidden = false;
-    previewed = currentRun;
-    $('empty-result').hidden = true;
-  }
+  if (currentDocument && previewed !== `${currentRun}:${currentDocument}`) await loadDocument(currentDocument);
   if (busy) timer = setTimeout(poll, 2000);
   else await history();
 }
@@ -311,7 +442,12 @@ async function selectRun(id) {
   currentRun = id;
   renderHistory(lastRuns);
   previewed = null;
-  $('review').hidden = true;
+  currentDocument = null;
+  currentDocumentText = '';
+  documentFiles = [];
+  $('document-workspace').hidden = true;
+  $('document-count').hidden = true;
+  $('download-document').hidden = true;
   if ($('copy-review')) $('copy-review').hidden = true;
   $('run-log').hidden = true;
   $('empty-log').hidden = false;
@@ -378,16 +514,25 @@ function setupTabs() {
 
   if ($('copy-review')) {
     $('copy-review').onclick = async () => {
-      const text = $('review').textContent;
+      const text = currentDocumentText;
       if (!text) return;
       try {
         await navigator.clipboard.writeText(text);
         $('copy-review').textContent = t('copied');
-        setTimeout(() => { $('copy-review').textContent = t('copyReview'); }, 2000);
+        setTimeout(() => { $('copy-review').textContent = t('copyDocument'); }, 2000);
       } catch (_) { notice(t('copyFailed'), true); }
     };
   }
 }
+
+$('previous-document').onclick = () => {
+  const index = documentFiles.indexOf(currentDocument);
+  if (index > 0) loadDocument(documentFiles[index - 1]).catch(error => notice(error.message, true));
+};
+$('next-document').onclick = () => {
+  const index = documentFiles.indexOf(currentDocument);
+  if (index >= 0 && index < documentFiles.length - 1) loadDocument(documentFiles[index + 1]).catch(error => notice(error.message, true));
+};
 
 let theme = getStoredTheme();
 

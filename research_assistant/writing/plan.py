@@ -110,6 +110,8 @@ def build_plan(snapshot, cfg, quota=None):
             if units:
                 add("gaps" if kind == "limitation" else cluster_for.get(key, "unassigned"),
                     units[0].text, kind, [key], [units[0].unit_id])
+    section_order = {section.section_id: index for index, section in enumerate(plan.sections)}
+    plan.slots.sort(key=lambda slot: (section_order[slot.section_id], slot.claim_id))
     plan.evidence_ids = sorted({ref for s in plan.slots for ref in s.support_refs})
     plan.unselected_evidence_ids = sorted(set(registry) - set(plan.evidence_ids))
     plan.sections = [s for s in plan.sections if s.claim_ids]

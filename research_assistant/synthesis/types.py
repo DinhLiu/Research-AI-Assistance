@@ -181,6 +181,10 @@ class ExecutionInfo(BaseModel):
     cache_cluster_hit: bool = False
     cache_narration_hit: bool = False
     prompt_omitted_units: int = 0
+    narration_batches: int = 0
+    successful_batches: int = 0
+    failed_cluster_ids: list[str] = Field(default_factory=list)
+    comparison_status: Literal["not_requested", "complete", "failed", "skipped_budget"] = "not_requested"
 
 
 class LlmClaimIn(BaseModel):

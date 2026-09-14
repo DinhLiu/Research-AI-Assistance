@@ -152,7 +152,9 @@ def write_review(synthesis, config=None, *, complete_fn=None, governor=None, quo
                     accepted.update(recover(previous))
                     logical, repair = int(previous.get("logical_calls", 0)), int(previous.get("repair_calls", 0))
                     attempted_batches.update(previous.get("attempted_batches", []))
-                    if not 0 <= repair <= 1 or not 0 <= logical <= 4 or not attempted_batches <= {b.batch_id for b in plan.batches}:
+                    if (not 0 <= repair <= cfg.max_repair_calls or
+                            not 0 <= logical <= cfg.max_generation_batches + cfg.max_repair_calls or
+                            not attempted_batches <= {b.batch_id for b in plan.batches}):
                         raise WritingInputError("invalid_run_checkpoint")
                 if cfg.use_cache:
                     accepted.update(recover(load_json(cache_path)))
@@ -199,6 +201,9 @@ def _finish(result, snapshot, started):
     result.bibliography = [{"paper_key": p.paper_key, "title": p.title,
                             "url": f"https://arxiv.org/abs/{p.paper_key}"}
                            for p in sorted(snapshot.paper_manifest, key=lambda p: p.paper_key) if p.paper_key in supported]
+    selected_refs = {ref for claim in result.claims for ref in claim.support_refs}
+    result.evidence = [unit.model_dump() for unit in sorted(snapshot.evidence_registry.units, key=lambda unit: unit.unit_id)
+                       if unit.unit_id in selected_refs]
     result.coverage = {"total_papers": len(papers), "supported_papers": len(supported),
                        "unsupported_paper_keys": sorted(papers - supported),
                        "llm_claims": sum(c.generation == "llm" for c in result.claims),

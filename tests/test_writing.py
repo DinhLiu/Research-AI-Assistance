@@ -7,7 +7,7 @@ from research_assistant.config import SynthesisConfig, WritingConfig
 from research_assistant.llm.governor import Quota
 from research_assistant.synthesis.pipeline import synthesize
 from research_assistant.writing.pipeline import write_review
-from research_assistant.writing.render import render_markdown
+from research_assistant.writing.render import render_bundle, render_markdown
 from research_assistant.writing.types import WritingInputError, WritingResult
 from tests.synthesis_utils import paper, snapshot
 from tests.test_llm_governor import setup
@@ -43,6 +43,18 @@ def test_offline_roundtrip_and_citations(tmp_path):
     markdown = render_markdown(result)
     assert "https://arxiv.org/abs/2205.00000v1" in markdown
     assert "semantic support is not verified" in markdown
+
+
+def test_linked_review_bundle_is_rendered_without_llm_owned_links(tmp_path):
+    result = write_review(synthesis(tmp_path), cfg(tmp_path))
+    bundle = render_bundle(result, evidence_chunk_size=1)
+    assert {'review.md', 'overview.md', 'evidence.md', 'references.md'} <= set(bundle)
+    assert any(name.startswith('section-') for name in bundle)
+    assert any(name.startswith('evidence-') for name in bundle)
+    assert '[Overview](overview.md)' in bundle['review.md']
+    assert '(references.md#ref-' in ''.join(bundle[name] for name in bundle if name.startswith('section-'))
+    assert '(evidence-' in ''.join(bundle[name] for name in bundle if name.startswith('section-'))
+    assert '#claim-' in ''.join(bundle[name] for name in bundle if name.startswith('evidence-'))
 
 
 def test_one_call_and_cache_hit(tmp_path):
@@ -185,7 +197,7 @@ def test_resume_does_not_repeat_exhausted_content_repair(tmp_path):
 
 def test_full_batch_ceiling_and_partial_fallback(tmp_path):
     snap = synthesis(tmp_path, n=10)
-    config = cfg(tmp_path, use_llm=True, max_input_tokens=3800)
+    config = cfg(tmp_path, use_llm=True, max_input_tokens=3800, max_generation_batches=3)
     result = live(tmp_path, snap, config)
     assert len(result.plan.batches) == 3
     assert result.plan.omitted
@@ -246,7 +258,9 @@ def test_five_http_attempt_ceiling_includes_all_retries(tmp_path):
         if len(calls) % 2:
             raise httpx.ReadTimeout("retry me")
         return echo(**kwargs)
-    result = live(tmp_path, synthesis(tmp_path, n=10), cfg(tmp_path, use_llm=True, max_input_tokens=3800), transient_then_success)
+    result = live(tmp_path, synthesis(tmp_path, n=10),
+                  cfg(tmp_path, use_llm=True, max_input_tokens=3800,
+                      max_http_attempts_per_run=5), transient_then_success)
     assert len(calls) == 5
     assert result.execution.http_attempts == 5
     assert result.generation_status == "partial"

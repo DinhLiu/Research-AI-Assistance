@@ -67,7 +67,8 @@ class Application:
             directory = self.runs / run_id
             directory.mkdir(mode=0o700)
             atomic_json(directory / "status.json", dict(status="running", topic=topic.strip(),
-                        stages=["pending"] * 4, summaries=[""] * 4, warnings=[], files=["run.log"], error=None))
+                        stages=["pending"] * 4, summaries=[""] * 4, warnings=[],
+                        files=["run.log", "config.json"], error=None))
             # Config snapshot excludes credentials. Secrets are passed through stdin only.
             atomic_json(directory / "config.json", dict(topic=topic.strip(), configs=configs))
             with (directory / "run.log").open("a", encoding="utf-8") as log_stream:

@@ -75,14 +75,14 @@ def run_pipeline(topic, configs, directory, update, services=None):
         from research_assistant.extraction.pipeline import extract_papers
         from research_assistant.synthesis.pipeline import synthesize
         from research_assistant.writing.pipeline import write_review
-        from research_assistant.writing.render import render_markdown
+        from research_assistant.writing.render import render_bundle
         services = (lambda topic, cfg: RetrievalPipeline(cfg).search(topic),
-                    extract_papers, synthesize, write_review, render_markdown)
+                    extract_papers, synthesize, write_review, render_bundle)
     retrieve, extract, synthesize, write, render = services
     stages = ["pending"] * 4
     summaries = [""] * 4
     warnings = []
-    files = ["run.log"] if (directory / "run.log").is_file() else []
+    files = [name for name in ("run.log", "config.json") if (directory / name).is_file()]
 
     def emit(status="running", error=None):
         update(dict(status=status, topic=topic, stages=stages[:], summaries=summaries[:],
@@ -120,8 +120,11 @@ def run_pipeline(topic, configs, directory, update, services=None):
                     warnings.append(f"Synthesis: {result.execution.summary_status}")
             else:
                 summaries[index] = result.generation_status
-                (directory / "review.md").write_text(render(result), encoding="utf-8")
-                files.append("review.md")
+                rendered = render(result)
+                bundle = {"review.md": rendered} if isinstance(rendered, str) else rendered
+                for filename, content in bundle.items():
+                    (directory / filename).write_text(content, encoding="utf-8")
+                    files.append(filename)
                 if result.generation_status != "complete":
                     warnings.append(f"Review: {result.generation_status} ({result.execution.stop_reason or 'see results'}).")
                 if result.generation_status == "failed":

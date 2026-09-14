@@ -34,13 +34,15 @@ from research_assistant.synthesis.fingerprint import (
 )
 from research_assistant.synthesis.prompt import (
     SYSTEM_PROMPT,
-    build_user_prompt,
+    build_comparison_prompt,
+    build_prompt_batches,
     prompt_within_budget,
     repair_user_message,
 )
 from research_assistant.synthesis.types import (
     ClusterAssignment,
     ClusterSummary,
+    ComparisonClaim,
     Diagnostics,
     EvidenceRegistry,
     ExecutionInfo,
@@ -50,7 +52,7 @@ from research_assistant.synthesis.types import (
     PaperCard,
     SynthesisResult,
 )
-from research_assistant.synthesis.validate import apply_narration, keep_validated
+from research_assistant.synthesis.validate import apply_narration, keep_validated, validate_comparison
 
 logger = logging.getLogger(__name__)
 
@@ -228,6 +230,10 @@ def _run_narration(
             result.execution.provider = cached.execution.provider
             result.execution.model = cached.execution.model
             result.execution.prompt_omitted_units = cached.execution.prompt_omitted_units
+            result.execution.narration_batches = cached.execution.narration_batches
+            result.execution.successful_batches = cached.execution.successful_batches
+            result.execution.failed_cluster_ids = cached.execution.failed_cluster_ids
+            result.execution.comparison_status = cached.execution.comparison_status
             result.execution.failure_reason = cached.execution.failure_reason
             result.execution.cache_narration_hit = True
             result.execution.logical_calls = 0
@@ -256,47 +262,94 @@ def _run_narration(
         result.execution.model = model
         return
 
-    user_prompt, omitted = build_user_prompt(
+    batches, oversized = build_prompt_batches(
         topic=result.topic,
         assignments=result.assignments,
         cards=result.paper_manifest,
         registry=result.evidence_registry,
         config=cfg,
     )
-    result.execution.prompt_omitted_units = omitted
+    result.execution.narration_batches = len(batches)
+    result.execution.prompt_omitted_units = sum(batch[2] for batch in batches)
+    result.execution.failed_cluster_ids = [cluster.cluster_id for cluster in oversized]
     result.execution.provider = provider
     result.execution.model = model
-    if not prompt_within_budget(user_prompt, cfg):
+    if not batches:
         result.execution.summary_status = "failed"
         result.execution.failure_reason = "prompt_exceeds_budget"
         return
 
     completer = complete_fn or _bound_complete(cfg, provider)
-    summaries, comparisons, errors, calls = _complete_narration(
-        completer,
-        user_prompt,
-        result.assignments,
-        result.evidence_registry,
-        cfg,
-    )
-    result.execution.logical_calls = calls
-    kept_s, kept_c, kept_n, rejected_n = keep_validated(summaries, comparisons)
-    result.summaries = _ensure_cluster_summaries(kept_s, result.assignments)
-    result.comparisons = kept_c
-    present = {item.cluster_id for item in summaries}
-    missing = [item.cluster_id for item in result.assignments if item.cluster_id not in present]
-    if calls == 0:
+    all_summaries: list[ClusterSummary] = []
+    all_comparisons: list[ComparisonClaim] = []
+    all_errors: list[str] = []
+    rejected_n = 0
+    remaining = max(0, int(cfg.max_logical_calls))
+    for assignments, user_prompt, _omitted in batches:
+        if remaining <= 0:
+            result.execution.failed_cluster_ids.extend(cluster.cluster_id for cluster in assignments)
+            all_errors.append("logical_call_budget_exhausted")
+            continue
+        summaries, comparisons, errors, calls = _complete_narration(
+            completer,
+            user_prompt,
+            assignments,
+            result.evidence_registry,
+            cfg,
+            max_calls=min(2, remaining),
+        )
+        remaining -= calls
+        result.execution.logical_calls += calls
+        kept_s, kept_c, kept_n, rejected = keep_validated(summaries, comparisons)
+        rejected_n += rejected
+        all_summaries.extend(kept_s)
+        all_comparisons.extend(kept_c)
+        all_errors.extend(errors)
+        present = {item.cluster_id for item in summaries if any(claim.validation_status == "structurally_validated" for claim in item.claims)}
+        missing = [cluster.cluster_id for cluster in assignments if cluster.cluster_id not in present]
+        if missing:
+            result.execution.failed_cluster_ids.extend(missing)
+        else:
+            result.execution.successful_batches += 1
+
+    result.execution.failed_cluster_ids = list(dict.fromkeys(result.execution.failed_cluster_ids))
+    result.summaries = _ensure_cluster_summaries(all_summaries, result.assignments)
+    result.comparisons = all_comparisons
+
+    if len(batches) > 1 and sum(bool(item.claims) for item in result.summaries) > 1:
+        comparison_prompt = build_comparison_prompt(
+            topic=result.topic,
+            summaries=result.summaries,
+            registry=result.evidence_registry,
+            config=cfg,
+        )
+        if remaining <= 0 or not prompt_within_budget(comparison_prompt, cfg):
+            result.execution.comparison_status = "skipped_budget"
+        else:
+            comparisons, errors, calls = _complete_comparisons(
+                completer, comparison_prompt, result.assignments, result.evidence_registry
+            )
+            remaining -= calls
+            result.execution.logical_calls += calls
+            result.comparisons.extend(comparisons)
+            all_errors.extend(errors)
+            result.execution.comparison_status = "failed" if errors else "complete"
+
+    kept_n = sum(len(item.claims) for item in result.summaries) + len(result.comparisons)
+    if result.execution.logical_calls == 0:
         result.execution.summary_status = "failed"
-        result.execution.failure_reason = result.execution.failure_reason or "no_completion"
+        result.execution.failure_reason = "logical_call_budget_exhausted"
     elif kept_n == 0:
         result.execution.summary_status = "failed"
-        result.execution.failure_reason = "; ".join(errors[:8]) or "no_valid_claims"
-    elif rejected_n == 0 and not missing and not errors:
+        result.execution.failure_reason = "; ".join(all_errors[:8]) or "no_valid_claims"
+    elif rejected_n == 0 and not result.execution.failed_cluster_ids and not all_errors:
         result.execution.summary_status = "complete"
     else:
         result.execution.summary_status = "partial"
-        if errors:
-            result.execution.failure_reason = "; ".join(errors[:8])
+        reasons = all_errors[:8]
+        if oversized:
+            reasons.insert(0, "oversized_clusters:" + ",".join(cluster.cluster_id for cluster in oversized))
+        result.execution.failure_reason = "; ".join(reasons) or "some_clusters_not_summarized"
 
     if cfg.use_cache and result.execution.summary_status in {"complete", "partial"}:
         save_result(narration_path(cfg.cache_dir, nkey), result)
@@ -308,13 +361,15 @@ def _complete_narration(
     assignments: list[ClusterAssignment],
     registry: EvidenceRegistry,
     cfg: SynthesisConfig,
+    *,
+    max_calls: int | None = None,
 ) -> tuple[list[ClusterSummary], list, list[str], int]:
     calls = 0
     last_summaries: list[ClusterSummary] = []
     last_comparisons: list = []
     last_errors: list[str] = []
     message = user_prompt
-    budget = max(0, int(cfg.max_logical_calls))
+    budget = max(0, int(cfg.max_logical_calls if max_calls is None else max_calls))
     while calls < budget:
         calls += 1
         try:
@@ -335,6 +390,41 @@ def _complete_narration(
             break
         message = repair_user_message(user_prompt, errors)
     return last_summaries, last_comparisons, last_errors, calls
+
+
+def _complete_comparisons(
+    completer: CompleteFn,
+    user_prompt: str,
+    assignments: list[ClusterAssignment],
+    registry: EvidenceRegistry,
+) -> tuple[list[ComparisonClaim], list[str], int]:
+    try:
+        raw = completer(system=SYSTEM_PROMPT, user=user_prompt)
+        payload = LlmNarration.model_validate(extract_json_object(raw))
+    except (LlmError, TimeoutError) as exc:
+        return [], [f"comparison_transport_fail:{exc}"], 1
+    except Exception as exc:
+        return [], [f"comparison_parse_fail:{exc}"], 1
+
+    lookup = registry.lookup()
+    comparisons: list[ComparisonClaim] = []
+    errors: list[str] = []
+    for item in payload.comparisons:
+        checked = validate_comparison(
+            ComparisonClaim(
+                text=item.text,
+                cluster_ids=list(item.cluster_ids),
+                subject_paper_keys=list(item.subject_paper_keys),
+                support_refs=list(item.support_refs),
+            ),
+            assignments=assignments,
+            registry=lookup,
+        )
+        if checked.validation_status == "structurally_validated":
+            comparisons.append(checked)
+        else:
+            errors.append(f"comparison:{checked.rejection_reason}")
+    return comparisons, errors, 1
 
 
 def _ensure_cluster_summaries(
